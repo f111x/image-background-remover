@@ -42,20 +42,20 @@ export async function POST(request: NextRequest) {
     // 转换为 base64
     const arrayBuffer = await imageFile.arrayBuffer();
     const base64Image = Buffer.from(arrayBuffer).toString('base64');
-    const dataUri = `data:${imageFile.type};base64,${base64Image}`;
 
-    // 调用 Remove.bg API
+    // 使用 FormData 调用 Remove.bg API
+    const apiFormData = new FormData();
+    apiFormData.append('image_file_b64', base64Image);
+    apiFormData.append('size', 'auto');
+    apiFormData.append('output_format', 'png');
+    apiFormData.append('output_info', 'true');
+
     const response = await fetch('https://api.remove.bg/v1.0/removebg', {
       method: 'POST',
       headers: {
         'X-Api-Key': REMOVE_BG_API_KEY,
       },
-      body: JSON.stringify({
-        image_file_b64: base64Image,
-        size: 'auto',
-        output_format: 'png',
-        output_info: true,
-      }),
+      body: apiFormData,
     });
 
     if (!response.ok) {
@@ -91,5 +91,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
-
