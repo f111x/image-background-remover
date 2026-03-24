@@ -22,7 +22,7 @@ jobs:
         run: npm install
 
       - name: Build for Cloudflare
-        run: npx opennextjs-cloudflare build
+        run: node node_modules/@opennextjs/cloudflare/dist/cli/index.js build
         env:
           REMOVE_BG_API_KEY: ${{ secrets.REMOVE_BG_API_KEY }}
 
