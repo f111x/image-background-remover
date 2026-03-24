@@ -18,8 +18,11 @@ jobs:
           node-version: "20"
           cache: "npm"
 
+      - name: Setup Corepack
+        run: corepack enable && corepack prepare pnpm@latest --activate
+
       - name: Install dependencies
-        run: npm install
+        run: pnpm install --ignore-scripts
 
       - name: Build for Cloudflare
         run: node node_modules/@opennextjs/cloudflare/dist/cli/index.js build
