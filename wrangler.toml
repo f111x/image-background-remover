@@ -2,7 +2,7 @@ name = "image-background-remover"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
 main = ".open-next/worker.js"
-assets = { directory = ".open-next/assets", binding = "ASSETS" }
+assets = { directory = ".open-next/assets", binding = "NEXT_ASSETS" }
 pages_build_output_dir = ".open-next/assets"
 
 [[services]]
