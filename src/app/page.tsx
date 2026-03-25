@@ -9,6 +9,9 @@ interface ProcessedResult {
   processedImage: string;
 }
 
+// 直接调用 remove.bg API
+const REMOVE_BG_API_KEY = process.env.NEXT_PUBLIC_REMOVE_BG_API_KEY || '';
+
 export default function HomePage() {
   const [status, setStatus] = useState<ProcessingStatus>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -27,23 +30,32 @@ export default function HomePage() {
     try {
       setStatus('processing');
 
+      // 直接调用 remove.bg API
       const formData = new FormData();
-      formData.append('image', file);
+      formData.append('image_file', file);
+      formData.append('size', 'auto');
+      formData.append('format', 'png');
 
-      const response = await fetch('/api/remove-background', {
+      const response = await fetch('https://api.remove.bg/v1.0/removebg', {
         method: 'POST',
+        headers: {
+          'X-Api-Key': REMOVE_BG_API_KEY,
+        },
         body: formData,
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || '处理失败');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error((errorData as any).errors?.[0]?.title || '处理失败');
       }
+
+      // 将响应转为 blob URL
+      const blob = await response.blob();
+      const processedImage = URL.createObjectURL(blob);
 
       setResult({
         originalImage: originalPreview,
-        processedImage: data.image,
+        processedImage,
       });
       setStatus('success');
     } catch (err) {
@@ -111,6 +123,7 @@ export default function HomePage() {
   const handleReset = () => {
     if (result) {
       URL.revokeObjectURL(result.originalImage);
+      URL.revokeObjectURL(result.processedImage);
     }
     setResult(null);
     setStatus('idle');
@@ -281,7 +294,7 @@ export default function HomePage() {
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="bg-white/90 backdrop-blur rounded-xl px-4 py-2 shadow-lg text-center">
                       <p className="text-gray-700 font-medium">透明背景</p>
-                      <p className="text-gray-500 text-sm"> Checkerboard 显示透明区域</p>
+                      <p className="text-gray-500 text-sm">Checkerboard 显示透明区域</p>
                     </div>
                   </div>
                 </div>

@@ -1,7 +1,5 @@
 name = "image-background-remover"
 compatibility_date = "2025-01-01"
-pages_build_output_dir = ".open-next/assets"
-
-[[r2_buckets]]
-binding = "NEXT_INC_CACHE_R2_BUCKET"
-bucket_name = "image-background-remover-cache"
+compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
+main = ".open-next/worker.js"
+assets = { directory = ".open-next/assets", binding = "ASSETS" }
