@@ -1,45 +1,137 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 
 type ProcessingStatus = 'idle' | 'uploading' | 'processing' | 'success' | 'error';
+type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
+
+interface GoogleUser {
+  email: string;
+  name: string;
+  picture: string;
+  sub: string;
+}
 
 interface ProcessedResult {
   originalImage: string;
   processedImage: string;
 }
 
-// 直接调用 remove.bg API
-const REMOVE_BG_API_KEY = process.env.NEXT_PUBLIC_REMOVE_BG_API_KEY || '';
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
+
+// 初始化 Google Identity Services
+declare global {
+  interface Window {
+    google: any;
+  }
+}
 
 export default function HomePage() {
   const [status, setStatus] = useState<ProcessingStatus>('idle');
+  const [authStatus, setAuthStatus] = useState<AuthStatus>('loading');
+  const [user, setUser] = useState<GoogleUser | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ProcessedResult | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [showComparison, setShowComparison] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const googleButtonRef = useRef<HTMLDivElement>(null);
+
+  // 初始化 Google Sign-In
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID) {
+      console.warn('Google Client ID not configured');
+      setAuthStatus('unauthenticated');
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      if (window.google) {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleCredentialResponse,
+        });
+
+        // 渲染登录按钮
+        if (googleButtonRef.current) {
+          window.google.accounts.id.renderButton(googleButtonRef.current, {
+            theme: 'outline',
+            size: 'large',
+            shape: 'rectangular',
+            text: 'signin_with',
+          });
+        }
+
+        // 检查是否已登录
+        window.google.accounts.id.prompt((notification: any) => {
+          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+            setAuthStatus('unauthenticated');
+          }
+        });
+      }
+    };
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
+
+  const handleCredentialResponse = (response: any) => {
+    try {
+      const payload = JSON.parse(atob(response.credential.split('.')[1]));
+      setUser({
+        email: payload.email,
+        name: payload.name,
+        picture: payload.picture,
+        sub: payload.sub,
+      });
+      setAuthStatus('authenticated');
+    } catch (err) {
+      console.error('Failed to parse credential:', err);
+      setAuthStatus('unauthenticated');
+    }
+  };
+
+  const handleSignOut = () => {
+    if (window.google) {
+      window.google.accounts.id.disableAutoSelect();
+    }
+    setUser(null);
+    setAuthStatus('unauthenticated');
+    if (googleButtonRef.current) {
+      window.google.accounts.id.renderButton(googleButtonRef.current, {
+        theme: 'outline',
+        size: 'large',
+        shape: 'rectangular',
+        text: 'signin_with',
+      });
+    }
+  };
 
   const processImage = async (file: File) => {
     setStatus('uploading');
     setError(null);
 
-    // 创建原图预览
     const originalPreview = URL.createObjectURL(file);
 
     try {
       setStatus('processing');
 
-      // 直接调用 remove.bg API
       const formData = new FormData();
       formData.append('image_file', file);
       formData.append('size', 'auto');
       formData.append('format', 'png');
 
+      const apiKey = process.env.NEXT_PUBLIC_REMOVE_BG_API_KEY || '';
       const response = await fetch('https://api.remove.bg/v1.0/removebg', {
         method: 'POST',
         headers: {
-          'X-Api-Key': REMOVE_BG_API_KEY,
+          'X-Api-Key': apiKey,
         },
         body: formData,
       });
@@ -49,7 +141,6 @@ export default function HomePage() {
         throw new Error((errorData as any).errors?.[0]?.title || '处理失败');
       }
 
-      // 将响应转为 blob URL
       const blob = await response.blob();
       const processedImage = URL.createObjectURL(blob);
 
@@ -134,16 +225,52 @@ export default function HomePage() {
     }
   };
 
+  // 加载中
+  if (authStatus === 'loading') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 flex items-center justify-center">
+        <div className="text-white text-xl">加载中...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700">
       {/* Header */}
-      <header className="py-6 px-4 text-center">
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-          🖼️ 图片背景去除工具
-        </h1>
-        <p className="text-purple-100 text-lg">
-          简单 · 快速 · 免费
-        </p>
+      <header className="py-4 px-4 flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">
+            🖼️ 图片背景去除工具
+          </h1>
+          <p className="text-purple-100 text-sm">
+            简单 · 快速 · 免费
+          </p>
+        </div>
+
+        {/* Auth Section */}
+        <div className="flex items-center gap-4">
+          {authStatus === 'authenticated' && user ? (
+            <div className="flex items-center gap-3">
+              <img
+                src={user.picture}
+                alt={user.name}
+                className="w-10 h-10 rounded-full border-2 border-white"
+              />
+              <div className="hidden md:block">
+                <p className="text-white text-sm font-medium">{user.name}</p>
+                <p className="text-purple-200 text-xs">{user.email}</p>
+              </div>
+              <button
+                onClick={handleSignOut}
+                className="px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white text-sm rounded-lg transition-colors"
+              >
+                退出
+              </button>
+            </div>
+          ) : (
+            <div ref={googleButtonRef} />
+          )}
+        </div>
       </header>
 
       {/* Main Content */}
@@ -261,7 +388,6 @@ export default function HomePage() {
                   <div className="text-center">
                     <p className="text-gray-500 text-sm mb-2">原图</p>
                     <div className="border rounded-xl overflow-hidden bg-gray-50">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={result.originalImage}
                         alt="原图"
@@ -272,7 +398,6 @@ export default function HomePage() {
                   <div className="text-center">
                     <p className="text-gray-500 text-sm mb-2">去除背景后</p>
                     <div className="border rounded-xl overflow-hidden bg-gray-50 bg-checkerboard">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={result.processedImage}
                         alt="处理结果"
@@ -284,7 +409,6 @@ export default function HomePage() {
               ) : (
                 <div className="relative max-w-lg mx-auto overflow-hidden rounded-xl bg-checkerboard">
                   <div className="relative w-full" style={{ paddingBottom: '66.67%' }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={result.processedImage}
                       alt="处理结果"
