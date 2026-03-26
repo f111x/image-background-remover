@@ -10,6 +10,7 @@ export default function CallbackPage() {
 
   useEffect(() => {
     const { searchParams } = new URL(window.location.href)
+    const code = searchParams.get('code')
     const error = searchParams.get('error')
     const errorDescription = searchParams.get('error_description')
     
@@ -20,18 +21,28 @@ export default function CallbackPage() {
       return
     }
 
-    // Try to exchange the code for a session
-    supabase.auth.getUser()
-      .then(({ error }) => {
+    if (!code) {
+      console.error('No code in URL')
+      router.push('/?error=auth_failed&error_description=No+authorization+code')
+      return
+    }
+
+    // Explicitly exchange the code for a session
+    supabase.auth.exchangeCodeForSession(code)
+      .then(({ data, error }) => {
         if (error) {
-          console.error('Auth error during code exchange:', error)
+          console.error('Code exchange error:', error)
           router.push(`/?error=auth_failed&error_description=${encodeURIComponent(error.message)}`)
-        } else {
+        } else if (data.session) {
+          console.log('Session established successfully')
           router.push('/')
+        } else {
+          console.error('No session after code exchange')
+          router.push('/?error=auth_failed&error_description=Session+creation+failed')
         }
       })
       .catch((err) => {
-        console.error('Unexpected auth error:', err)
+        console.error('Unexpected error:', err)
         router.push('/?error=auth_failed')
       })
   }, [router, supabase])
