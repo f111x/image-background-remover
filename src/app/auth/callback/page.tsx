@@ -21,12 +21,11 @@ export default function CallbackPage() {
       }
 
       if (code) {
-        // The code exchange happens automatically in the Supabase client
-        // when we call getUser() after the redirect
-        const { error: authError } = await supabase.auth.getUser()
+        // Exchange the code for a session
+        const { error: sessionError } = await supabase.auth.exchangeCodeForSession(code)
         
-        if (authError) {
-          console.error('Auth error:', authError)
+        if (sessionError) {
+          console.error('Session error:', sessionError)
           router.push('/?error=auth_failed')
           return
         }
