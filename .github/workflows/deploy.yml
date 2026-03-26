@@ -18,19 +18,21 @@ jobs:
           node-version: "20"
           cache: "npm"
 
-      - name: Setup Corepack
-        run: corepack enable && corepack prepare pnpm@latest --activate
-
       - name: Install dependencies
-        run: pnpm install --ignore-scripts
+        run: npm ci
 
       - name: Build
-        run: pnpm build
+        run: npm run build
         env:
           REMOVE_BG_API_KEY: ${{ secrets.REMOVE_BG_API_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
 
       - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy out --project-name=image-background-remover
+        run: npx wrangler pages deploy .next --project-name=image-background-remover
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
