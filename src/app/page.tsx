@@ -143,8 +143,19 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* Auth Section */}
-        <AuthButton />
+        {/* Navigation */}
+        <div className="flex items-center gap-4">
+          <a href="/pricing" className="text-white hover:text-purple-200 text-sm transition-colors">
+            定价
+          </a>
+          <a href="/faq" className="text-white hover:text-purple-200 text-sm transition-colors">
+            FAQ
+          </a>
+          <a href="/profile" className="text-white hover:text-purple-200 text-sm transition-colors">
+            个人中心
+          </a>
+          <AuthButton />
+        </div>
       </header>
 
       {/* Main Content */}
