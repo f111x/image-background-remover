@@ -9,25 +9,31 @@ export default function CallbackPage() {
   const supabase = createClient()
 
   useEffect(() => {
-    // The supabase client will automatically handle the OAuth code exchange
-    // when it detects the code in the URL via getUser() or onAuthStateChange
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' || session) {
-        router.push('/')
-      } else {
-        router.push('/?error=auth_failed')
-      }
-    })
+    const { searchParams } = new URL(window.location.href)
+    const error = searchParams.get('error')
+    const errorDescription = searchParams.get('error_description')
+    
+    // If there's an error from the OAuth provider
+    if (error) {
+      console.error('OAuth error:', error, errorDescription)
+      router.push(`/?error=${encodeURIComponent(error)}&error_description=${encodeURIComponent(errorDescription || '')}`)
+      return
+    }
 
-    // Also try to get the user immediately - this triggers the code exchange
-    supabase.auth.getUser().then(({ error }) => {
-      if (error) {
-        console.error('Auth error:', error)
+    // Try to exchange the code for a session
+    supabase.auth.getUser()
+      .then(({ error }) => {
+        if (error) {
+          console.error('Auth error during code exchange:', error)
+          router.push(`/?error=auth_failed&error_description=${encodeURIComponent(error.message)}`)
+        } else {
+          router.push('/')
+        }
+      })
+      .catch((err) => {
+        console.error('Unexpected auth error:', err)
         router.push('/?error=auth_failed')
-      }
-    })
-
-    return () => subscription.unsubscribe()
+      })
   }, [router, supabase])
 
   return (
