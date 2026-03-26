@@ -13,6 +13,11 @@ interface User {
 export function AuthButton() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isSignUp, setIsSignUp] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [showForm, setShowForm] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -46,15 +51,29 @@ export function AuthButton() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const handleSignIn = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
-    if (error) {
-      console.error('Sign in error:', error)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+
+    if (isSignUp) {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+      })
+      if (error) {
+        setError(error.message)
+      } else {
+        setShowForm(false)
+        alert('注册成功！请查收验证邮件。')
+      }
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      if (error) {
+        setError(error.message)
+      }
     }
   }
 
@@ -70,14 +89,8 @@ export function AuthButton() {
   if (user) {
     return (
       <div className="flex items-center gap-3">
-        <img
-          src={user.picture}
-          alt={user.name}
-          className="w-10 h-10 rounded-full border-2 border-white"
-        />
         <div className="hidden md:block">
-          <p className="text-white text-sm font-medium">{user.name}</p>
-          <p className="text-purple-200 text-xs">{user.email}</p>
+          <p className="text-white text-sm font-medium">{user.email}</p>
         </div>
         <button
           onClick={handleSignOut}
@@ -89,12 +102,53 @@ export function AuthButton() {
     )
   }
 
+  if (showForm) {
+    return (
+      <div className="flex items-center gap-2">
+        <form onSubmit={handleSubmit} className="flex items-center gap-2">
+          <input
+            type="email"
+            placeholder="邮箱"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="px-3 py-1.5 rounded-lg text-sm bg-white/20 text-white placeholder-purple-200 border border-white/30 focus:outline-none focus:border-white"
+            required
+          />
+          <input
+            type="password"
+            placeholder="密码"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="px-3 py-1.5 rounded-lg text-sm bg-white/20 text-white placeholder-purple-200 border border-white/30 focus:outline-none focus:border-white"
+            required
+            minLength={6}
+          />
+          <button
+            type="submit"
+            className="px-3 py-1.5 bg-white text-purple-600 text-sm rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            {isSignUp ? '注册' : '登录'}
+          </button>
+        </form>
+        <button
+          onClick={() => setShowForm(false)}
+          className="px-2 py-1.5 text-white/70 hover:text-white text-sm"
+        >
+          取消
+        </button>
+        {error && <p className="text-red-300 text-xs">{error}</p>}
+      </div>
+    )
+  }
+
   return (
-    <button
-      onClick={handleSignIn}
-      className="px-4 py-2 bg-white text-purple-600 font-medium rounded-lg hover:bg-gray-100 transition-colors"
-    >
-      使用 Google 登录
-    </button>
+    <div className="flex items-center gap-2">
+      <button
+        onClick={() => setShowForm(true)}
+        className="px-4 py-2 bg-white text-purple-600 font-medium rounded-lg hover:bg-gray-100 transition-colors"
+      >
+        登录
+      </button>
+    </div>
   )
 }
