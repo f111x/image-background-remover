@@ -3,6 +3,5 @@ main = ".open-next/worker.js"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
-[vars]
-NEXT_PUBLIC_SUPABASE_URL = "https://mjngzhchyebqocmcwdbf.supabase.co"
-NEXT_PUBLIC_SITE_URL = "https://imagetoolss.com"
+[assets]
+directory = ".open-next/assets"

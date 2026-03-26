@@ -1,99 +1,16 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-
-const GOOGLE_CLIENT_ID = '1022859227926-trq1sat8le6tdbrf3a36ggqe544e8vce.apps.googleusercontent.com'
-const REDIRECT_URI = 'https://image-background-remover.fx9038.workers.dev/auth/callback'
-
-interface User {
-  id: string
-  email: string
-  name: string
-  picture: string
-}
-
 export function AuthButton() {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    // Check for OAuth callback
-    const params = new URLSearchParams(window.location.search)
-    const code = params.get('code')
-    const error = params.get('error')
-
-    if (error) {
-      console.error('OAuth error:', error)
-      window.history.replaceState({}, '', '/')
-      return
-    }
-
-    if (code) {
-      // Handle OAuth callback - exchange code for tokens
-      handleOAuthCallback(code)
-      return
-    }
-
-    // Check for stored user session
-    const savedUser = localStorage.getItem('google_user')
-    if (savedUser) {
-      setUser(JSON.parse(savedUser))
-    }
-    setLoading(false)
-  }, [])
-
-  const handleOAuthCallback = async (code: string) => {
-    try {
-      // In a real implementation, you would call your backend to exchange the code
-      // For now, we'll store basic info and redirect
-      const userData: User = {
-        id: code.substring(0, 20),
-        email: 'user@gmail.com', // This would come from the backend
-        name: 'Google User',
-        picture: ''
-      }
-      setUser(userData)
-      localStorage.setItem('google_user', JSON.stringify(userData))
-      window.history.replaceState({}, '', '/')
-    } catch (err) {
-      console.error('OAuth error:', err)
-      window.history.replaceState({}, '', '/')
-    }
-  }
-
   const handleGoogleLogin = () => {
     const params = new URLSearchParams({
-      client_id: GOOGLE_CLIENT_ID,
-      redirect_uri: REDIRECT_URI,
+      client_id: '1022859227926-trq1sat8le6tdbrf3a36ggqe544e8vce.apps.googleusercontent.com',
+      redirect_uri: 'https://image-background-remover.fx9038.workers.dev/auth/callback',
       response_type: 'code',
       scope: 'email profile',
       access_type: 'offline',
       prompt: 'consent'
     })
     window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
-  }
-
-  const handleSignOut = () => {
-    setUser(null)
-    localStorage.removeItem('google_user')
-  }
-
-  if (loading) {
-    return <div className="w-20 h-10 bg-white/20 rounded-lg animate-pulse" />
-  }
-
-  if (user) {
-    return (
-      <div className="flex items-center gap-3">
-        <span className="text-white text-sm">{user.email}</span>
-        <button
-          onClick={handleSignOut}
-          className="px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white text-sm rounded-lg transition-colors"
-        >
-          退出
-        </button>
-      </div>
-    )
   }
 
   return (
