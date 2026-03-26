@@ -61,7 +61,7 @@ export function AuthButton() {
   if (loggedIn) {
     return (
       <div className="flex items-center gap-3">
-        <span className="text-white text-sm">已登录</span>
+        <span className="text-white text-sm">Google 用户</span>
         <button
           onClick={handleSignOut}
           className="px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white text-sm rounded-lg transition-colors"

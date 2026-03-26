@@ -38,20 +38,16 @@ export default function CallbackPage() {
       }
 
       // If we have the code verifier, exchange the code for tokens
-      // Otherwise, just show success and let the user log in again
       if (codeVerifier) {
-        // Clear session storage
         sessionStorage.removeItem('oauth_state')
         sessionStorage.removeItem('code_verifier')
         
-        // For now, just redirect to home - in a real app you'd exchange the code for tokens here
         console.log('Authorization code received:', code.substring(0, 20) + '...')
         
-        // Store a simple indicator that we're logged in
-        // In production, you'd call your backend to exchange the code for tokens
+        // Store auth indicator
         localStorage.setItem('google_auth', 'true')
-        localStorage.setItem('auth_code', code)
-        
+        // Note: In production, you'd exchange the code for tokens via backend
+        // For now, we just indicate successful login
         router.push('/?login=success')
       } else {
         // No code verifier - this is expected if the session didn't persist
