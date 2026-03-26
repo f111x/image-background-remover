@@ -34,6 +34,9 @@ jobs:
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
 
+      - name: Copy worker.js for Cloudflare Functions
+        run: cp .open-next/worker.js .open-next/assets/_worker.js
+
       - name: Deploy to Cloudflare Pages
         run: npx wrangler pages deploy .open-next --project-name=image-background-remover
         env:
