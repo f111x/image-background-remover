@@ -1,51 +1,85 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 export default function CallbackPage() {
   const router = useRouter()
-  const supabase = createClient()
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const { searchParams } = new URL(window.location.href)
-    const code = searchParams.get('code')
-    const error = searchParams.get('error')
-    const errorDescription = searchParams.get('error_description')
-    
-    // If there's an error from the OAuth provider
-    if (error) {
-      console.error('OAuth error:', error, errorDescription)
-      router.push(`/?error=${encodeURIComponent(error)}&error_description=${encodeURIComponent(errorDescription || '')}`)
-      return
+    const handleCallback = async () => {
+      const params = new URLSearchParams(window.location.search)
+      const code = params.get('code')
+      const state = params.get('state')
+      const errorParam = params.get('error')
+      const errorDescription = params.get('error_description')
+
+      if (errorParam) {
+        console.error('OAuth error:', errorParam, errorDescription)
+        setError(errorDescription || errorParam)
+        return
+      }
+
+      if (!code) {
+        console.error('No authorization code')
+        setError('No authorization code received')
+        return
+      }
+
+      // Check state
+      const savedState = sessionStorage.getItem('oauth_state')
+      const codeVerifier = sessionStorage.getItem('code_verifier')
+      
+      if (state && savedState && state !== savedState) {
+        console.error('State mismatch')
+        setError('State mismatch - possible CSRF attack')
+        return
+      }
+
+      // If we have the code verifier, exchange the code for tokens
+      // Otherwise, just show success and let the user log in again
+      if (codeVerifier) {
+        // Clear session storage
+        sessionStorage.removeItem('oauth_state')
+        sessionStorage.removeItem('code_verifier')
+        
+        // For now, just redirect to home - in a real app you'd exchange the code for tokens here
+        console.log('Authorization code received:', code.substring(0, 20) + '...')
+        
+        // Store a simple indicator that we're logged in
+        // In production, you'd call your backend to exchange the code for tokens
+        localStorage.setItem('google_auth', 'true')
+        localStorage.setItem('auth_code', code)
+        
+        router.push('/?login=success')
+      } else {
+        // No code verifier - this is expected if the session didn't persist
+        console.error('No code verifier found in sessionStorage')
+        setError('Session expired. Please try logging in again.')
+      }
     }
 
-    if (!code) {
-      console.error('No code in URL')
-      router.push('/?error=auth_failed&error_description=No+authorization+code')
-      return
-    }
+    handleCallback()
+  }, [router])
 
-    // Explicitly exchange the code for a session
-    supabase.auth.exchangeCodeForSession(code)
-      .then(({ data, error }) => {
-        if (error) {
-          console.error('Code exchange error:', error)
-          router.push(`/?error=auth_failed&error_description=${encodeURIComponent(error.message)}`)
-        } else if (data.session) {
-          console.log('Session established successfully')
-          router.push('/')
-        } else {
-          console.error('No session after code exchange')
-          router.push('/?error=auth_failed&error_description=Session+creation+failed')
-        }
-      })
-      .catch((err) => {
-        console.error('Unexpected error:', err)
-        router.push('/?error=auth_failed')
-      })
-  }, [router, supabase])
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 flex items-center justify-center">
+        <div className="bg-white rounded-xl p-8 max-w-md text-center">
+          <div className="text-4xl mb-4">❌</div>
+          <h2 className="text-xl font-bold text-gray-800 mb-2">登录失败</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={() => router.push('/')}
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+          >
+            返回首页
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 flex items-center justify-center">
