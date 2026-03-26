@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react'
 const GOOGLE_CLIENT_ID = '1022859227926-trq1sat8le6tdbrf3a36ggqe544e8vce.apps.googleusercontent.com'
 const REDIRECT_URI = 'https://image-background-remover.fx9038.workers.dev/auth/callback'
 
-// Generate random string for state parameter
 function generateState(): string {
   const array = new Uint8Array(32)
   crypto.getRandomValues(array)
@@ -14,22 +13,31 @@ function generateState(): string {
 
 export function AuthButton() {
   const [loading, setLoading] = useState(false)
+  const [loggedIn, setLoggedIn] = useState(false)
+
+  useEffect(() => {
+    // Check for login success
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('login') === 'success') {
+      setLoggedIn(true)
+      localStorage.setItem('google_auth', 'true')
+      // Clean up URL
+      window.history.replaceState({}, '', '/')
+    } else if (localStorage.getItem('google_auth') === 'true') {
+      setLoggedIn(true)
+    }
+  }, [])
 
   const handleGoogleLogin = async () => {
     setLoading(true)
     
-    // Generate state for security
     const state = generateState()
-    
-    // Generate PKCE code verifier and challenge
     const codeVerifier = generateState()
     const codeChallenge = await generateCodeChallenge(codeVerifier)
     
-    // Store in sessionStorage (persists during redirect)
     sessionStorage.setItem('oauth_state', state)
     sessionStorage.setItem('code_verifier', codeVerifier)
     
-    // Build Google OAuth URL
     const params = new URLSearchParams({
       client_id: GOOGLE_CLIENT_ID,
       redirect_uri: REDIRECT_URI,
@@ -43,6 +51,25 @@ export function AuthButton() {
     })
     
     window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
+  }
+
+  const handleSignOut = () => {
+    setLoggedIn(false)
+    localStorage.removeItem('google_auth')
+  }
+
+  if (loggedIn) {
+    return (
+      <div className="flex items-center gap-3">
+        <span className="text-white text-sm">已登录</span>
+        <button
+          onClick={handleSignOut}
+          className="px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white text-sm rounded-lg transition-colors"
+        >
+          退出
+        </button>
+      </div>
+    )
   }
 
   return (
@@ -68,7 +95,6 @@ export function AuthButton() {
   )
 }
 
-// Generate S256 code challenge from verifier
 async function generateCodeChallenge(verifier: string): Promise<string> {
   const encoder = new TextEncoder()
   const data = encoder.encode(verifier)
