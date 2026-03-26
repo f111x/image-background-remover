@@ -9,32 +9,25 @@ export default function CallbackPage() {
   const supabase = createClient()
 
   useEffect(() => {
-    const handleCallback = async () => {
-      const { searchParams } = new URL(window.location.href)
-      const code = searchParams.get('code')
-      const error = searchParams.get('error')
-
-      if (error) {
-        console.error('OAuth error:', error)
+    // The supabase client will automatically handle the OAuth code exchange
+    // when it detects the code in the URL via getUser() or onAuthStateChange
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' || session) {
+        router.push('/')
+      } else {
         router.push('/?error=auth_failed')
-        return
       }
+    })
 
-      if (code) {
-        // Exchange the code for a session
-        const { error: sessionError } = await supabase.auth.exchangeCodeForSession(code)
-        
-        if (sessionError) {
-          console.error('Session error:', sessionError)
-          router.push('/?error=auth_failed')
-          return
-        }
+    // Also try to get the user immediately - this triggers the code exchange
+    supabase.auth.getUser().then(({ error }) => {
+      if (error) {
+        console.error('Auth error:', error)
+        router.push('/?error=auth_failed')
       }
+    })
 
-      router.push('/')
-    }
-
-    handleCallback()
+    return () => subscription.unsubscribe()
   }, [router, supabase])
 
   return (
