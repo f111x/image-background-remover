@@ -1,4 +1,4 @@
 {
-  "installCommand": "pnpm install --ignore-scripts",
-  "buildCommand": "pnpm run build"
+  "installCommand": "npm install --legacy-peer-deps",
+  "buildCommand": "npm run build"
 }
