@@ -1,19 +1,19 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
-// PayPal.Me packages
+// PayPal packages
 const CREDIT_PACKAGES = [
-  { id: '10-credits', credits: 10, price: 1, label: '10 Credits', popular: false },
-  { id: '50-credits', credits: 50, price: 4, label: '50 Credits', popular: true },
-  { id: '100-credits', credits: 100, price: 7, label: '100 Credits', popular: false },
+  { id: '10-credits', credits: 10, price: '1.00', label: '10 Credits', popular: false },
+  { id: '50-credits', credits: 50, price: '4.00', label: '50 Credits', popular: true },
+  { id: '100-credits', credits: 100, price: '7.00', label: '100 Credits', popular: false },
 ]
 
 const SUBSCRIPTION_PLANS = [
   {
     id: 'pro-monthly',
     name: 'Pro',
-    price: 10,
+    price: '10.00',
     period: '每月',
     features: [
       '每天 100 次处理',
@@ -26,20 +26,51 @@ const SUBSCRIPTION_PLANS = [
   }
 ]
 
-const PAYPAL_ME_USERNAME = 'loadingpay'
+// PayPal Client ID (sandbox for testing)
+const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'AWa86ek1hDnGq4UrjBQ0DOiYPAp2Y8SRLfUhOAg43LuK5tGzCTkZ1xFLvfDLQVOr4rJmEfVG7P3b3IqU'
+
+// Load PayPal SDK
+function loadPayPalScript(clientId) {
+  return new Promise((resolve, reject) => {
+    if (window.paypal) {
+      resolve(window.paypal)
+      return
+    }
+    const script = document.createElement('script')
+    // Disable funding sources that cause promotional financing issues
+    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture&disable-funding=credit,card,bancontact,blik,eps,giropay,ideal,klarna,mybank,p24,sepa,sofort,venmo`
+    script.async = true
+    script.onload = () => resolve(window.paypal)
+    script.onerror = reject
+    document.body.appendChild(script)
+  })
+}
 
 export default function PricingPage() {
+  const [loading, setLoading] = useState(false)
   const [paymentStatus, setPaymentStatus] = useState(null)
+  const [userId, setUserId] = useState('guest')
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [paymentType, setPaymentType] = useState('credits')
+  const [selectedPackage, setSelectedPackage] = useState(null)
+  const paypalContainerRef = useRef(null)
+  const paypalInitialized = useRef(false)
   
+  // Get user ID
   useEffect(() => {
+    const storedUserId = localStorage.getItem('userId') || `guest_${Date.now()}`
+    localStorage.setItem('userId', storedUserId)
+    setUserId(storedUserId)
+    
     // Check URL params for payment status
     const params = new URLSearchParams(window.location.search)
     const payment = params.get('payment')
+    const subscription = params.get('subscription')
     
     if (payment === 'success') {
       setPaymentStatus({ 
         type: 'credits', 
-        message: 'Payment submitted! Your credits will be added shortly.' 
+        message: 'Payment successful! Your credits will be added shortly.' 
       })
       window.history.replaceState({}, '', '/pricing')
     } else if (payment === 'cancelled') {
@@ -48,21 +79,153 @@ export default function PricingPage() {
         message: 'Payment cancelled.' 
       })
       window.history.replaceState({}, '', '/pricing')
+    } else if (subscription === 'success') {
+      setPaymentStatus({ type: 'subscription', message: 'Subscription activated! Welcome to Pro.' })
+      window.history.replaceState({}, '', '/pricing')
+    } else if (subscription === 'cancelled') {
+      setPaymentStatus({ type: 'subscription', message: 'Subscription cancelled.' })
+      window.history.replaceState({}, '', '/pricing')
     }
   }, [])
 
-  // Open PayPal.Me for payment
-  const handlePayment = (type, pkg) => {
-    if (type === 'subscription') {
-      // Subscription - open PayPal.Me with note
-      const url = `https://paypal.me/${PAYPAL_ME_USERNAME}/${pkg.price}?note=Pro+Monthly+Subscription`
-      window.open(url, '_blank')
-    } else {
-      // Credits - open PayPal.Me with package info
-      const url = `https://paypal.me/${PAYPAL_ME_USERNAME}/${pkg.price}?note=${pkg.credits}+Credits`
-      window.open(url, '_blank')
-    }
+  // Handle payment button click
+  const handlePaymentClick = (type, packageId = null) => {
+    setPaymentType(type)
+    setSelectedPackage(packageId)
+    setShowPaymentModal(true)
+    paypalInitialized.current = false
   }
+
+  // Initialize PayPal buttons when modal opens
+  useEffect(() => {
+    if (!showPaymentModal) return
+
+    const initPayPal = async () => {
+      if (paypalInitialized.current) return
+      paypalInitialized.current = true
+      
+      try {
+        const paypal = await loadPayPalScript(PAYPAL_CLIENT_ID)
+        
+        // Clear container
+        if (paypalContainerRef.current) {
+          paypalContainerRef.current.innerHTML = ''
+        }
+
+        if (paymentType === 'credits' && selectedPackage) {
+          const pkg = CREDIT_PACKAGES.find(p => p.id === selectedPackage)
+          
+          paypal.Buttons({
+            style: {
+              layout: 'vertical',
+              color: 'gold',
+              shape: 'rect',
+              label: 'pay'
+            },
+            
+            createOrder: (data, actions) => {
+              // Create order entirely on the client side
+              return actions.order.create({
+                purchase_units: [{
+                  description: `ImageTools - ${pkg.credits} Credits`,
+                  amount: {
+                    currency_code: 'USD',
+                    value: pkg.price
+                  }
+                }],
+                application_context: {
+                  brand_name: 'ImageTools',
+                  user_action: 'PAY_NOW',
+                  return_url: `${window.location.origin}/pricing?payment=success`,
+                  cancel_url: `${window.location.origin}/pricing?payment=cancelled`
+                }
+              })
+            },
+            
+            onApprove: async (data, actions) => {
+              try {
+                const order = await actions.order.capture()
+                console.log('Order captured:', order)
+                // Store payment info for manual processing
+                const paymentInfo = {
+                  orderId: data.orderID,
+                  credits: pkg.credits,
+                  userId,
+                  status: 'paid',
+                  capturedAt: new Date().toISOString()
+                }
+                localStorage.setItem(`payment_${data.orderID}`, JSON.stringify(paymentInfo))
+                
+                setPaymentStatus({ 
+                  type: 'credits', 
+                  message: `Payment received! Your credits will be added shortly. Order ID: ${data.orderID}` 
+                })
+                setShowPaymentModal(false)
+              } catch (err) {
+                console.error('Capture error:', err)
+                alert('Payment capture failed. Please try again.')
+              }
+            },
+            
+            onError: (err) => {
+              console.error('PayPal error:', err)
+              alert('Payment failed. Please try again.')
+            },
+            
+            onCancel: () => {
+              console.log('Payment cancelled by user')
+            }
+          }).render(paypalContainerRef.current)
+          
+        } else if (paymentType === 'subscription') {
+          const plan = SUBSCRIPTION_PLANS[0]
+          
+          paypal.Buttons({
+            style: {
+              layout: 'vertical',
+              color: 'gold',
+              shape: 'rect',
+              label: 'subscribe'
+            },
+            
+            createSubscription: (data, actions) => {
+              return actions.subscription.create({
+                plan_id: 'PENDING', // Will be replaced with actual plan ID
+                quantity: '1',
+                application_context: {
+                  brand_name: 'ImageTools',
+                  user_action: 'SUBSCRIBE_NOW',
+                  return_url: `${window.location.origin}/pricing?subscription=success`,
+                  cancel_url: `${window.location.origin}/pricing?subscription=cancelled`
+                }
+              })
+            },
+            
+            onApprove: async (data, actions) => {
+              console.log('Subscription approved:', data)
+              setPaymentStatus({ type: 'subscription', message: 'Subscription activated! Welcome to Pro.' })
+              setShowPaymentModal(false)
+            },
+            
+            onError: (err) => {
+              console.error('PayPal error:', err)
+              alert('Subscription failed. Please try again.')
+            },
+            
+            onCancel: () => {
+              console.log('Subscription cancelled by user')
+            }
+          }).render(paypalContainerRef.current)
+        }
+      } catch (error) {
+        console.error('Failed to load PayPal:', error)
+        alert('Failed to load PayPal. Please refresh and try again.')
+      }
+    }
+
+    const timer = setTimeout(initPayPal, 100)
+    return () => clearTimeout(timer)
+  }, [showPaymentModal, paymentType, selectedPackage, userId])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700">
@@ -129,10 +292,10 @@ export default function PricingPage() {
                 </ul>
                 
                 <button 
-                  onClick={() => handlePayment('subscription', plan)}
+                  onClick={() => handlePaymentClick('subscription', plan.id)}
                   className="w-full py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-medium rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all"
                 >
-                  立即订阅 (PayPal)
+                  立即订阅
                 </button>
               </div>
             ))}
@@ -171,14 +334,14 @@ export default function PricingPage() {
                 </ul>
                 
                 <button 
-                  onClick={() => handlePayment('credits', pkg)}
+                  onClick={() => handlePaymentClick('credits', pkg.id)}
                   className={`w-full py-3 font-medium rounded-lg transition-all ${
                     pkg.popular 
                       ? 'bg-white text-purple-600 hover:bg-gray-100' 
                       : 'bg-white/20 text-white hover:bg-white/30'
                   }`}
                 >
-                  立即购买 (PayPal)
+                  立即购买
                 </button>
               </div>
             ))}
@@ -234,6 +397,40 @@ export default function PricingPage() {
           <p className="mt-2">📧 联系我们: support@imagetoolss.com</p>
         </div>
       </main>
+
+      {/* Payment Modal */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-gray-800">
+                {paymentType === 'credits' 
+                  ? `购买 ${CREDIT_PACKAGES.find(p => p.id === selectedPackage)?.credits} 积分`
+                  : '订阅 Pro 会员'
+                }
+              </h3>
+              <button 
+                onClick={() => {
+                  setShowPaymentModal(false)
+                  paypalInitialized.current = false
+                }}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div ref={paypalContainerRef} className="min-h-[150px]" />
+            
+            <p className="text-center text-gray-500 text-sm mt-4">
+              {paymentType === 'credits' 
+                ? '积分将添加到您的账户'
+                : '每月自动续费，随时取消'
+              }
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
