@@ -14,6 +14,3 @@ id = "07fda2f5863949d7b38e176e819d65b6"
 binding = "USER_DATA"
 id = "4fe5b29d54b341aaae66dd332d8f78ba"
 
-routes = [
-  { pattern = "imagetoolss.com", zone_name = "imagetoolss.com", zone_id = "515802d82d846bb9bb28fd104463a6fa" }
-]
