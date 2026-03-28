@@ -37,8 +37,8 @@ function loadPayPalScript(clientId) {
       return
     }
     const script = document.createElement('script')
-    // Disable funding sources that cause promotional financing issues
-    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture&disable-funding=credit,card,bancontact,blik,eps,giropay,ideal,klarna,mybank,p24,sepa,sofort,venmo`
+    // Use sandbox URL for testing, disable funding sources that cause promotional financing issues
+    script.src = `https://www.sandbox.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture&disable-funding=credit,card,bancontact,blik,eps,giropay,ideal,klarna,mybank,p24,sepa,sofort,venmo`
     script.async = true
     script.onload = () => resolve(window.paypal)
     script.onerror = reject
@@ -123,48 +123,26 @@ export default function PricingPage() {
               label: 'pay'
             },
             
-            createOrder: (data, actions) => {
-              // Create order entirely on the client side
-              return actions.order.create({
-                purchase_units: [{
-                  description: `ImageTools - ${pkg.credits} Credits`,
-                  amount: {
-                    currency_code: 'USD',
-                    value: pkg.price
-                  }
-                }],
-                application_context: {
-                  brand_name: 'ImageTools',
-                  user_action: 'PAY_NOW',
-                  return_url: `${window.location.origin}/pricing?payment=success`,
-                  cancel_url: `${window.location.origin}/pricing?payment=cancelled`
-                }
-              })
+            createOrder: async (data, actions) => {
+              // Call backend to create order
+              try {
+                const response = await fetch('/api/paypal/create-order', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ packageId: selectedPackage, userId })
+                })
+                const result = await response.json()
+                if (result.error) throw new Error(result.error)
+                return result.orderId
+              } catch (err) {
+                console.error('Order creation error:', err)
+                throw err
+              }
             },
             
             onApprove: async (data, actions) => {
-              try {
-                const order = await actions.order.capture()
-                console.log('Order captured:', order)
-                // Store payment info for manual processing
-                const paymentInfo = {
-                  orderId: data.orderID,
-                  credits: pkg.credits,
-                  userId,
-                  status: 'paid',
-                  capturedAt: new Date().toISOString()
-                }
-                localStorage.setItem(`payment_${data.orderID}`, JSON.stringify(paymentInfo))
-                
-                setPaymentStatus({ 
-                  type: 'credits', 
-                  message: `Payment received! Your credits will be added shortly. Order ID: ${data.orderID}` 
-                })
-                setShowPaymentModal(false)
-              } catch (err) {
-                console.error('Capture error:', err)
-                alert('Payment capture failed. Please try again.')
-              }
+              // Redirect to success page - webhook will handle credit addition
+              window.location.href = `/pricing?payment=success&orderId=${data.orderID}`
             },
             
             onError: (err) => {
@@ -188,32 +166,29 @@ export default function PricingPage() {
               label: 'subscribe'
             },
             
-            createSubscription: (data, actions) => {
-              return actions.subscription.create({
-                plan_id: 'PENDING', // Will be replaced with actual plan ID
-                quantity: '1',
-                application_context: {
-                  brand_name: 'ImageTools',
-                  user_action: 'SUBSCRIBE_NOW',
-                  return_url: `${window.location.origin}/pricing?subscription=success`,
-                  cancel_url: `${window.location.origin}/pricing?subscription=cancelled`
-                }
-              })
-            },
-            
-            onApprove: async (data, actions) => {
-              console.log('Subscription approved:', data)
-              setPaymentStatus({ type: 'subscription', message: 'Subscription activated! Welcome to Pro.' })
-              setShowPaymentModal(false)
+            onClick: async (data, actions) => {
+              // Call backend to create subscription
+              try {
+                const response = await fetch('/api/paypal/create-subscription', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ planId: 'pro-monthly', userId })
+                })
+                const result = await response.json()
+                if (result.error) throw new Error(result.error)
+                // Redirect to PayPal approval URL
+                window.location.href = result.approveUrl
+                return actions.resolve()
+              } catch (err) {
+                console.error('Subscription error:', err)
+                alert('订阅创建失败: ' + err.message)
+                return actions.reject()
+              }
             },
             
             onError: (err) => {
               console.error('PayPal error:', err)
-              alert('Subscription failed. Please try again.')
-            },
-            
-            onCancel: () => {
-              console.log('Subscription cancelled by user')
+              alert('订阅失败，请重试')
             }
           }).render(paypalContainerRef.current)
         }
