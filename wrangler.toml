@@ -14,3 +14,6 @@ id = "07fda2f5863949d7b38e176e819d65b6"
 binding = "USER_DATA"
 id = "4fe5b29d54b341aaae66dd332d8f78ba"
 
+[vars]
+PAYPAL_WEBHOOK_ID = ""
+
