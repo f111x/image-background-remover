@@ -1,15 +1,11 @@
-import { createClient } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 
-export function createServerClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        name: 'sb-auth-token',
-        key: 'sb-auth-token',
-        whitelistPatterns: ['/api/', '/profile', '/pricing'],
-      },
-    }
-  )
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+// Helper functions for API routes
+export function createServerSupabase() {
+  return createClient(supabaseUrl, supabaseAnonKey)
 }
