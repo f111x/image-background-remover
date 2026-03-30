@@ -1,411 +1,211 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Link from 'next/link'
 
-// PayPal packages
 const CREDIT_PACKAGES = [
-  { id: '10-credits', credits: 10, price: '1.00', label: '10 Credits', popular: false },
-  { id: '50-credits', credits: 50, price: '4.00', label: '50 Credits', popular: true },
-  { id: '100-credits', credits: 100, price: '7.00', label: '100 Credits', popular: false },
+  { id: '10-credits', credits: 10, price: 0.99, label: '10 Credits', desc: 'Perfect for occasional use' },
+  { id: '50-credits', credits: 50, price: 3.99, label: '50 Credits', desc: 'Best value for regular users', popular: true },
+  { id: '100-credits', credits: 100, price: 6.99, label: '100 Credits', desc: 'For heavy users' },
 ]
 
 const SUBSCRIPTION_PLANS = [
-  {
-    id: 'pro-monthly',
-    name: 'Pro',
-    price: '10.00',
-    period: '每月',
-    features: [
-      '每天 100 次处理',
-      '高清无水印',
-      '无限历史记录',
-      '优先处理队列',
-      '专属客服支持'
-    ],
-    popular: true
-  }
+  { id: 'pro-monthly', name: 'Pro Monthly', credits: 100, price: 9.9, desc: '100 credits daily, unlimited monthly' },
 ]
 
-// PayPal Client ID (sandbox for testing)
-const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'AWa86ek1hDnGq4UrjBQ0DOiYPAp2Y8SRLfUhOAg43LuK5tGzCTkZ1xFLvfDLQVOr4rJmEfVG7P3b3IqU'
-
-// Load PayPal SDK
-function loadPayPalScript(clientId) {
-  return new Promise((resolve, reject) => {
-    if (window.paypal) {
-      resolve(window.paypal)
-      return
-    }
-    const script = document.createElement('script')
-    // Use sandbox URL for testing, disable funding sources that cause promotional financing issues
-    script.src = `https://www.sandbox.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture&disable-funding=credit,card,bancontact,blik,eps,giropay,ideal,klarna,mybank,p24,sepa,sofort,venmo`
-    script.async = true
-    script.onload = () => resolve(window.paypal)
-    script.onerror = reject
-    document.body.appendChild(script)
-  })
-}
-
-export default function PricingPage() {
+export default function Pricing() {
+  const [credits, setCredits] = useState(0)
+  const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [paymentStatus, setPaymentStatus] = useState(null)
-  const [userId, setUserId] = useState('guest')
-  const [showPaymentModal, setShowPaymentModal] = useState(false)
-  const [paymentType, setPaymentType] = useState('credits')
-  const [selectedPackage, setSelectedPackage] = useState(null)
-  const paypalContainerRef = useRef(null)
-  const paypalInitialized = useRef(false)
-  
-  // Get user ID
+  const [message, setMessage] = useState({ type: '', text: '' })
+  const paypalRef = useRef(null)
+
   useEffect(() => {
-    const storedUserId = localStorage.getItem('userId') || `guest_${Date.now()}`
-    localStorage.setItem('userId', storedUserId)
-    setUserId(storedUserId)
-    
-    // Check URL params for payment status
-    const params = new URLSearchParams(window.location.search)
-    const payment = params.get('payment')
-    const subscription = params.get('subscription')
-    
-    if (payment === 'success') {
-      setPaymentStatus({ 
-        type: 'credits', 
-        message: 'Payment successful! Your credits will be added shortly.' 
-      })
-      window.history.replaceState({}, '', '/pricing')
-    } else if (payment === 'cancelled') {
-      setPaymentStatus({ 
-        type: 'credits', 
-        message: 'Payment cancelled.' 
-      })
-      window.history.replaceState({}, '', '/pricing')
-    } else if (subscription === 'success') {
-      setPaymentStatus({ type: 'subscription', message: 'Subscription activated! Welcome to Pro.' })
-      window.history.replaceState({}, '', '/pricing')
-    } else if (subscription === 'cancelled') {
-      setPaymentStatus({ type: 'subscription', message: 'Subscription cancelled.' })
-      window.history.replaceState({}, '', '/pricing')
-    }
+    loadUserData()
+    loadPayPalSDK()
   }, [])
 
-  // Handle payment button click
-  const handlePaymentClick = (type, packageId = null) => {
-    setPaymentType(type)
-    setSelectedPackage(packageId)
-    setShowPaymentModal(true)
-    paypalInitialized.current = false
-  }
-
-  // Initialize PayPal buttons when modal opens
-  useEffect(() => {
-    if (!showPaymentModal) return
-
-    const initPayPal = async () => {
-      if (paypalInitialized.current) return
-      paypalInitialized.current = true
-      
+  async function loadUserData() {
+    const userId = localStorage.getItem('userId')
+    const userData = localStorage.getItem('user')
+    if (userId) {
+      setUser(userData ? JSON.parse(userData) : { id: userId })
       try {
-        const paypal = await loadPayPalScript(PAYPAL_CLIENT_ID)
-        
-        // Clear container
-        if (paypalContainerRef.current) {
-          paypalContainerRef.current.innerHTML = ''
-        }
-
-        if (paymentType === 'credits' && selectedPackage) {
-          const pkg = CREDIT_PACKAGES.find(p => p.id === selectedPackage)
-          
-          paypal.Buttons({
-            style: {
-              layout: 'vertical',
-              color: 'gold',
-              shape: 'rect',
-              label: 'pay'
-            },
-            
-            createOrder: async (data, actions) => {
-              // Call backend to create order
-              try {
-                const response = await fetch('/api/paypal/create-order', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ packageId: selectedPackage, userId })
-                })
-                const result = await response.json()
-                if (result.error) throw new Error(result.error)
-                return result.orderId
-              } catch (err) {
-                console.error('Order creation error:', err)
-                throw err
-              }
-            },
-            
-            onApprove: async (data, actions) => {
-              // Redirect to success page - webhook will handle credit addition
-              window.location.href = `/pricing?payment=success&orderId=${data.orderID}`
-            },
-            
-            onError: (err) => {
-              console.error('PayPal error:', err)
-              alert('Payment failed. Please try again.')
-            },
-            
-            onCancel: () => {
-              console.log('Payment cancelled by user')
-            }
-          }).render(paypalContainerRef.current)
-          
-        } else if (paymentType === 'subscription') {
-          const plan = SUBSCRIPTION_PLANS[0]
-          
-          paypal.Buttons({
-            style: {
-              layout: 'vertical',
-              color: 'gold',
-              shape: 'rect',
-              label: 'subscribe'
-            },
-            
-            onClick: async (data, actions) => {
-              // Call backend to create subscription
-              try {
-                const response = await fetch('/api/paypal/create-subscription', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ planId: 'pro-monthly', userId })
-                })
-                const result = await response.json()
-                if (result.error) throw new Error(result.error)
-                // Redirect to PayPal approval URL
-                window.location.href = result.approveUrl
-                return actions.resolve()
-              } catch (err) {
-                console.error('Subscription error:', err)
-                alert('订阅创建失败: ' + err.message)
-                return actions.reject()
-              }
-            },
-            
-            onError: (err) => {
-              console.error('PayPal error:', err)
-              alert('订阅失败，请重试')
-            }
-          }).render(paypalContainerRef.current)
-        }
-      } catch (error) {
-        console.error('Failed to load PayPal:', error)
-        alert('Failed to load PayPal. Please refresh and try again.')
+        const res = await fetch(`/api/user?userId=${userId}&action=check`)
+        const data = await res.json()
+        if (data.credits !== undefined) setCredits(data.credits)
+      } catch (e) {
+        console.error('Failed to load credits')
       }
     }
+  }
 
-    const timer = setTimeout(initPayPal, 100)
-    return () => clearTimeout(timer)
-  }, [showPaymentModal, paymentType, selectedPackage, userId])
+  function loadPayPalSDK() {
+    if (window.paypal) return
+    const script = document.createElement('script')
+    script.src = `https://www.sandbox.paypal.com/sdk/js?client-id=${process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID}&currency=USD&intent=capture`
+    script.async = true
+    script.onload = () => initPayPalButtons()
+    document.body.appendChild(script)
+  }
+
+  async function initPayPalButtons() {
+    if (!window.paypal || !paypalRef.current) return
+    paypalRef.current.innerHTML = ''
+
+    window.paypal.Buttons({
+      style: { layout: 'vertical', color: 'blue', shape: 'rect', label: 'pay' },
+      createOrder: async (data, actions) => {
+        const userId = localStorage.getItem('userId') || 'guest'
+        const res = await fetch('/api/paypal/create-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ packageId: '10-credits', userId })
+        })
+        const { orderId } = await res.json()
+        return orderId
+      },
+      onApprove: async (data, actions) => {
+        setLoading(true)
+        try {
+          const res = await fetch('/api/paypal/capture-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId: data.orderID })
+          })
+          const result = await res.json()
+          if (result.success) {
+            setCredits(prev => prev + result.credits)
+            setMessage({ type: 'success', text: `Successfully purchased ${result.credits} credits!` })
+          }
+        } catch (e) {
+          setMessage({ type: 'error', text: 'Payment capture failed' })
+        }
+        setLoading(false)
+      },
+      onError: () => setMessage({ type: 'error', text: 'Payment error occurred' })
+    }).render(paypalRef.current)
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700">
-      <header className="py-4 px-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <a href="/" className="text-white hover:text-purple-200 transition-colors">← 返回首页</a>
-        </div>
-        <div className="text-white text-sm">🖼️ 图片背景去除工具</div>
+    <div className="min-h-screen bg-gray-900 text-white">
+      <header className="p-6 border-b border-gray-800">
+        <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+          ImageTools
+        </Link>
       </header>
 
-      <main className="container mx-auto px-4 pb-12 max-w-5xl">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            选择适合您的方案
-          </h1>
-          <p className="text-purple-200 text-lg">
-            简单、透明、无隐藏费用
-          </p>
-        </div>
+      <main className="max-w-6xl mx-auto p-6">
+        <h1 className="text-4xl font-bold text-center mb-2">Simple Pricing</h1>
+        <p className="text-gray-400 text-center mb-12">Choose a plan that works for you</p>
 
-        {/* Payment Status Alert */}
-        {paymentStatus && (
-          <div className={`mb-8 p-4 rounded-xl text-center bg-green-500/30 border border-green-400/50`}>
-            <p className="text-white font-medium">{paymentStatus.message}</p>
-            <button 
-              onClick={() => setPaymentStatus(null)}
-              className="mt-2 text-sm text-purple-200 hover:text-white"
-            >
-              ✕ 关闭
-            </button>
+        {user && (
+          <div className="bg-gray-800 rounded-xl p-4 mb-8 max-w-md mx-auto text-center">
+            <p className="text-gray-400">Your Credits</p>
+            <p className="text-4xl font-bold text-green-400">{credits}</p>
           </div>
         )}
 
-        {/* Subscription Plans */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-white text-center mb-6">月度订阅</h2>
-          <div className="grid md:grid-cols-1 gap-6 max-w-md mx-auto">
-            {SUBSCRIPTION_PLANS.map((plan) => (
-              <div 
-                key={plan.id}
-                className={`bg-gradient-to-br from-yellow-500/20 to-orange-500/20 backdrop-blur rounded-2xl p-6 border-2 ${plan.popular ? 'border-yellow-400/50' : 'border-white/20'} relative`}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs px-3 py-1 rounded-full">
-                    ⭐ 最受欢迎
-                  </div>
-                )}
-                
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
-                  <div className="text-4xl font-bold text-white mb-2">
-                    ${plan.price}
-                    <span className="text-lg text-purple-200 font-normal">/{plan.period}</span>
-                  </div>
-                </div>
-                
-                <ul className="space-y-3 mb-6">
-                  {plan.features.map((feature, i) => (
-                    <li key={i} className="flex items-center gap-2 text-white">
-                      <span className="text-yellow-400">✓</span>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                
-                <button 
-                  onClick={() => handlePaymentClick('subscription', plan.id)}
-                  className="w-full py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-medium rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all"
-                >
-                  立即订阅
-                </button>
-              </div>
-            ))}
+        {message.text && (
+          <div className={`max-w-md mx-auto mb-6 p-4 rounded-lg ${message.type === 'success' ? 'bg-green-900' : 'bg-red-900'}`}>
+            {message.text}
           </div>
-        </div>
+        )}
 
-        {/* Credit Packages */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-white text-center mb-6">积分购买</h2>
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold text-center mb-6">Credit Packages</h2>
           <div className="grid md:grid-cols-3 gap-6">
-            {CREDIT_PACKAGES.map((pkg) => (
-              <div 
-                key={pkg.id}
-                className={`bg-white/10 backdrop-blur rounded-2xl p-6 border ${pkg.popular ? 'border-purple-400/50' : 'border-white/20'} relative`}
-              >
-                {pkg.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-purple-500 text-white text-xs px-3 py-1 rounded-full">
-                    推荐
-                  </div>
-                )}
-                
-                <div className="text-center mb-6">
-                  <h3 className="text-xl font-bold text-white mb-2">{pkg.label}</h3>
-                  <div className="text-3xl font-bold text-white mb-2">
-                    ${pkg.price}
-                  </div>
-                  <p className="text-purple-200 text-sm">
-                    {pkg.credits} 次处理额度
-                  </p>
-                </div>
-                
-                <ul className="space-y-2 mb-6 text-sm text-purple-200">
-                  <li>✓ 永久有效</li>
-                  <li>✓ 高清无水印</li>
-                  <li>✓ 即时到账</li>
-                </ul>
-                
-                <button 
-                  onClick={() => handlePaymentClick('credits', pkg.id)}
-                  className={`w-full py-3 font-medium rounded-lg transition-all ${
-                    pkg.popular 
-                      ? 'bg-white text-purple-600 hover:bg-gray-100' 
-                      : 'bg-white/20 text-white hover:bg-white/30'
-                  }`}
+            {CREDIT_PACKAGES.map(pkg => (
+              <div key={pkg.id} className={`bg-gray-800 rounded-xl p-6 ${pkg.popular ? 'ring-2 ring-purple-500' : ''}`}>
+                {pkg.popular && <span className="text-xs bg-purple-500 text-white px-2 py-1 rounded-full">Most Popular</span>}
+                <h3 className="text-2xl font-bold mt-2">{pkg.label}</h3>
+                <p className="text-4xl font-bold text-green-400 mt-4">${pkg.price}</p>
+                <p className="text-gray-400 mt-2">{pkg.desc}</p>
+                <button
+                  onClick={() => handleBuyPackage(pkg.id)}
+                  disabled={loading}
+                  className="w-full mt-6 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 py-3 rounded-lg font-semibold transition"
                 >
-                  立即购买
+                  {loading ? 'Processing...' : 'Buy Now'}
                 </button>
               </div>
             ))}
           </div>
-        </div>
+        </section>
 
-        {/* Free Tier */}
-        <div className="bg-white/10 backdrop-blur rounded-2xl p-6 border border-white/20 mb-12">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div>
-              <h3 className="text-xl font-bold text-white mb-2">免费使用</h3>
-              <p className="text-purple-200">每天 3 次免费处理，无需注册</p>
-            </div>
-            <a 
-              href="/" 
-              className="px-6 py-3 bg-white/20 text-white font-medium rounded-lg hover:bg-white/30 transition-colors whitespace-nowrap"
-            >
-              立即试用 →
-            </a>
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold text-center mb-6">Subscription Plans</h2>
+          <div className="max-w-md mx-auto">
+            {SUBSCRIPTION_PLANS.map(plan => (
+              <div key={plan.id} className="bg-gray-800 rounded-xl p-6 ring-2 ring-purple-500">
+                <h3 className="text-2xl font-bold">{plan.name}</h3>
+                <p className="text-4xl font-bold text-green-400 mt-4">${plan.price}<span className="text-lg text-gray-400">/mo</span></p>
+                <p className="text-gray-400 mt-2">{plan.desc}</p>
+                <button
+                  onClick={() => handleSubscribe(plan.id)}
+                  disabled={loading}
+                  className="w-full mt-6 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 py-3 rounded-lg font-semibold transition"
+                >
+                  Subscribe
+                </button>
+              </div>
+            ))}
           </div>
-        </div>
+        </section>
 
-        {/* FAQ Section */}
-        <div className="bg-white/10 backdrop-blur rounded-2xl p-8">
-          <h2 className="text-2xl font-bold text-white text-center mb-8">常见问题</h2>
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-white font-medium mb-2">Q: 积分和订阅有什么区别？</h3>
-              <p className="text-purple-200 text-sm">A: 积分是一次性购买，永不过期；订阅是每月付费，享受每日额度，适合高频用户。</p>
-            </div>
-            <div>
-              <h3 className="text-white font-medium mb-2">Q: 支付安全吗？</h3>
-              <p className="text-purple-200 text-sm">A: 所有支付由 PayPal 提供安全保障，我们不存储您的银行卡信息。</p>
-            </div>
-            <div>
-              <h3 className="text-white font-medium mb-2">Q: 如何取消订阅？</h3>
-              <p className="text-purple-200 text-sm">A: 随时可在 PayPal 账户中取消，取消后本期仍可使用，下期不再扣费。</p>
-            </div>
-            <div>
-              <h3 className="text-white font-medium mb-2">Q: 购买后如何查看积分余额？</h3>
-              <p className="text-purple-200 text-sm">A: 前往个人中心查看您的积分余额和使用记录。</p>
-            </div>
-            <div>
-              <h3 className="text-white font-medium mb-2">Q: 支持退款吗？</h3>
-              <p className="text-purple-200 text-sm">A: 7天内如有任何问题可申请全额退款，请联系我们。</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer Note */}
-        <div className="text-center mt-8 text-purple-200 text-sm">
-          <p>💳 支付安全由 PayPal 提供支持</p>
-          <p className="mt-2">📧 联系我们: support@imagetoolss.com</p>
-        </div>
+        <section className="text-center">
+          <h2 className="text-2xl font-bold mb-4">PayPal Payment</h2>
+          <div ref={paypalRef} className="max-w-xs mx-auto" />
+        </section>
       </main>
-
-      {/* Payment Modal */}
-      {showPaymentModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-gray-800">
-                {paymentType === 'credits' 
-                  ? `购买 ${CREDIT_PACKAGES.find(p => p.id === selectedPackage)?.credits} 积分`
-                  : '订阅 Pro 会员'
-                }
-              </h3>
-              <button 
-                onClick={() => {
-                  setShowPaymentModal(false)
-                  paypalInitialized.current = false
-                }}
-                className="text-gray-500 hover:text-gray-700 text-2xl"
-              >
-                ✕
-              </button>
-            </div>
-            
-            <div ref={paypalContainerRef} className="min-h-[150px]" />
-            
-            <p className="text-center text-gray-500 text-sm mt-4">
-              {paymentType === 'credits' 
-                ? '积分将添加到您的账户'
-                : '每月自动续费，随时取消'
-              }
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   )
+
+  async function handleBuyPackage(packageId) {
+    if (!user) {
+      alert('Please login first')
+      return
+    }
+    setLoading(true)
+    const userId = user.id
+    
+    try {
+      const res = await fetch('/api/paypal/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ packageId, userId })
+      })
+      const { orderId, approveUrl } = await res.json()
+      if (approveUrl) {
+        window.location.href = approveUrl
+      }
+    } catch (e) {
+      setMessage({ type: 'error', text: 'Failed to create order' })
+      setLoading(false)
+    }
+  }
+
+  async function handleSubscribe(planId) {
+    if (!user) {
+      alert('Please login first')
+      return
+    }
+    setLoading(true)
+    const userId = user.id
+    
+    try {
+      const res = await fetch('/api/paypal/create-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planId, userId })
+      })
+      const { subscriptionId, approveUrl } = await res.json()
+      if (approveUrl) {
+        window.location.href = approveUrl
+      }
+    } catch (e) {
+      setMessage({ type: 'error', text: 'Failed to create subscription' })
+      setLoading(false)
+    }
+  }
 }
