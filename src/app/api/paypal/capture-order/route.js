@@ -1,18 +1,42 @@
-import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
 export const runtime = 'edge'
+import { NextResponse } from 'next/server'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-function getSupabaseAdmin() {
-  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+async function supabaseFetch(table, eq) {
+  let url = `${SUPABASE_URL}/rest/v1/${table}?${eq[0]}=eq.${eq[1]}`
+  const headers = {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+  }
+  const res = await fetch(url, { headers })
+  return res.json()
+}
+
+async function supabaseUpdate(table, data, eq) {
+  let url = `${SUPABASE_URL}/rest/v1/${table}?${eq[0]}=eq.${eq[1]}`
+  const headers = {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+    'Content-Type': 'application/json',
+  }
+  return fetch(url, { method: 'PATCH', headers, body: JSON.stringify(data) })
+}
+
+async function supabaseUpsert(table, data) {
+  const url = `${SUPABASE_URL}/rest/v1/${table}`
+  const headers = {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+    'Content-Type': 'application/json',
+    'Prefer': 'resolution=merge-duplicates',
+  }
+  return fetch(url, { method: 'POST', headers, body: JSON.stringify(data) })
 }
 
 async function getPayPalAccessToken(clientId, clientSecret) {
   const auth = btoa(`${clientId}:${clientSecret}`)
-  
   const response = await fetch('https://api-m.sandbox.paypal.com/v1/oauth2/token', {
     method: 'POST',
     headers: {
@@ -21,17 +45,10 @@ async function getPayPalAccessToken(clientId, clientSecret) {
     },
     body: 'grant_type=client_credentials',
   })
-  
-  if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`Failed to get PayPal access token: ${error}`)
-  }
-  
   const data = await response.json()
   return data.access_token
 }
 
-// POST /api/paypal/capture-order
 export async function POST(request) {
   try {
     const { orderId } = await request.json()
@@ -42,7 +59,6 @@ export async function POST(request) {
     
     const clientId = process.env.PAYPAL_CLIENT_ID
     const clientSecret = process.env.PAYPAL_CLIENT_SECRET
-    const supabase = getSupabaseAdmin()
     
     const accessToken = await getPayPalAccessToken(clientId, clientSecret)
     
@@ -62,51 +78,36 @@ export async function POST(request) {
     
     const captureData = await captureResponse.json()
     
-    await supabase
-      .from('orders')
-      .update({ 
-        status: 'captured',
-        captured_at: new Date().toISOString()
+    await supabaseUpdate('orders', { 
+      status: 'captured',
+      captured_at: new Date().toISOString()
+    }, ['id', orderId])
+    
+    const orderInfo = await supabaseFetch('orders', ['id', orderId])
+    const order = orderInfo?.[0]
+    
+    if (order && order.user_id && order.user_id !== 'guest') {
+      const existingCredits = await supabaseFetch('credits', ['user_id', order.user_id])
+      const currentBalance = existingCredits?.[0]?.balance || 0
+      await supabaseUpsert('credits', {
+        user_id: order.user_id,
+        balance: currentBalance + order.credits
       })
-      .eq('id', orderId)
-    
-    const { data: orderInfo } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('id', orderId)
-      .single()
-    
-    if (orderInfo && orderInfo.user_id && orderInfo.user_id !== 'guest') {
-      const { data: existingCredits } = await supabase
-        .from('credits')
-        .select('balance')
-        .eq('user_id', orderInfo.user_id)
-        .single()
       
-      const currentBalance = existingCredits?.balance || 0
-      await supabase
-        .from('credits')
-        .upsert({
-          user_id: orderInfo.user_id,
-          balance: currentBalance + orderInfo.credits
-        })
-      
-      await supabase
-        .from('purchases')
-        .insert({
-          user_id: orderInfo.user_id,
-          type: 'credits',
-          package_id: orderInfo.package_id,
-          credits: orderInfo.credits,
-          price: orderInfo.price,
-          order_id: orderId,
-        })
+      await supabaseUpsert('purchases', {
+        user_id: order.user_id,
+        type: 'credits',
+        package_id: order.package_id,
+        credits: order.credits,
+        price: order.price,
+        order_id: orderId,
+      })
     }
     
     return NextResponse.json({
       success: true,
       status: captureData.status,
-      credits: orderInfo?.credits || 0,
+      credits: order?.credits || 0,
       message: 'Payment captured successfully!'
     })
     

@@ -1,7 +1,5 @@
-import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
 export const runtime = 'edge'
+import { NextResponse } from 'next/server'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -12,8 +10,14 @@ const CREDIT_PACKAGES = {
   '100-credits': { credits: 100, price: 6.99 },
 }
 
-function getSupabaseAdmin() {
-  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+async function supabaseInsert(table, data) {
+  const url = `${SUPABASE_URL}/rest/v1/${table}`
+  const headers = {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+    'Content-Type': 'application/json',
+  }
+  return fetch(url, { method: 'POST', headers, body: JSON.stringify(data) })
 }
 
 async function getPayPalAccessToken(clientId, clientSecret) {
@@ -28,16 +32,10 @@ async function getPayPalAccessToken(clientId, clientSecret) {
     body: 'grant_type=client_credentials',
   })
   
-  if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`Failed to get PayPal access token: ${error}`)
-  }
-  
   const data = await response.json()
   return data.access_token
 }
 
-// POST /api/paypal/create-order
 export async function POST(request) {
   try {
     const { packageId, userId } = await request.json()
@@ -89,17 +87,14 @@ export async function POST(request) {
     
     const order = await orderResponse.json()
     
-    const supabase = getSupabaseAdmin()
-    await supabase
-      .from('orders')
-      .insert({
-        id: order.id,
-        user_id: userId || 'guest',
-        package_id: packageId,
-        credits: pkg.credits,
-        price: pkg.price,
-        status: 'pending',
-      })
+    await supabaseInsert('orders', {
+      id: order.id,
+      user_id: userId || 'guest',
+      package_id: packageId,
+      credits: pkg.credits,
+      price: pkg.price,
+      status: 'pending',
+    })
     
     return NextResponse.json({
       orderId: order.id,
