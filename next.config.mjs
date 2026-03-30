@@ -3,8 +3,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // Generate static HTML files for Cloudflare Pages
   output: 'export',
+  distDir: '.next',
   trailingSlash: true,
   env: {
     NEXT_PUBLIC_REMOVE_BG_API_KEY: process.env.REMOVE_BG_API_KEY,
