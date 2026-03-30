@@ -1,5 +1,12 @@
-// PayPal Capture Order API - Complete payment after user approval
-// POST /api/paypal/capture-order
+import { NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+function getSupabaseAdmin() {
+  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+}
 
 async function getPayPalAccessToken(clientId, clientSecret) {
   const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64')
@@ -22,32 +29,21 @@ async function getPayPalAccessToken(clientId, clientSecret) {
   return data.access_token
 }
 
-export async function onRequest(context) {
-  if (context.request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' }
-    })
-  }
-
+// POST /api/paypal/capture-order
+export async function POST(request) {
   try {
-    const { orderId, userId } = await context.request.json()
+    const { orderId, userId } = await request.json()
     
     if (!orderId) {
-      return new Response(JSON.stringify({ error: 'Missing orderId' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      })
+      return NextResponse.json({ error: 'Missing orderId' }, { status: 400 })
     }
     
-    const clientId = context.env.PAYPAL_CLIENT_ID
-    const clientSecret = context.env.PAYPAL_CLIENT_SECRET
-    const kv = context.env.USER_DATA
+    const clientId = process.env.PAYPAL_CLIENT_ID
+    const clientSecret = process.env.PAYPAL_CLIENT_SECRET
+    const supabase = getSupabaseAdmin()
     
-    // Get access token
     const accessToken = await getPayPalAccessToken(clientId, clientSecret)
     
-    // Capture the order
     const captureResponse = await fetch(`https://api-m.sandbox.paypal.com/v1/checkout/orders/${orderId}/capture`, {
       method: 'POST',
       headers: {
@@ -64,51 +60,61 @@ export async function onRequest(context) {
     
     const captureData = await captureResponse.json()
     
-    // Update KV with captured status
-    const orderData = await kv.get(`paypal_order:${orderId}`)
-    if (orderData) {
-      const orderInfo = JSON.parse(orderData)
-      orderInfo.status = 'captured'
-      orderInfo.capturedAt = new Date().toISOString()
-      await kv.put(`paypal_order:${orderId}`, JSON.stringify(orderInfo))
+    // Update order status in Supabase
+    await supabase
+      .from('orders')
+      .update({ 
+        status: 'captured',
+        captured_at: new Date().toISOString()
+      })
+      .eq('id', orderId)
+    
+    // Get order info
+    const { data: orderInfo } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('id', orderId)
+      .single()
+    
+    // Add credits to user
+    if (orderInfo && orderInfo.user_id && orderInfo.user_id !== 'guest') {
+      // Upsert credits
+      const { data: existingCredits } = await supabase
+        .from('credits')
+        .select('balance')
+        .eq('user_id', orderInfo.user_id)
+        .single()
       
-      // Add credits to user
-      if (orderInfo.userId && orderInfo.userId !== 'guest') {
-        const creditsKey = `credits:${orderInfo.userId}`
-        const currentCredits = await kv.get(creditsKey)
-        const credits = currentCredits ? parseInt(currentCredits) : 0
-        await kv.put(creditsKey, (credits + orderInfo.credits).toString(), { expirationTtl: 86400 * 365 })
-        
-        // Also update user's purchase history
-        const purchaseHistoryKey = `purchases:${orderInfo.userId}`
-        const history = await kv.get(purchaseHistoryKey)
-        const purchases = history ? JSON.parse(history) : []
-        purchases.push({
+      const currentBalance = existingCredits?.balance || 0
+      await supabase
+        .from('credits')
+        .upsert({
+          user_id: orderInfo.user_id,
+          balance: currentBalance + orderInfo.credits
+        })
+      
+      // Add to purchase history
+      await supabase
+        .from('purchases')
+        .insert({
+          user_id: orderInfo.user_id,
           type: 'credits',
-          packageId: orderInfo.packageId,
+          package_id: orderInfo.package_id,
           credits: orderInfo.credits,
           price: orderInfo.price,
-          orderId,
-          purchasedAt: new Date().toISOString()
+          order_id: orderId,
         })
-        await kv.put(purchaseHistoryKey, JSON.stringify(purchases), { expirationTtl: 86400 * 365 })
-      }
     }
     
-    return new Response(JSON.stringify({
+    return NextResponse.json({
       success: true,
       status: captureData.status,
-      credits: orderData ? JSON.parse(orderData).credits : 0,
+      credits: orderInfo?.credits || 0,
       message: 'Payment captured successfully!'
-    }), {
-      headers: { 'Content-Type': 'application/json' }
     })
     
   } catch (error) {
     console.error('PayPal capture-order error:', error)
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    })
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }

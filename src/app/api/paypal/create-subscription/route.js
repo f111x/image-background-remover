@@ -1,17 +1,23 @@
-// PayPal Create Subscription API - Monthly Pro Plan
-// POST /api/paypal/create-subscription
+import { NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 const SUBSCRIPTION_PLANS = {
   'pro-monthly': {
     name: 'Pro Monthly',
-    credits: 100, // daily credits
-    price: 9.9, // USD
+    credits: 100,
+    price: 9.9,
     interval: 'MONTH',
     description: 'Pro Plan - 100 credits daily, unlimited monthly'
   }
 }
 
-// Get PayPal access token
+function getSupabaseAdmin() {
+  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+}
+
 async function getPayPalAccessToken(clientId, clientSecret) {
   const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64')
   
@@ -33,15 +39,14 @@ async function getPayPalAccessToken(clientId, clientSecret) {
   return data.access_token
 }
 
-// Create product (only once, but we'll create on-the-fly for simplicity)
 async function ensureProduct(accessToken, clientId) {
   const productPayload = {
     name: 'ImageTools Pro Subscription',
     type: 'SERVICE',
     description: 'AI Image Background Remover - Pro Plan',
     category: 'SOFTWARE',
-    image_url: 'https://image-background-remover.fx9038.workers.dev/icon.png',
-    home_url: 'https://image-background-remover.fx9038.workers.dev',
+    image_url: 'https://imagetoolss.com/icon.png',
+    home_url: 'https://imagetoolss.com',
   }
   
   const productResponse = await fetch('https://api-m.sandbox.paypal.com/v1/catalogs/products', {
@@ -57,50 +62,35 @@ async function ensureProduct(accessToken, clientId) {
   if (productResponse.ok) {
     return await productResponse.json()
   }
-  // If product already exists, try to get it
   const productsList = await fetch('https://api-m.sandbox.paypal.com/v1/catalogs/products', {
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-    },
+    headers: { 'Authorization': `Bearer ${accessToken}` },
   })
   const products = await productsList.json()
   return products.products?.[0] || null
 }
 
-export async function onRequest(context) {
-  if (context.request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' }
-    })
-  }
-
+// POST /api/paypal/create-subscription
+export async function POST(request) {
   try {
-    const { planId = 'pro-monthly', userId } = await context.request.json()
+    const { planId = 'pro-monthly', userId } = await request.json()
     
     if (!SUBSCRIPTION_PLANS[planId]) {
-      return new Response(JSON.stringify({ error: 'Invalid subscription plan' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      })
+      return NextResponse.json({ error: 'Invalid subscription plan' }, { status: 400 })
     }
     
     const plan = SUBSCRIPTION_PLANS[planId]
-    const clientId = context.env.PAYPAL_CLIENT_ID
-    const clientSecret = context.env.PAYPAL_CLIENT_SECRET
-    const kv = context.env.USER_DATA
-    const siteUrl = context.env.NEXT_PUBLIC_SITE_URL || 'https://image-background-remover.fx9038.workers.dev'
+    const clientId = process.env.PAYPAL_CLIENT_ID
+    const clientSecret = process.env.PAYPAL_CLIENT_SECRET
+    const supabase = getSupabaseAdmin()
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://imagetoolss.com'
     
-    // Get PayPal access token
     const accessToken = await getPayPalAccessToken(clientId, clientSecret)
     
-    // Create product
     const product = await ensureProduct(accessToken, clientId)
     if (!product) {
       throw new Error('Failed to create/get PayPal product')
     }
     
-    // Create billing plan
     const planPayload = {
       name: plan.name,
       description: plan.description,
@@ -110,24 +100,15 @@ export async function onRequest(context) {
         type: 'REGULAR',
         frequency: 'MONTH',
         frequency_interval: '1',
-        amount: {
-          currency: 'USD',
-          value: plan.price.toFixed(2)
-        },
-        cycles: '0', // Infinite
+        amount: { currency: 'USD', value: plan.price.toFixed(2) },
+        cycles: '0',
         charge_models: [{
           type: 'TAX',
-          amount: {
-            currency: 'USD',
-            value: '0.00'
-          }
+          amount: { currency: 'USD', value: '0.00' }
         }]
       }],
       merchant_preferences: {
-        setup_fee: {
-          currency: 'USD',
-          value: plan.price.toFixed(2)
-        },
+        setup_fee: { currency: 'USD', value: plan.price.toFixed(2) },
         return_url: `${siteUrl}/pricing?subscription=success`,
         cancel_url: `${siteUrl}/pricing?subscription=cancelled`,
         auto_bill_amount: 'YES',
@@ -153,7 +134,6 @@ export async function onRequest(context) {
     
     const billingPlan = await billingPlanResponse.json()
     
-    // Activate the plan
     await fetch(`https://api-m.sandbox.paypal.com/v1/billing/plans/${billingPlan.id}/activate`, {
       method: 'POST',
       headers: {
@@ -162,12 +142,9 @@ export async function onRequest(context) {
       },
     })
     
-    // Create subscription
     const subscriptionPayload = {
       plan_id: billingPlan.id,
-      subscriber: {
-        email_address: 'user@example.com', // Will be overridden by PayPal account
-      },
+      subscriber: { email_address: 'user@example.com' },
       application_context: {
         brand_name: 'ImageTools',
         user_action: 'SUBSCRIBE_NOW',
@@ -194,31 +171,26 @@ export async function onRequest(context) {
     
     const subscription = await subscriptionResponse.json()
     
-    // Store subscription mapping in KV
-    await kv.put(`paypal_subscription:${subscription.id}`, JSON.stringify({
-      planId,
-      userId: userId || 'guest',
-      status: 'pending',
-      plan: billingPlan.id,
-      createdAt: new Date().toISOString()
-    }), { expirationTtl: 86400 * 30 })
+    await supabase
+      .from('subscriptions')
+      .insert({
+        id: subscription.id,
+        user_id: userId || 'guest',
+        plan_id: planId,
+        paypal_plan_id: billingPlan.id,
+        status: 'pending',
+      })
     
-    // Find approval URL
     const approvalUrl = subscription.links.find(link => link.rel === 'approve')?.href
     
-    return new Response(JSON.stringify({
+    return NextResponse.json({
       subscriptionId: subscription.id,
       approveUrl: approvalUrl,
       planId: billingPlan.id
-    }), {
-      headers: { 'Content-Type': 'application/json' }
     })
     
   } catch (error) {
     console.error('PayPal create-subscription error:', error)
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    })
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }

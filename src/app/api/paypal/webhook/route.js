@@ -1,5 +1,12 @@
-// PayPal Webhook Handler
-// POST /api/paypal/webhook
+import { NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+function getSupabaseAdmin() {
+  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+}
 
 /**
  * Calculate CRC32 of a string (required for PayPal webhook signature)
@@ -21,52 +28,30 @@ function crc32(data) {
   return (crc ^ 0xFFFFFFFF) >>> 0;
 }
 
-/**
- * Verify PayPal webhook signature.
- * Returns { valid: true } if verified, or { valid: false, error: string } if not.
- */
-async function verifyPayPalWebhook(request, payload, webhookId, env) {
+async function verifyPayPalWebhook(request, payload, webhookId) {
   const transmissionId = request.headers.get('paypal-transmission-id');
   const transmissionTime = request.headers.get('paypal-transmission-time');
   const transmissionSig = request.headers.get('paypal-transmission-sig');
   const certUrl = request.headers.get('paypal-cert-url');
-  const authAlgo = request.headers.get('paypal-auth-algo') || 'SHA256withRSA';
 
-  // Validate required headers
   if (!transmissionId || !transmissionTime || !transmissionSig || !certUrl) {
     return { valid: false, error: 'Missing required PayPal webhook headers' };
   }
 
-  // Verify cert URL is from PayPal domain (security check)
-  try {
-    const certUrlObj = new URL(certUrl);
-    if (!certUrlObj.hostname.endsWith('.paypal.com') && !certUrlObj.hostname.endsWith('.paypal.cn')) {
-      return { valid: false, error: `Invalid cert URL domain: ${certUrl}` };
-    }
-  } catch {
-    return { valid: false, error: 'Invalid cert URL format' };
-  }
-
-  // Build the signed message
-  // Format: transmission_id|transmission_time|webhook_id|crc32(body)
   const crc = crc32(payload);
   const signedMessage = `${transmissionId}|${transmissionTime}|${webhookId}|${crc}`;
 
   try {
-    // Fetch the certificate from PayPal
     const certResponse = await fetch(certUrl);
     if (!certResponse.ok) {
       return { valid: false, error: `Failed to fetch certificate: ${certResponse.status}` };
     }
     const certPem = await certResponse.text();
-
-    // Extract certificate body (PEM format)
     const certBody = certPem
       .replace(/-----BEGIN CERTIFICATE-----/, '')
       .replace(/-----END CERTIFICATE-----/, '')
       .replace(/\s/g, '');
 
-    // Import the certificate
     const certDer = Uint8Array.from(atob(certBody), c => c.charCodeAt(0));
     const certificate = await crypto.subtle.importCert(
       'spki',
@@ -76,11 +61,8 @@ async function verifyPayPalWebhook(request, payload, webhookId, env) {
       ['verify']
     );
 
-    // Decode the signature from base64
     const signatureBinary = atob(transmissionSig);
     const signature = Uint8Array.from(signatureBinary, c => c.charCodeAt(0));
-
-    // Verify the signature
     const encoder = new TextEncoder();
     const data = encoder.encode(signedMessage);
 
@@ -97,37 +79,26 @@ async function verifyPayPalWebhook(request, payload, webhookId, env) {
   }
 }
 
-export async function onRequest(context) {
-  if (context.request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' }
-    })
-  }
-
+// POST /api/paypal/webhook
+export async function POST(request) {
   try {
-    const payload = await context.request.text()
-    const webhookId = context.env.PAYPAL_WEBHOOK_ID;
+    const payload = await request.text()
+    const webhookId = process.env.PAYPAL_WEBHOOK_ID;
+    const supabase = getSupabaseAdmin()
 
-    // --- Signature Verification ---
+    // Signature verification
     if (webhookId) {
-      const verification = await verifyPayPalWebhook(context.request, payload, webhookId, context.env);
+      const verification = await verifyPayPalWebhook(request, payload, webhookId);
       if (!verification.valid) {
         console.error('PayPal webhook signature verification failed:', verification.error);
-        return new Response(JSON.stringify({ error: 'Signature verification failed' }), {
-          status: 401,
-          headers: { 'Content-Type': 'application/json' }
-        });
+        return NextResponse.json({ error: 'Signature verification failed' }, { status: 401 });
       }
       console.log('PayPal webhook signature verified successfully');
-    } else {
-      console.warn('PAYPAL_WEBHOOK_ID not configured, skipping signature verification');
     }
 
     const event = JSON.parse(payload)
     console.log('PayPal Webhook received:', JSON.stringify(event))
 
-    // Handle different event types
     switch (event.event_type) {
       case 'CHECKOUT.ORDER.APPROVED':
         console.log('Order approved:', event.resource?.id)
@@ -136,37 +107,48 @@ export async function onRequest(context) {
       case 'PAYMENT.CAPTURE.COMPLETED':
         const orderId = event.resource?.supplementary_data?.related_ids?.order_id
         if (orderId) {
-          const kv = context.env.USER_DATA
-          const orderData = await kv.get(`paypal_order:${orderId}`)
-          if (orderData) {
-            const order = JSON.parse(orderData)
-            await kv.put(`paypal_order:${orderId}`, JSON.stringify({
-              ...order,
-              status: 'completed',
-              completedAt: new Date().toISOString()
-            }), { expirationTtl: 86400 * 7 })
-
-            // Add credits to user
-            if (order.userId && order.userId !== 'guest') {
-              const creditsKey = `credits:${order.userId}`
-              const currentCredits = await kv.get(creditsKey)
-              const credits = currentCredits ? parseInt(currentCredits) : 0
-              await kv.put(creditsKey, (credits + order.credits).toString(), { expirationTtl: 86400 * 365 })
-
-              // Update purchase history
-              const purchaseHistoryKey = `purchases:${order.userId}`
-              const history = await kv.get(purchaseHistoryKey)
-              const purchases = history ? JSON.parse(history) : []
-              purchases.push({
-                type: 'credits',
-                packageId: order.packageId,
-                credits: order.credits,
-                price: order.price,
-                orderId,
-                purchasedAt: new Date().toISOString()
+          const { data: order } = await supabase
+            .from('orders')
+            .select('*')
+            .eq('id', orderId)
+            .single()
+          
+          if (order) {
+            await supabase
+              .from('orders')
+              .update({ 
+                status: 'completed',
+                completed_at: new Date().toISOString()
               })
-              await kv.put(purchaseHistoryKey, JSON.stringify(purchases), { expirationTtl: 86400 * 365 })
-              console.log(`Credits added: +${order.credits} for user ${order.userId}`)
+              .eq('id', orderId)
+
+            if (order.user_id && order.user_id !== 'guest') {
+              // Add credits
+              const { data: existingCredits } = await supabase
+                .from('credits')
+                .select('balance')
+                .eq('user_id', order.user_id)
+                .single()
+              
+              const currentBalance = existingCredits?.balance || 0
+              await supabase
+                .from('credits')
+                .upsert({
+                  user_id: order.user_id,
+                  balance: currentBalance + order.credits
+                })
+
+              // Add to purchase history
+              await supabase
+                .from('purchases')
+                .insert({
+                  user_id: order.user_id,
+                  type: 'credits',
+                  package_id: order.package_id,
+                  credits: order.credits,
+                  price: order.price,
+                  order_id: orderId,
+                })
             }
             console.log(`Payment completed for order ${orderId}, credits: ${order.credits}`)
           }
@@ -181,17 +163,10 @@ export async function onRequest(context) {
         console.log('Unhandled event type:', event.event_type)
     }
 
-    // Return 200 to acknowledge receipt
-    return new Response(JSON.stringify({ received: true }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    })
+    return NextResponse.json({ received: true }, { status: 200 })
 
   } catch (error) {
     console.error('PayPal webhook error:', error)
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    })
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }

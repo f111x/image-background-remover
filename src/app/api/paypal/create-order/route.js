@@ -1,10 +1,17 @@
-// PayPal Create Order API - One-time credit package purchase
-// POST /api/paypal/create-order
+import { NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 const CREDIT_PACKAGES = {
   '10-credits': { credits: 10, price: 0.99 },
   '50-credits': { credits: 50, price: 3.99 },
   '100-credits': { credits: 100, price: 6.99 },
+}
+
+function getSupabaseAdmin() {
+  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 }
 
 async function getPayPalAccessToken(clientId, clientSecret) {
@@ -28,33 +35,22 @@ async function getPayPalAccessToken(clientId, clientSecret) {
   return data.access_token
 }
 
-export async function onRequest(context) {
-  // Only allow POST
-  if (context.request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' }
-    })
-  }
-
+// POST /api/paypal/create-order
+export async function POST(request) {
   try {
-    const { packageId, userId } = await context.request.json()
+    const { packageId, userId } = await request.json()
     
     if (!packageId || !CREDIT_PACKAGES[packageId]) {
-      return new Response(JSON.stringify({ error: 'Invalid package ID' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      })
+      return NextResponse.json({ error: 'Invalid package ID' }, { status: 400 })
     }
     
     const pkg = CREDIT_PACKAGES[packageId]
-    const clientId = context.env.PAYPAL_CLIENT_ID
-    const clientSecret = context.env.PAYPAL_CLIENT_SECRET
+    const clientId = process.env.PAYPAL_CLIENT_ID
+    const clientSecret = process.env.PAYPAL_CLIENT_SECRET
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://imagetoolss.com'
     
-    // Get PayPal access token
     const accessToken = await getPayPalAccessToken(clientId, clientSecret)
     
-    // Create PayPal order
     const orderPayload = {
       intent: 'CAPTURE',
       purchase_units: [{
@@ -69,8 +65,8 @@ export async function onRequest(context) {
         brand_name: 'ImageTools',
         landing_page: 'BILLING',
         user_action: 'PAY_NOW',
-        return_url: `${context.env.NEXT_PUBLIC_SITE_URL || 'https://image-background-remover.fx9038.workers.dev'}/pricing?payment=success`,
-        cancel_url: `${context.env.NEXT_PUBLIC_SITE_URL || 'https://image-background-remover.fx9038.workers.dev'}/pricing?payment=cancelled`,
+        return_url: `${siteUrl}/pricing?payment=success`,
+        cancel_url: `${siteUrl}/pricing?payment=cancelled`,
       }
     }
     
@@ -91,29 +87,26 @@ export async function onRequest(context) {
     
     const order = await orderResponse.json()
     
-    // Store order mapping in KV for later verification
-    const kv = context.env.USER_DATA
-    await kv.put(`paypal_order:${order.id}`, JSON.stringify({
-      packageId,
-      credits: pkg.credits,
-      price: pkg.price,
-      userId: userId || 'guest',
-      status: 'pending',
-      createdAt: new Date().toISOString()
-    }), { expirationTtl: 86400 * 2 })
+    // Store order mapping in Supabase for later verification
+    const supabase = getSupabaseAdmin()
+    await supabase
+      .from('orders')
+      .insert({
+        id: order.id,
+        user_id: userId || 'guest',
+        package_id: packageId,
+        credits: pkg.credits,
+        price: pkg.price,
+        status: 'pending',
+      })
     
-    return new Response(JSON.stringify({
+    return NextResponse.json({
       orderId: order.id,
       approveUrl: order.links.find(link => link.rel === 'approve').href
-    }), {
-      headers: { 'Content-Type': 'application/json' }
     })
     
   } catch (error) {
     console.error('PayPal create-order error:', error)
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    })
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }

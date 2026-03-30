@@ -9,9 +9,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:cloudflare": "opennextjs-cloudflare build",
+    "build:cloudflare": "next build",
     "deploy": "opennextjs-cloudflare build && wrangler pages deploy .open-next",
-    "pages:dev": "npm run build:cloudflare && wrangler pages dev .open-next --port 8788",
+    "pages:dev": "next build && wrangler pages dev .next --port 8788",
     "start": "next start",
     "lint": "eslint"
   },
