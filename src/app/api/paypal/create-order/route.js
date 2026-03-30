@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
+export const runtime = 'edge'
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
@@ -15,7 +17,7 @@ function getSupabaseAdmin() {
 }
 
 async function getPayPalAccessToken(clientId, clientSecret) {
-  const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64')
+  const auth = btoa(`${clientId}:${clientSecret}`)
   
   const response = await fetch('https://api-m.sandbox.paypal.com/v1/oauth2/token', {
     method: 'POST',
@@ -87,7 +89,6 @@ export async function POST(request) {
     
     const order = await orderResponse.json()
     
-    // Store order mapping in Supabase for later verification
     const supabase = getSupabaseAdmin()
     await supabase
       .from('orders')

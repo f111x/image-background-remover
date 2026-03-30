@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
+export const runtime = 'edge'
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
@@ -86,7 +88,6 @@ export async function POST(request) {
     const webhookId = process.env.PAYPAL_WEBHOOK_ID;
     const supabase = getSupabaseAdmin()
 
-    // Signature verification
     if (webhookId) {
       const verification = await verifyPayPalWebhook(request, payload, webhookId);
       if (!verification.valid) {
@@ -123,7 +124,6 @@ export async function POST(request) {
               .eq('id', orderId)
 
             if (order.user_id && order.user_id !== 'guest') {
-              // Add credits
               const { data: existingCredits } = await supabase
                 .from('credits')
                 .select('balance')
@@ -138,7 +138,6 @@ export async function POST(request) {
                   balance: currentBalance + order.credits
                 })
 
-              // Add to purchase history
               await supabase
                 .from('purchases')
                 .insert({

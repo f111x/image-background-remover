@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
+export const runtime = 'edge'
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
@@ -9,7 +11,7 @@ function getSupabaseAdmin() {
 }
 
 async function getPayPalAccessToken(clientId, clientSecret) {
-  const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64')
+  const auth = btoa(`${clientId}:${clientSecret}`)
   
   const response = await fetch('https://api-m.sandbox.paypal.com/v1/oauth2/token', {
     method: 'POST',
@@ -32,7 +34,7 @@ async function getPayPalAccessToken(clientId, clientSecret) {
 // POST /api/paypal/capture-order
 export async function POST(request) {
   try {
-    const { orderId, userId } = await request.json()
+    const { orderId } = await request.json()
     
     if (!orderId) {
       return NextResponse.json({ error: 'Missing orderId' }, { status: 400 })
@@ -60,7 +62,6 @@ export async function POST(request) {
     
     const captureData = await captureResponse.json()
     
-    // Update order status in Supabase
     await supabase
       .from('orders')
       .update({ 
@@ -69,16 +70,13 @@ export async function POST(request) {
       })
       .eq('id', orderId)
     
-    // Get order info
     const { data: orderInfo } = await supabase
       .from('orders')
       .select('*')
       .eq('id', orderId)
       .single()
     
-    // Add credits to user
     if (orderInfo && orderInfo.user_id && orderInfo.user_id !== 'guest') {
-      // Upsert credits
       const { data: existingCredits } = await supabase
         .from('credits')
         .select('balance')
@@ -93,7 +91,6 @@ export async function POST(request) {
           balance: currentBalance + orderInfo.credits
         })
       
-      // Add to purchase history
       await supabase
         .from('purchases')
         .insert({

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
+export const runtime = 'edge'
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
@@ -28,7 +30,6 @@ export async function GET(request) {
   const today = new Date().toISOString().split('T')[0]
 
   if (action === 'check') {
-    // Check current usage
     const { data: usage } = await supabase
       .from('usage')
       .select('count')
@@ -104,7 +105,7 @@ export async function POST(request) {
   let body = {}
   try {
     body = await request.json()
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
@@ -117,7 +118,6 @@ export async function POST(request) {
   }
 
   if (action === 'use') {
-    // Increment usage
     const { data: existing } = await supabase
       .from('usage')
       .select('count')
