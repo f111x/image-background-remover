@@ -21,16 +21,11 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Enable corepack and pnpm
-        run: |
-          corepack enable
-          corepack prepare pnpm@9 --activate
-
       - name: Install dependencies
-        run: pnpm install
+        run: npm ci
 
       - name: Build
-        run: pnpm run build
+        run: npm run build
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
