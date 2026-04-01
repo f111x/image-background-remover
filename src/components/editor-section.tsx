@@ -154,20 +154,16 @@ export function EditorSection() {
 
           {/* Credits Display */}
           <div className="flex justify-center mb-6">
-            {status === "authenticated" ? (
+            {status === "authenticated" && credits !== null ? (
               <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
-                (credits ?? 0) > 0 
+                credits > 0 
                   ? "bg-yellow-500/20 text-yellow-400" 
                   : "bg-red-500/20 text-red-400"
               }`}>
                 <Coins className="w-4 h-4" />
-                {credits !== null ? (
-                  <span>{credits} credits available</span>
-                ) : (
-                  <span>Loading...</span>
-                )}
+                <span>{credits} credits available</span>
               </div>
-            ) : (
+            ) : !session || status === "unauthenticated" ? (
               <button
                 onClick={() => setShowSignIn(true)}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/20 text-purple-400 text-sm font-medium hover:bg-purple-500/30 transition"
@@ -175,7 +171,7 @@ export function EditorSection() {
                 <LogIn className="w-4 h-4" />
                 {t("login")} to use
               </button>
-            )}
+            ) : null}
           </div>
 
           {error && (
