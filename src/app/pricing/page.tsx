@@ -1,15 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
-import { Check, CreditCard, Zap, RefreshCw, Shield, Clock, ArrowRight } from "lucide-react"
+import { Layout } from "@/components/layout"
+import { Check, CreditCard, Zap, RefreshCw, Shield, ArrowRight } from "lucide-react"
+import { useLanguage } from "@/lib/i18n"
 
 const creditPackages = [
   {
     name: "Trial",
     price: "1",
     credits: 10,
-    description: "Perfect for trying out",
     features: [
       "10 one-time credits",
       "Standard quality",
@@ -18,13 +18,11 @@ const creditPackages = [
       "Email support",
     ],
     popular: false,
-    cta: "Get Started",
   },
   {
     name: "Starter",
     price: "5",
     credits: 50,
-    description: "For regular users",
     features: [
       "50 one-time credits",
       "High quality output",
@@ -33,13 +31,11 @@ const creditPackages = [
       "Credits never expire",
     ],
     popular: true,
-    cta: "Most Popular",
   },
   {
     name: "Value",
     price: "15",
     credits: 200,
-    description: "Best value",
     features: [
       "200 one-time credits",
       "Highest quality output",
@@ -49,7 +45,6 @@ const creditPackages = [
       "Bulk discount",
     ],
     popular: false,
-    cta: "Best Value",
   },
 ]
 
@@ -59,7 +54,6 @@ const monthlyPlans = [
     monthlyPrice: "5",
     monthlyCredits: 50,
     rolloverCap: 100,
-    description: "Light usage",
     features: [
       "50 credits/month",
       "Credits refresh monthly",
@@ -75,7 +69,6 @@ const monthlyPlans = [
     monthlyPrice: "15",
     monthlyCredits: 200,
     rolloverCap: 400,
-    description: "Power users",
     features: [
       "200 credits/month",
       "Credits refresh monthly",
@@ -90,6 +83,7 @@ const monthlyPlans = [
 ]
 
 export default function PricingPage() {
+  const { t } = useLanguage()
   const [loadingPackage, setLoadingPackage] = useState<string | null>(null)
 
   const handlePurchase = async (packageName: string) => {
@@ -97,73 +91,58 @@ export default function PricingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800 text-white">
-      <header className="p-6 border-b border-gray-800/50 backdrop-blur">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-            ImageTools
-          </Link>
-          <nav className="flex items-center gap-6">
-            <Link href="/pricing" className="text-purple-400 font-medium">Pricing</Link>
-            <Link href="/faq" className="text-gray-400 hover:text-white transition">FAQ</Link>
-          </nav>
-        </div>
-      </header>
-
-      <main className="max-w-6xl mx-auto p-6">
+    <Layout>
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
         {/* Hero */}
-        <div className="text-center mb-16 pt-8">
-          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 text-purple-400 text-sm font-medium mb-6">
+        <div className="text-center mb-16 pt-16 px-6">
+          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-sm font-medium mb-6">
             <Zap className="w-4 h-4" />
-            Simple, transparent pricing
+            {t("pricing_subtitle")}
           </span>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Choose Your Plan
+            {t("pricing_title")}
           </h1>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Pay only for what you use. Credits never expire with one-time packages.
-            <br className="hidden md:block" />
-            Monthly subscribers get rolling credits that carry over.
+          <p className="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
+            {t("pricing_subtitle")}
           </p>
         </div>
 
         {/* One-time Credit Packages */}
-        <div className="mb-20">
+        <div className="mb-20 px-6">
           <div className="flex items-center justify-center gap-3 mb-8">
             <CreditCard className="w-5 h-5 text-gray-400" />
-            <h2 className="text-2xl font-bold">One-time Credit Packages</h2>
+            <h2 className="text-2xl font-bold">{t("credit_packages")}</h2>
           </div>
-          
-          <div className="grid md:grid-cols-3 gap-6">
+
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {creditPackages.map((pkg) => (
               <div
                 key={pkg.name}
-                className={`relative bg-gray-800/30 backdrop-blur rounded-2xl p-8 border transition-all ${
-                  pkg.popular 
-                    ? "border-purple-500 shadow-lg shadow-purple-500/10 scale-105" 
-                    : "border-gray-700/50 hover:border-gray-600"
+                className={`relative bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border transition-all ${
+                  pkg.popular
+                    ? "border-purple-500 shadow-purple-500/10"
+                    : "border-gray-200 dark:border-gray-700 hover:border-purple-300"
                 }`}
               >
                 {pkg.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-semibold px-4 py-1 rounded-full shadow-lg">
-                    Most Popular
+                    {t("most_popular")}
                   </div>
                 )}
 
                 <div className="text-center mb-6">
                   <h3 className="text-xl font-bold mb-1">{pkg.name}</h3>
-                  <p className="text-gray-400 text-sm">{pkg.description}</p>
                 </div>
 
                 <div className="text-center mb-6">
                   <span className="text-5xl font-bold">${pkg.price}</span>
                   <div className="mt-2">
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-yellow-500/10 text-yellow-400 text-sm rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 text-sm rounded-full">
                       <Zap className="w-3 h-3" />
                       {pkg.credits} credits
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-2">
+                  <p className="text-xs text-gray-400 mt-2">
                     ${(parseFloat(pkg.price) / pkg.credits).toFixed(3)} per credit
                   </p>
                 </div>
@@ -171,8 +150,8 @@ export default function PricingPage() {
                 <ul className="space-y-3 mb-8">
                   {pkg.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-2 text-sm">
-                      <Check className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-300">{feature}</span>
+                      <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                      <span className="text-gray-600 dark:text-gray-300">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -183,20 +162,11 @@ export default function PricingPage() {
                   className={`w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
                     pkg.popular
                       ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
-                      : "bg-gray-700 hover:bg-gray-600 text-white"
+                      : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white"
                   }`}
                 >
-                  {loadingPackage === pkg.name ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      {pkg.cta}
-                      <ArrowRight className="w-4 h-4" />
-                    </>
-                  )}
+                  {t("coming_soon") || "Coming Soon"}
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             ))}
@@ -204,46 +174,42 @@ export default function PricingPage() {
         </div>
 
         {/* Monthly Subscription */}
-        <div className="mb-20">
+        <div className="mb-20 px-6">
           <div className="flex items-center justify-center gap-3 mb-8">
             <RefreshCw className="w-5 h-5 text-gray-400" />
-            <h2 className="text-2xl font-bold">Monthly Subscription</h2>
+            <h2 className="text-2xl font-bold">{t("monthly_subscription")}</h2>
           </div>
-          <p className="text-center text-gray-400 mb-8 max-w-xl mx-auto">
-            Subscribe for a monthly credit allocation. Unused credits roll over to the next month (up to 2x your monthly allocation).
-          </p>
 
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             {monthlyPlans.map((plan) => (
               <div
                 key={plan.name}
-                className={`relative bg-gray-800/30 backdrop-blur rounded-2xl p-8 border transition-all ${
-                  plan.popular 
-                    ? "border-purple-500 shadow-lg shadow-purple-500/10" 
-                    : "border-gray-700/50 hover:border-gray-600"
+                className={`relative bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border transition-all ${
+                  plan.popular
+                    ? "border-purple-500 shadow-purple-500/10"
+                    : "border-gray-200 dark:border-gray-700"
                 }`}
               >
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-semibold px-4 py-1 rounded-full shadow-lg">
-                    Recommended
+                    {t("recommended") || "Recommended"}
                   </div>
                 )}
 
                 <div className="text-center mb-6">
                   <h3 className="text-xl font-bold mb-1">{plan.name}</h3>
-                  <p className="text-gray-400 text-sm">{plan.description}</p>
                 </div>
 
                 <div className="text-center mb-6">
                   <span className="text-5xl font-bold">${plan.monthlyPrice}</span>
                   <span className="text-gray-400">/month</span>
                   <div className="mt-2">
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-500/10 text-green-400 text-sm rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-sm rounded-full">
                       <RefreshCw className="w-3 h-3" />
                       {plan.monthlyCredits}/month
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-2">
+                  <p className="text-xs text-gray-400 mt-2">
                     Rollover cap: {plan.rolloverCap} credits
                   </p>
                 </div>
@@ -251,8 +217,8 @@ export default function PricingPage() {
                 <ul className="space-y-3 mb-8">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-2 text-sm">
-                      <Check className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-300">{feature}</span>
+                      <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                      <span className="text-gray-600 dark:text-gray-300">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -260,23 +226,9 @@ export default function PricingPage() {
                 <button
                   onClick={() => handlePurchase(`${plan.name} Monthly`)}
                   disabled={true}
-                  className={`w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-                    plan.popular
-                      ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
-                      : "bg-gray-700 hover:bg-gray-600 text-white"
-                  }`}
+                  className={`w-full py-3 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg`}
                 >
-                  {loadingPackage === plan.name ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      Subscribe
-                      <ArrowRight className="w-4 h-4" />
-                    </>
-                  )}
+                  {t("coming_soon") || "Coming Soon"}
                 </button>
               </div>
             ))}
@@ -284,73 +236,42 @@ export default function PricingPage() {
         </div>
 
         {/* FAQ */}
-        <div className="mb-16">
+        <div className="mb-16 px-6">
           <div className="flex items-center justify-center gap-3 mb-8">
             <Shield className="w-5 h-5 text-gray-400" />
-            <h2 className="text-2xl font-bold">Common Questions</h2>
+            <h2 className="text-2xl font-bold">{t("common_questions")}</h2>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4 max-w-4xl mx-auto">
             {[
-              {
-                q: "Do credits expire?",
-                a: "One-time purchased credits never expire. Monthly subscription credits refresh each month, with unused credits rolling over (up to 2x your monthly allocation).",
-              },
-              {
-                q: "What payment methods are supported?",
-                a: "We accept PayPal and major credit cards. More payment options coming soon.",
-              },
-              {
-                q: "Can I get a refund?",
-                a: "Unused one-time purchased credits can be refunded within 30 days of purchase. Contact support for assistance.",
-              },
-              {
-                q: "How is credit usage calculated?",
-                a: "Each image processing request uses 1 credit, regardless of image size or complexity.",
-              },
-              {
-                q: "What happens when I run out of credits?",
-                a: "You'll need to purchase more credits or subscribe to a monthly plan to continue using ImageTools.",
-              },
-              {
-                q: "Can I upgrade or downgrade my subscription?",
-                a: "Yes, you can change your subscription plan at any time. Contact support for plan changes.",
-              },
+              { q: t("faq_credits_expire"), a: t("faq_credits_expire_a") },
+              { q: t("faq_payment"), a: t("faq_payment_a") },
+              { q: t("faq_refund"), a: t("faq_refund_a") },
+              { q: t("faq_credit_usage"), a: t("faq_credit_usage_a") },
             ].map((faq, i) => (
-              <div key={i} className="bg-gray-800/30 backdrop-blur rounded-xl p-5 border border-gray-700/50">
-                <h3 className="font-semibold mb-2 flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-purple-400" />
-                  {faq.q}
-                </h3>
-                <p className="text-gray-400 text-sm">{faq.a}</p>
+              <div key={i} className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+                <h3 className="font-semibold mb-2">{faq.q}</h3>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">{faq.a}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* CTA */}
-        <div className="text-center bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-2xl p-12 border border-purple-500/20 mb-8">
-          <h2 className="text-2xl font-bold mb-4">Ready to get started?</h2>
-          <p className="text-gray-400 mb-6 max-w-md mx-auto">
-            Create an account and get 3 free credits to try ImageTools.
+        <div className="text-center bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-12 max-w-3xl mx-6 mb-8 border border-purple-100 dark:border-purple-800/50">
+          <h2 className="text-2xl font-bold mb-4">{t("get_started_free")}</h2>
+          <p className="text-gray-500 mb-6">
+            3 free credits when you sign up.
           </p>
-          <Link
+          <a
             href="/"
             className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg"
           >
-            Get Started Free
+            {t("get_started_free")}
             <ArrowRight className="w-4 h-4" />
-          </Link>
+          </a>
         </div>
-
-        {/* Footer Note */}
-        <div className="text-center text-gray-500 text-sm">
-          <p>All payments are processed securely through PayPal.</p>
-          <p className="mt-1">
-            Need a custom plan? <a href="mailto:support@imagetoolss.com" className="text-purple-400 hover:underline">Contact us</a>
-          </p>
-        </div>
-      </main>
-    </div>
+      </div>
+    </Layout>
   )
 }
