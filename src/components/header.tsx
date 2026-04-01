@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Upload, LogIn, LogOut, User as UserIcon, Coins } from "lucide-react"
+import { Upload, LogIn, LogOut, Coins, User as UserIcon, UserCircle } from "lucide-react"
 import { signIn, signOut, useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
@@ -43,11 +43,12 @@ export function Header() {
               </Link>
             </nav>
           </div>
-          <div className="flex items-center gap-4 ml-auto">
+          <div className="flex items-center gap-3 ml-auto">
             {status === "loading" ? (
               <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
             ) : session ? (
-              <div className="flex items-center gap-3">
+              <>
+                {/* Credits badge */}
                 {credits !== null && (
                   <Link
                     href="/profile"
@@ -57,15 +58,23 @@ export function Header() {
                     {credits}
                   </Link>
                 )}
-                <div className="flex items-center gap-2 text-sm">
-                  <UserIcon className="w-4 h-4" />
-                  <span className="text-muted-foreground hidden sm:inline">{session.user?.name || session.user?.email}</span>
+                {/* Profile link */}
+                <Link
+                  href="/profile"
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition"
+                >
+                  <UserCircle className="w-5 h-5" />
+                  <span className="hidden sm:inline">Profile</span>
+                </Link>
+                {/* User name */}
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span className="hidden md:inline">{session.user?.name || session.user?.email}</span>
                 </div>
+                {/* Logout */}
                 <Button variant="ghost" size="sm" onClick={() => signOut()}>
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Logout
+                  <LogOut className="w-4 h-4" />
                 </Button>
-              </div>
+              </>
             ) : (
               <Button variant="ghost" size="sm" onClick={() => setShowSignIn(true)}>
                 <LogIn className="w-4 h-4 mr-2" />
