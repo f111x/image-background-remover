@@ -64,7 +64,11 @@ export function EditorSection() {
       return
     }
 
-    if (status === "unauthenticated") {
+    if (status === "loading") {
+      return
+    }
+
+    if (!session) {
       setShowSignIn(true)
       return
     }
