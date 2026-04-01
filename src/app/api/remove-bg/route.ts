@@ -15,7 +15,16 @@ export async function POST(request: NextRequest) {
       }, { status: 401 })
     }
 
-    // Check credits using the new function
+    // Check if user is subscriber
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_subscriber")
+      .eq("id", user.id)
+      .single()
+
+    const isSubscriber = profile?.is_subscriber || false
+
+    // Check credits using the function
     const { data: creditsData, error: creditsError } = await supabase
       .rpc("get_total_credits", { p_user_id: user.id })
 
@@ -69,12 +78,12 @@ export async function POST(request: NextRequest) {
     })
 
     if (!response.ok) {
-      // Log failed usage (API was called, credits were spent)
+      // Log failed usage
       await supabase.from("usage_history").insert({
         user_id: user.id,
         credits_used: 1,
         image_size: imageFile.size,
-        source: creditsData.is_subscriber ? "subscription" : "one-time",
+        source: isSubscriber ? "subscription" : "one-time",
         status: "failed",
         error_message: "Remove.bg API error",
       })
@@ -86,18 +95,29 @@ export async function POST(request: NextRequest) {
       }, { status: response.status })
     }
 
-    // Deduct credits
+    // Deduct credits BEFORE returning the image
     const { data: deductResult, error: deductError } = await supabase
       .rpc("deduct_credits", {
         p_user_id: user.id,
         p_credits: 1,
-        p_source: creditsData.is_subscriber ? "subscription" : "one-time"
+        p_source: isSubscriber ? "subscription" : "one-time"
       })
 
     if (deductError || !deductResult?.success) {
       console.error("Failed to deduct credits:", deductError, deductResult)
-      // Image was processed, but credits weren't deducted - we still return success to user
-      // The deduction should be retried or reconciled manually
+      // Image was processed but credits weren't deducted - don't give the image
+      await supabase.from("usage_history").insert({
+        user_id: user.id,
+        credits_used: 1,
+        image_size: imageFile.size,
+        source: isSubscriber ? "subscription" : "one-time",
+        status: "failed",
+        error_message: "Credits deduction failed after image processing",
+      })
+      return NextResponse.json({ 
+        error: "Payment processing failed. Please contact support.",
+        code: "DEDUCTION_FAILED"
+      }, { status: 500 })
     }
 
     // Log successful usage
@@ -105,7 +125,7 @@ export async function POST(request: NextRequest) {
       user_id: user.id,
       credits_used: 1,
       image_size: imageFile.size,
-      source: creditsData.is_subscriber ? "subscription" : "one-time",
+      source: isSubscriber ? "subscription" : "one-time",
       status: "success",
     })
 
@@ -116,7 +136,7 @@ export async function POST(request: NextRequest) {
       status: 200,
       headers: {
         "Content-Type": "image/png",
-        "X-Credits-Remaining": deductResult?.total_credits || "unknown",
+        "X-Credits-Remaining": deductResult.total_credits,
       },
     })
   } catch (error) {

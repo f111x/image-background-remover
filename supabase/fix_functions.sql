@@ -1,11 +1,9 @@
--- =====================================================
--- ImageTools User System Schema v2.1
--- Fixed: deduct_credits returns total, refresh is complete
--- =====================================================
+-- Drop existing functions
+DROP FUNCTION IF EXISTS public.get_total_credits(UUID);
+DROP FUNCTION IF EXISTS public.deduct_credits(UUID, INTEGER, TEXT);
+DROP FUNCTION IF EXISTS public.refresh_monthly_credits();
 
--- =====================================================
--- FUNCTION: Get total available credits
--- =====================================================
+-- New get_total_credits
 CREATE OR REPLACE FUNCTION public.get_total_credits(p_user_id UUID)
 RETURNS JSONB AS $$
 DECLARE
@@ -19,14 +17,12 @@ BEGIN
     RETURN jsonb_build_object('success', false, 'error', 'User not found');
   END IF;
 
-  -- If subscriber, get remaining monthly allocation
   IF v_profile.is_subscriber THEN
     SELECT monthly_credits INTO v_monthly_remaining
     FROM public.subscriptions
     WHERE user_id = p_user_id AND status = 'active';
   END IF;
 
-  -- Total = one-time + monthly remaining + rollover
   v_total := v_profile.credits + COALESCE(v_monthly_remaining, 0) + v_profile.rollover_credits;
 
   RETURN jsonb_build_object(
@@ -40,11 +36,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- =====================================================
--- FUNCTION: Deduct credits
--- Priority: rollover -> monthly -> one-time
--- Returns total remaining credits
--- =====================================================
+-- New deduct_credits
 CREATE OR REPLACE FUNCTION public.deduct_credits(
   p_user_id UUID,
   p_credits INTEGER,
@@ -66,11 +58,9 @@ BEGIN
     RETURN jsonb_build_object('success', false, 'error', 'User not found');
   END IF;
 
-  -- Initialize
   v_one_time_credits := v_profile.credits;
   v_rollover_credits := v_profile.rollover_credits;
 
-  -- Get subscription info if subscriber
   IF v_profile.is_subscriber THEN
     SELECT * INTO v_subscription FROM public.subscriptions 
     WHERE user_id = p_user_id AND status = 'active' FOR UPDATE;
@@ -80,7 +70,6 @@ BEGIN
     END IF;
   END IF;
 
-  -- Check if enough credits
   IF (COALESCE(v_monthly_remaining, 0) + v_rollover_credits + v_one_time_credits) < p_credits THEN
     RETURN jsonb_build_object(
       'success', false,
@@ -89,7 +78,6 @@ BEGIN
     );
   END IF;
 
-  -- Deduct from rollover first, then monthly, then one-time
   IF p_credits > 0 AND v_rollover_credits > 0 THEN
     IF v_rollover_credits >= p_credits THEN
       v_rollover_credits := v_rollover_credits - p_credits;
@@ -120,17 +108,14 @@ BEGIN
     p_credits := 0;
   END IF;
 
-  -- Calculate new total
   v_total := v_one_time_credits + v_monthly_remaining + v_rollover_credits;
 
-  -- Update profile
   UPDATE public.profiles SET
     credits = v_one_time_credits,
     rollover_credits = v_rollover_credits,
     updated_at = NOW()
   WHERE id = p_user_id;
 
-  -- Update subscription monthly credits
   IF v_profile.is_subscriber AND FOUND THEN
     UPDATE public.subscriptions
     SET monthly_credits = v_monthly_remaining,
@@ -149,10 +134,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- =====================================================
--- FUNCTION: Refresh monthly credits (call monthly via cron)
--- Resets monthly credits to plan allocation + carries over unused
--- =====================================================
+-- New refresh_monthly_credits
 CREATE OR REPLACE FUNCTION public.refresh_monthly_credits()
 RETURNS JSONB AS $$
 DECLARE
@@ -164,7 +146,6 @@ BEGIN
     FROM public.subscriptions s
     WHERE s.status = 'active'
   LOOP
-    -- Determine plan's full monthly allocation
     CASE v_subscription.plan
       WHEN 'basic' THEN v_plan_monthly := 50;
       WHEN 'pro' THEN v_plan_monthly := 200;
@@ -172,21 +153,16 @@ BEGIN
       ELSE v_plan_monthly := 50;
     END CASE;
 
-    -- Carry over unused monthly credits (up to rollover cap)
-    -- remaining is what wasn't used from last month
-    -- new rollover = remaining + old rollover (capped)
     UPDATE public.profiles p SET
       rollover_credits = LEAST(v_subscription.remaining + p.rollover_credits, v_subscription.rollover_cap),
       updated_at = NOW()
     WHERE p.id = v_subscription.user_id;
 
-    -- Reset subscription to full monthly allocation
     UPDATE public.subscriptions s SET
       monthly_credits = v_plan_monthly,
       next_billing = next_billing + INTERVAL '1 month',
       updated_at = NOW()
     WHERE s.user_id = v_subscription.user_id AND s.status = 'active';
-    
   END LOOP;
 
   RETURN jsonb_build_object('success', true, 'refreshed_at', NOW());
