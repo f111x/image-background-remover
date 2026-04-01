@@ -92,17 +92,17 @@ export default function PricingPage() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+      <div className="min-h-screen bg-gray-50">
         {/* Hero */}
         <div className="text-center mb-16 pt-16 px-6">
-          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-sm font-medium mb-6">
+          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-100 text-purple-600 text-sm font-medium mb-6">
             <Zap className="w-4 h-4" />
             {t("pricing_subtitle")}
           </span>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             {t("pricing_title")}
           </h1>
-          <p className="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-500 max-w-2xl mx-auto">
             {t("pricing_subtitle")}
           </p>
         </div>
@@ -118,10 +118,10 @@ export default function PricingPage() {
             {creditPackages.map((pkg) => (
               <div
                 key={pkg.name}
-                className={`relative bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border transition-all ${
+                className={`relative bg-white rounded-2xl p-8 shadow-md border transition-all hover:shadow-lg ${
                   pkg.popular
                     ? "border-purple-500 shadow-purple-500/10"
-                    : "border-gray-200 dark:border-gray-700 hover:border-purple-300"
+                    : "border-gray-200 hover:border-purple-300"
                 }`}
               >
                 {pkg.popular && (
@@ -137,7 +137,7 @@ export default function PricingPage() {
                 <div className="text-center mb-6">
                   <span className="text-5xl font-bold">${pkg.price}</span>
                   <div className="mt-2">
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 text-sm rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 text-yellow-600 text-sm rounded-full">
                       <Zap className="w-3 h-3" />
                       {pkg.credits} credits
                     </span>
@@ -151,7 +151,7 @@ export default function PricingPage() {
                   {pkg.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-2 text-sm">
                       <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-600 dark:text-gray-300">{feature}</span>
+                      <span className="text-gray-600">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -162,10 +162,10 @@ export default function PricingPage() {
                   className={`w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
                     pkg.popular
                       ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
-                      : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white"
+                      : "bg-gray-100 hover:bg-gray-200 text-gray-900"
                   }`}
                 >
-                  {t("coming_soon") || "Coming Soon"}
+                  Coming Soon
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -184,15 +184,15 @@ export default function PricingPage() {
             {monthlyPlans.map((plan) => (
               <div
                 key={plan.name}
-                className={`relative bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border transition-all ${
+                className={`relative bg-white rounded-2xl p-8 shadow-md border transition-all hover:shadow-lg ${
                   plan.popular
                     ? "border-purple-500 shadow-purple-500/10"
-                    : "border-gray-200 dark:border-gray-700"
+                    : "border-gray-200 hover:border-purple-300"
                 }`}
               >
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-semibold px-4 py-1 rounded-full shadow-lg">
-                    {t("recommended") || "Recommended"}
+                    {t("most_popular")}
                   </div>
                 )}
 
@@ -204,7 +204,7 @@ export default function PricingPage() {
                   <span className="text-5xl font-bold">${plan.monthlyPrice}</span>
                   <span className="text-gray-400">/month</span>
                   <div className="mt-2">
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-sm rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-600 text-sm rounded-full">
                       <RefreshCw className="w-3 h-3" />
                       {plan.monthlyCredits}/month
                     </span>
@@ -218,7 +218,7 @@ export default function PricingPage() {
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-2 text-sm">
                       <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-600 dark:text-gray-300">{feature}</span>
+                      <span className="text-gray-600">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -228,7 +228,7 @@ export default function PricingPage() {
                   disabled={true}
                   className={`w-full py-3 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg`}
                 >
-                  {t("coming_soon") || "Coming Soon"}
+                  Coming Soon
                 </button>
               </div>
             ))}
@@ -249,16 +249,16 @@ export default function PricingPage() {
               { q: t("faq_refund"), a: t("faq_refund_a") },
               { q: t("faq_credit_usage"), a: t("faq_credit_usage_a") },
             ].map((faq, i) => (
-              <div key={i} className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+              <div key={i} className="bg-white rounded-xl p-5 border border-gray-200 hover:border-purple-300 transition-colors">
                 <h3 className="font-semibold mb-2">{faq.q}</h3>
-                <p className="text-gray-500 dark:text-gray-400 text-sm">{faq.a}</p>
+                <p className="text-gray-500 text-sm">{faq.a}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* CTA */}
-        <div className="text-center bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-12 max-w-3xl mx-6 mb-8 border border-purple-100 dark:border-purple-800/50">
+        <div className="text-center bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-12 max-w-3xl mx-6 mb-8 border border-purple-100">
           <h2 className="text-2xl font-bold mb-4">{t("get_started_free")}</h2>
           <p className="text-gray-500 mb-6">
             3 free credits when you sign up.

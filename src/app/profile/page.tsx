@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useSession, signOut } from "next-auth/react"
-import { Coins, History, LogOut, CreditCard, Zap, Calendar, RefreshCw, Crown } from "lucide-react"
+import { Coins, LogOut, CreditCard, Zap, Calendar, RefreshCw, Crown } from "lucide-react"
 import { Layout } from "@/components/layout"
 import { useLanguage } from "@/lib/i18n"
 
@@ -80,9 +80,9 @@ export default function ProfilePage() {
   if (status === "unauthenticated") {
     return (
       <Layout>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-700 text-center max-w-md mx-4">
-            <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full mx-auto mb-6 flex items-center justify-center">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200 text-center max-w-md mx-4">
+            <div className="w-16 h-16 bg-purple-100 rounded-full mx-auto mb-6 flex items-center justify-center">
               <Coins className="w-8 h-8 text-purple-500" />
             </div>
             <h1 className="text-2xl font-bold mb-4">{t("sign_in_required")}</h1>
@@ -102,7 +102,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <Layout>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
             <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-gray-400">{t("loading")}</p>
@@ -116,9 +116,9 @@ export default function ProfilePage() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen bg-gray-50">
         {/* Profile Header */}
-        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="bg-white border-b border-gray-200">
           <div className="max-w-4xl mx-auto p-6">
             <div className="flex items-center gap-6 mb-8">
               <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-lg ring-4 ring-purple-500/20">
@@ -132,7 +132,7 @@ export default function ProfilePage() {
                 <h1 className="text-2xl font-bold">{user?.name || "User"}</h1>
                 <p className="text-gray-500">{user?.email}</p>
                 {creditInfo?.isSubscriber && (
-                  <span className="inline-flex items-center gap-1 mt-2 px-3 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 text-sm rounded-full">
+                  <span className="inline-flex items-center gap-1 mt-2 px-3 py-1 bg-yellow-100 text-yellow-600 text-sm rounded-full">
                     <Crown className="w-3 h-3" />
                     {t("subscriber")}
                   </span>
@@ -140,7 +140,7 @@ export default function ProfilePage() {
               </div>
               <button
                 onClick={() => signOut()}
-                className="flex items-center gap-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                className="flex items-center gap-2 text-gray-500 hover:text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-100 transition"
               >
                 <LogOut className="w-4 h-4" />
                 {t("logout")}
@@ -150,9 +150,9 @@ export default function ProfilePage() {
             {/* Credits Display */}
             <div className="grid md:grid-cols-3 gap-4">
               {/* Total Credits */}
-              <div className="md:col-span-2 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40 rounded-xl p-6 border border-purple-200 dark:border-purple-800">
+              <div className="md:col-span-2 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-100">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center">
+                  <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
                     <Coins className="w-6 h-6 text-yellow-500" />
                   </div>
                   <div>
@@ -163,20 +163,20 @@ export default function ProfilePage() {
 
                 <div className="flex flex-wrap gap-3">
                   {(creditInfo?.oneTimeCredits ?? 0) > 0 && (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/50 dark:bg-gray-800/50 rounded-lg text-sm">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg text-sm shadow-sm">
                       <Zap className="w-3 h-3 text-blue-500" />
-                      <span className="text-gray-600 dark:text-gray-300">{t("one_time")}: {creditInfo?.oneTimeCredits}</span>
+                      <span className="text-gray-600">{t("one_time")}: {creditInfo?.oneTimeCredits}</span>
                     </span>
                   )}
                   {creditInfo?.isSubscriber && (
                     <>
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/50 dark:bg-gray-800/50 rounded-lg text-sm">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg text-sm shadow-sm">
                         <Calendar className="w-3 h-3 text-green-500" />
-                        <span className="text-gray-600 dark:text-gray-300">{t("monthly")}: {creditInfo?.monthlyCredits}</span>
+                        <span className="text-gray-600">{t("monthly")}: {creditInfo?.monthlyCredits}</span>
                       </span>
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/50 dark:bg-gray-800/50 rounded-lg text-sm">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg text-sm shadow-sm">
                         <RefreshCw className="w-3 h-3 text-purple-500" />
-                        <span className="text-gray-600 dark:text-gray-300">{t("rollover")}: {creditInfo?.rolloverCredits}</span>
+                        <span className="text-gray-600">{t("rollover")}: {creditInfo?.rolloverCredits}</span>
                       </span>
                     </>
                   )}
@@ -184,9 +184,9 @@ export default function ProfilePage() {
               </div>
 
               {/* Actions */}
-              <div className="bg-gray-100 dark:bg-gray-700 rounded-xl p-6">
+              <div className="bg-gray-100 rounded-xl p-6">
                 <p className="text-gray-500 text-sm mb-2">{t("need_more_credits")}</p>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">{t("purchase_packages")}</p>
+                <p className="text-gray-600 mb-4">{t("purchase_packages")}</p>
                 <a
                   href="/pricing"
                   className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all"
@@ -203,29 +203,29 @@ export default function ProfilePage() {
         <div className="max-w-4xl mx-auto p-6">
           {/* Alerts */}
           {(creditInfo?.credits ?? 0) === 0 && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-6">
-              <p className="text-red-600 dark:text-red-400 flex items-center gap-2">
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+              <p className="text-red-600 flex items-center gap-2">
                 ❌ {t("credits_empty")} <a href="/pricing" className="underline font-semibold">{t("purchase_credits")}</a>
               </p>
             </div>
           )}
           {(creditInfo?.credits ?? 0) > 0 && (creditInfo?.credits ?? 0) < 5 && (
-            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4 mb-6">
-              <p className="text-yellow-600 dark:text-yellow-400 flex items-center gap-2">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
+              <p className="text-yellow-600 flex items-center gap-2">
                 ⚠️ {t("credits_low").replace("{credits}", String(creditInfo?.credits))}
               </p>
             </div>
           )}
 
           {/* Tabs */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div className="flex border-b border-gray-200 dark:border-gray-700">
+          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+            <div className="flex border-b border-gray-200">
               <button
                 onClick={() => setActiveTab("usage")}
                 className={`flex-1 px-6 py-4 text-center font-medium transition flex items-center justify-center gap-2 ${
                   activeTab === "usage"
-                    ? "bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border-b-2 border-purple-500"
-                    : "text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    ? "bg-purple-50 text-purple-600 border-b-2 border-purple-500"
+                    : "text-gray-500 hover:bg-gray-50"
                 }`}
               >
                 <Zap className="w-4 h-4" />
@@ -235,8 +235,8 @@ export default function ProfilePage() {
                 onClick={() => setActiveTab("purchases")}
                 className={`flex-1 px-6 py-4 text-center font-medium transition flex items-center justify-center gap-2 ${
                   activeTab === "purchases"
-                    ? "bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border-b-2 border-purple-500"
-                    : "text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    ? "bg-purple-50 text-purple-600 border-b-2 border-purple-500"
+                    : "text-gray-500 hover:bg-gray-50"
                 }`}
               >
                 <CreditCard className="w-4 h-4" />
@@ -249,7 +249,7 @@ export default function ProfilePage() {
                 <div>
                   {usage.length === 0 ? (
                     <div className="text-center py-12">
-                      <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full mx-auto mb-4 flex items-center justify-center">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
                         <Zap className="w-8 h-8 text-gray-400" />
                       </div>
                       <p className="text-gray-400">{t("no_usage")}</p>
@@ -260,15 +260,15 @@ export default function ProfilePage() {
                       {usage.map((record) => (
                         <div
                           key={record.id}
-                          className={`flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border ${
-                            record.status === "failed" ? "opacity-60 border-red-200 dark:border-red-800" : "border-gray-200 dark:border-gray-700"
+                          className={`flex items-center justify-between p-4 bg-gray-50 rounded-xl border ${
+                            record.status === "failed" ? "opacity-60 border-red-200" : "border-gray-200"
                           }`}
                         >
                           <div className="flex items-center gap-4">
                             <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                               record.status === "failed"
-                                ? "bg-red-100 dark:bg-red-900/30"
-                                : "bg-green-100 dark:bg-green-900/30"
+                                ? "bg-red-100"
+                                : "bg-green-100"
                             }`}>
                               {record.status === "failed" ? (
                                 <span className="text-red-500 text-lg">✗</span>
@@ -310,7 +310,7 @@ export default function ProfilePage() {
                 <div>
                   {purchases.length === 0 ? (
                     <div className="text-center py-12">
-                      <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full mx-auto mb-4 flex items-center justify-center">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
                         <CreditCard className="w-8 h-8 text-gray-400" />
                       </div>
                       <p className="text-gray-400">{t("no_purchases")}</p>
@@ -323,10 +323,10 @@ export default function ProfilePage() {
                       {purchases.map((purchase) => (
                         <div
                           key={purchase.id}
-                          className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-700"
+                          className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200"
                         >
                           <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                               <CreditCard className="w-5 h-5 text-green-500" />
                             </div>
                             <div>
