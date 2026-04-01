@@ -1,48 +1,67 @@
 import { NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { createClient } from "@/lib/supabase/server"
 
 export async function GET() {
   try {
-    const supabase = await createClient()
+    const session = await getServerSession(authOptions)
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Use the new get_total_credits function
-    const { data, error: fnError } = await supabase
-      .rpc("get_total_credits", { p_user_id: user.id })
+    const userId = session.user.id
+    const supabase = await createClient()
 
-    if (fnError) {
-      // Fallback to simple profile query if function doesn't exist yet
-      const { data: profile, error: profileError } = await supabase
+    // Check if user exists, if not create
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("credits, total_credits, is_subscriber, rollover_credits")
+      .eq("id", userId)
+      .single()
+
+    // If profile doesn't exist, create it
+    if (profileError && profileError.code === "PGRST116") {
+      const userEmail = session.user.email || ""
+      const { error: insertError } = await supabase
         .from("profiles")
-        .select("credits, total_credits, is_subscriber, rollover_credits")
-        .eq("id", user.id)
-        .single()
+        .insert({
+          id: userId,
+          email: userEmail,
+          credits: 3,
+          total_credits: 0,
+        })
 
-      if (profileError) {
-        return NextResponse.json({ error: "Failed to fetch credits" }, { status: 500 })
+      if (insertError) {
+        return NextResponse.json({ error: "Failed to create profile" }, { status: 500 })
       }
 
       return NextResponse.json({
-        credits: profile.credits,
-        totalCredits: profile.total_credits,
-        isSubscriber: profile.is_subscriber,
-        rolloverCredits: profile.rollover_credits || 0,
+        credits: 3,
+        totalCredits: 0,
+        isSubscriber: false,
         monthlyCredits: 0,
+        rolloverCredits: 0,
+        oneTimeCredits: 3,
       })
     }
 
+    if (profileError) {
+      return NextResponse.json({ error: "Failed to fetch credits" }, { status: 500 })
+    }
+
+    // Get total credits including subscription
+    const { data: creditsData } = await supabase
+      .rpc("get_total_credits", { p_user_id: userId })
+
     return NextResponse.json({
-      credits: data.total_credits,
-      totalCredits: data.one_time_credits,
-      isSubscriber: data.is_subscriber,
-      monthlyCredits: data.monthly_credits,
-      rolloverCredits: data.rollover_credits,
-      oneTimeCredits: data.one_time_credits,
+      credits: creditsData?.total_credits || profile.credits,
+      totalCredits: profile.total_credits,
+      isSubscriber: profile.is_subscriber || false,
+      monthlyCredits: creditsData?.monthly_credits || 0,
+      rolloverCredits: profile.rollover_credits || 0,
+      oneTimeCredits: profile.credits,
     })
   } catch (error) {
     console.error("Credits API error:", error)

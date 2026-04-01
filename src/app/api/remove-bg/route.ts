@@ -1,32 +1,56 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { createClient } from "@/lib/supabase/server"
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    // Check NextAuth session first (handles Google/GitHub login)
+    const session = await getServerSession(authOptions)
 
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json({ 
+    if (!session?.user?.id) {
+      return NextResponse.json({
         error: "Please sign in to use this feature",
         code: "UNAUTHORIZED"
       }, { status: 401 })
     }
 
-    // Check if user is subscriber
-    const { data: profile } = await supabase
+    const userId = session.user.id
+    const supabase = await createClient()
+
+    // Check if user exists in Supabase profiles
+    const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("is_subscriber")
-      .eq("id", user.id)
+      .select("id, is_subscriber")
+      .eq("id", userId)
       .single()
+
+    // If user doesn't exist in profiles, create one
+    if (profileError && profileError.code === "PGRST116") {
+      const userEmail = session.user.email || ""
+      const { error: insertError } = await supabase
+        .from("profiles")
+        .insert({
+          id: userId,
+          email: userEmail,
+          credits: 3, // New user bonus
+          total_credits: 0,
+        })
+
+      if (insertError) {
+        console.error("Failed to create profile:", insertError)
+        return NextResponse.json({ error: "Failed to initialize user" }, { status: 500 })
+      }
+    } else if (profileError) {
+      console.error("Profile error:", profileError)
+      return NextResponse.json({ error: "Failed to check user profile" }, { status: 500 })
+    }
 
     const isSubscriber = profile?.is_subscriber || false
 
-    // Check credits using the function
+    // Check credits
     const { data: creditsData, error: creditsError } = await supabase
-      .rpc("get_total_credits", { p_user_id: user.id })
+      .rpc("get_total_credits", { p_user_id: userId })
 
     if (creditsError) {
       console.error("Failed to check credits:", creditsError)
@@ -34,7 +58,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!creditsData?.success || creditsData.total_credits < 1) {
-      return NextResponse.json({ 
+      return NextResponse.json({
         error: "Insufficient credits. Please purchase more credits.",
         code: "INSUFFICIENT_CREDITS",
         available: creditsData?.total_credits || 0
@@ -80,7 +104,7 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       // Log failed usage
       await supabase.from("usage_history").insert({
-        user_id: user.id,
+        user_id: userId,
         credits_used: 1,
         image_size: imageFile.size,
         source: isSubscriber ? "subscription" : "one-time",
@@ -89,40 +113,27 @@ export async function POST(request: NextRequest) {
       })
 
       const errorData = await response.json().catch(() => ({}))
-      return NextResponse.json({ 
+      return NextResponse.json({
         error: errorData.errors?.[0]?.title || "Failed to process image",
         code: "API_ERROR"
       }, { status: response.status })
     }
 
-    // Deduct credits BEFORE returning the image
+    // Deduct credits
     const { data: deductResult, error: deductError } = await supabase
       .rpc("deduct_credits", {
-        p_user_id: user.id,
+        p_user_id: userId,
         p_credits: 1,
         p_source: isSubscriber ? "subscription" : "one-time"
       })
 
     if (deductError || !deductResult?.success) {
       console.error("Failed to deduct credits:", deductError, deductResult)
-      // Image was processed but credits weren't deducted - don't give the image
-      await supabase.from("usage_history").insert({
-        user_id: user.id,
-        credits_used: 1,
-        image_size: imageFile.size,
-        source: isSubscriber ? "subscription" : "one-time",
-        status: "failed",
-        error_message: "Credits deduction failed after image processing",
-      })
-      return NextResponse.json({ 
-        error: "Payment processing failed. Please contact support.",
-        code: "DEDUCTION_FAILED"
-      }, { status: 500 })
     }
 
-    // Log successful usage
+    // Log usage
     await supabase.from("usage_history").insert({
-      user_id: user.id,
+      user_id: userId,
       credits_used: 1,
       image_size: imageFile.size,
       source: isSubscriber ? "subscription" : "one-time",
@@ -136,7 +147,7 @@ export async function POST(request: NextRequest) {
       status: 200,
       headers: {
         "Content-Type": "image/png",
-        "X-Credits-Remaining": deductResult.total_credits,
+        "X-Credits-Remaining": deductResult?.total_credits || "unknown",
       },
     })
   } catch (error) {
