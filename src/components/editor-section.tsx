@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card"
 import { Upload, ImageIcon, Download, Loader2, Coins, LogIn } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { SignInDialog } from "./sign-in-dialog"
+import { useLanguage } from "@/lib/i18n"
 
 export function EditorSection() {
   const { data: session, status } = useSession()
@@ -17,6 +18,7 @@ export function EditorSection() {
   const [file, setFile] = useState<File | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [credits, setCredits] = useState<number | null>(null)
+  const { t } = useLanguage()
 
   useEffect(() => {
     if (session) {
@@ -36,12 +38,12 @@ export function EditorSection() {
     if (!selectedFile) return
 
     if (!selectedFile.type.match(/^image\/(jpeg|png|webp)$/)) {
-      setError("Please upload a JPG, PNG, or WEBP image")
+      setError(t("error_invalid_type"))
       return
     }
 
     if (selectedFile.size > 10 * 1024 * 1024) {
-      setError("File size must be less than 10MB")
+      setError(t("error_file_too_large"))
       return
     }
 
@@ -58,7 +60,7 @@ export function EditorSection() {
 
   const handleRemoveBackground = async () => {
     if (!file) {
-      setError("Please upload an image first")
+      setError(t("error_no_image"))
       return
     }
 
@@ -89,23 +91,21 @@ export function EditorSection() {
           return
         }
         if (data.code === "INSUFFICIENT_CREDITS") {
-          setError("No credits remaining. Please purchase more credits.")
+          setError(t("error_insufficient"))
           setIsProcessing(false)
           return
         }
-        throw new Error(data.error || "Failed to process image")
+        throw new Error(data.error || t("error_processing"))
       }
 
       const blob = await response.blob()
       const resultUrl = URL.createObjectURL(blob)
       setResultImage(resultUrl)
       
-      // Update credits display
       const creditsRemaining = response.headers.get("X-Credits-Remaining")
       if (creditsRemaining) {
         setCredits(parseInt(creditsRemaining))
       } else {
-        // Refresh credits from API
         const creditsRes = await fetch("/api/user/credits")
         if (creditsRes.ok) {
           const creditsData = await creditsRes.json()
@@ -113,7 +113,7 @@ export function EditorSection() {
         }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong")
+      setError(err instanceof Error ? err.message : t("error_processing"))
     } finally {
       setIsProcessing(false)
     }
@@ -141,10 +141,10 @@ export function EditorSection() {
       <section id="editor" className="py-20 px-4 bg-secondary/30">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
-            <span className="text-primary font-semibold text-sm uppercase tracking-wide">AI Powered</span>
-            <h2 className="text-4xl md:text-5xl font-bold mt-2 mb-4">Remove Image Background</h2>
+            <span className="text-primary font-semibold text-sm uppercase tracking-wide">{t("editor_section")}</span>
+            <h2 className="text-4xl md:text-5xl font-bold mt-2 mb-4">{t("editor_title")}</h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Upload your image and get a transparent background in seconds.
+              {t("editor_subtitle")}
             </p>
           </div>
 
@@ -160,7 +160,7 @@ export function EditorSection() {
                 {credits !== null ? (
                   <span>{credits} credits available</span>
                 ) : (
-                  <span>Loading credits...</span>
+                  <span>Loading...</span>
                 )}
               </div>
             ) : (
@@ -169,7 +169,7 @@ export function EditorSection() {
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/20 text-purple-400 text-sm font-medium hover:bg-purple-500/30 transition"
               >
                 <LogIn className="w-4 h-4" />
-                Sign in to use
+                {t("login")} to use
               </button>
             )}
           </div>
@@ -187,7 +187,7 @@ export function EditorSection() {
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Upload className="w-5 h-5 text-primary" />
                 </div>
-                <h3 className="font-bold text-lg">Upload Image</h3>
+                <h3 className="font-bold text-lg">{t("upload_image")}</h3>
               </div>
 
               <div className="space-y-4">
@@ -202,8 +202,8 @@ export function EditorSection() {
                     />
                     <label htmlFor="image-upload" className="cursor-pointer">
                       <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">Click to upload or drag and drop</p>
-                      <p className="text-xs text-muted-foreground mt-1">JPG, PNG, WEBP up to 10MB</p>
+                      <p className="text-sm text-muted-foreground">{t("click_or_drag")}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{t("supported_formats")}</p>
                     </label>
                   </div>
                 </div>
@@ -222,21 +222,21 @@ export function EditorSection() {
                   {isProcessing ? (
                     <>
                       <Loader2 className="w-6 h-6 mr-3 animate-spin" />
-                      Processing...
+                      {t("processing")}
                     </>
                   ) : status === "unauthenticated" ? (
                     <>
                       <LogIn className="w-6 h-6 mr-3" />
-                      Sign in to Process
+                      {t("login")}
                     </>
                   ) : (
-                    "✨ Remove Background"
+                    `✨ ${t("remove_bg")}`
                   )}
                 </Button>
 
                 {uploadedImage && (
                   <Button onClick={handleReset} variant="outline" className="w-full">
-                    Reset
+                    {t("reset")}
                   </Button>
                 )}
               </div>
@@ -248,15 +248,15 @@ export function EditorSection() {
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                   <ImageIcon className="w-5 h-5 text-primary" />
                 </div>
-                <h3 className="font-bold text-lg">Result</h3>
+                <h3 className="font-bold text-lg">{t("result")}</h3>
               </div>
 
               <div className="border-2 border-dashed border-border rounded-lg aspect-square flex items-center justify-center bg-muted/30 overflow-hidden">
                 {isProcessing ? (
                   <div className="text-center">
                     <Loader2 className="w-16 h-16 mx-auto mb-4 text-primary animate-spin" />
-                    <p className="text-sm text-muted-foreground font-medium">Removing background...</p>
-                    <p className="text-xs text-muted-foreground mt-1">This usually takes a few seconds</p>
+                    <p className="text-sm text-muted-foreground font-medium">{t("processing")}</p>
+                    <p className="text-xs text-muted-foreground mt-1">...</p>
                   </div>
                 ) : resultImage ? (
                   <div className="w-full h-full flex flex-col">
@@ -267,14 +267,14 @@ export function EditorSection() {
                 ) : uploadedImage ? (
                   <div className="text-center p-8">
                     <ImageIcon className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
-                    <p className="text-sm text-muted-foreground font-medium">Ready to process</p>
-                    <p className="text-xs text-muted-foreground mt-1">Click &quot;Remove Background&quot; to continue</p>
+                    <p className="text-sm text-muted-foreground font-medium">{t("ready_to_process")}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t("click_to_process")}</p>
                   </div>
                 ) : (
                   <div className="text-center">
                     <ImageIcon className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
-                    <p className="text-sm text-muted-foreground font-medium">No image yet</p>
-                    <p className="text-xs text-muted-foreground mt-1">Upload an image to get started</p>
+                    <p className="text-sm text-muted-foreground font-medium">{t("no_image")}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t("upload_to_start")}</p>
                   </div>
                 )}
               </div>
@@ -282,7 +282,7 @@ export function EditorSection() {
               {resultImage && (
                 <Button onClick={handleDownload} className="w-full mt-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-3 rounded-lg">
                   <Download className="w-5 h-5 mr-2" />
-                  Download Result
+                  {t("download_result")}
                 </Button>
               )}
             </Card>
