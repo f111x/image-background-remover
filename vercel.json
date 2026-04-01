@@ -1,16 +1,6 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "yarn run build",
   "outputDirectory": ".next",
   "framework": "nextjs",
-  "env": {
-    "NEXT_PUBLIC_SUPABASE_URL": "@NEXT_PUBLIC_SUPABASE_URL",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@NEXT_PUBLIC_SUPABASE_ANON_KEY",
-    "NEXT_PUBLIC_SITE_URL": "@NEXT_PUBLIC_SITE_URL",
-    "GOOGLE_CLIENT_ID": "@GOOGLE_CLIENT_ID",
-    "GOOGLE_CLIENT_SECRET": "@GOOGLE_CLIENT_SECRET",
-    "PAYPAL_CLIENT_ID": "@PAYPAL_CLIENT_ID",
-    "PAYPAL_CLIENT_SECRET": "@PAYPAL_CLIENT_SECRET",
-    "PAYPAL_WEBHOOK_ID": "@PAYPAL_WEBHOOK_ID",
-    "REMOVE_BG_API_KEY": "@REMOVE_BG_API_KEY"
-  }
+  "installCommand": "yarn install"
 }

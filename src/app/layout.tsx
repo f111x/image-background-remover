@@ -1,20 +1,29 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import type { Metadata } from "next"
+import "./globals.css"
+import { Providers } from "./providers"
+import { Analytics } from "@vercel/analytics/next"
+import { PayPalProvider } from "@/components/paypal/PayPalProvider"
 
 export const metadata: Metadata = {
-  title: "图片背景去除工具 - AI 智能去背景",
-  description: "简单、快速、免费的在线图片背景去除工具，无需安装软件，一键去除图片背景",
-  keywords: ["图片去背景", "背景去除", "透明背景", "Remove BG", "AI抠图"],
-};
+  title: "ImageTools - Remove Image Background",
+  description: "AI-powered background removal. Upload your image and get a transparent background in seconds.",
+}
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <html lang="zh-CN" suppressHydrationWarning>
-      <body className="antialiased" suppressHydrationWarning>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body className="antialiased">
+        <Providers>
+          <PayPalProvider>
+            {children}
+          </PayPalProvider>
+        </Providers>
+        <Analytics />
+      </body>
     </html>
-  );
+  )
 }
