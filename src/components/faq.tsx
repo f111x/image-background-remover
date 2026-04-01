@@ -9,19 +9,39 @@ const faqs = [
   },
   {
     question: "What image formats are supported?",
-    answer: "We support JPG, PNG, and WEBP formats. Maximum file size is 5MB per image.",
-  },
-  {
-    question: "Is my image data secure?",
-    answer: "Yes! Your images are processed and never stored on our servers. Once you download your result, the processed image is gone from our systems.",
+    answer: "We support JPG, PNG, and WEBP formats. Maximum file size is 10MB per image.",
   },
   {
     question: "Do I need to sign up to use this tool?",
-    answer: "No signup required! You can start removing backgrounds immediately for free.",
+    answer: "Yes, you need to create a free account. New users get 3 free credits to try out the service. Each image processing costs 1 credit.",
+  },
+  {
+    question: "How do credits work?",
+    answer: "Each image processing costs 1 credit. You can purchase credit packages or subscribe monthly. Purchased credits never expire. Monthly subscribers also get rollover - unused credits from one month carry over to the next (up to 2x your monthly allocation).",
+  },
+  {
+    question: "Do credits expire?",
+    answer: "Purchased one-time credits never expire. For monthly subscribers, your monthly allocation resets each month, but unused credits roll over (up to 2x your monthly amount).",
+  },
+  {
+    question: "What payment methods are supported?",
+    answer: "We accept PayPal and major credit cards. Payment is processed securely through PayPal.",
+  },
+  {
+    question: "Can I get a refund?",
+    answer: "Unused credits can be refunded within 30 days of purchase. Contact us at support@imagetoolss.com for assistance.",
+  },
+  {
+    question: "Is my image data secure?",
+    answer: "Yes! Your images are processed and never stored on our servers. Once you download your result, the processed image is deleted from our systems.",
   },
   {
     question: "What can I use the transparent images for?",
     answer: "You can use them for product photography, profile pictures, presentations, social media posts, graphic design projects, and much more.",
+  },
+  {
+    question: "How can I contact support?",
+    answer: "Email us at support@imagetoolss.com. We typically respond within 24 hours.",
   },
 ]
 
@@ -34,7 +54,7 @@ export function FAQ() {
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
           <p className="text-muted-foreground text-lg">
-            Everything you need to know about our background removal tool
+            Everything you need to know about ImageTools
           </p>
         </div>
 
