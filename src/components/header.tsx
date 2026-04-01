@@ -1,15 +1,29 @@
 "use client"
 
 import Link from "next/link"
-import { Upload, LogIn, LogOut, User as UserIcon } from "lucide-react"
+import { Upload, LogIn, LogOut, User as UserIcon, Coins } from "lucide-react"
 import { signIn, signOut, useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { SignInDialog } from "./sign-in-dialog"
 
 export function Header() {
   const { data: session, status } = useSession()
   const [showSignIn, setShowSignIn] = useState(false)
+  const [credits, setCredits] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (session) {
+      fetch("/api/user/credits")
+        .then((res) => res.ok ? res.json() : null)
+        .then((data) => {
+          if (data) setCredits(data.credits)
+        })
+        .catch(() => {})
+    } else {
+      setCredits(null)
+    }
+  }, [session])
 
   return (
     <>
@@ -34,6 +48,15 @@ export function Header() {
               <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
             ) : session ? (
               <div className="flex items-center gap-3">
+                {credits !== null && (
+                  <Link
+                    href="/profile"
+                    className="flex items-center gap-2 px-3 py-1.5 bg-yellow-500/20 text-yellow-400 rounded-full text-sm font-medium hover:bg-yellow-500/30 transition"
+                  >
+                    <Coins className="w-4 h-4" />
+                    {credits}
+                  </Link>
+                )}
                 <div className="flex items-center gap-2 text-sm">
                   <UserIcon className="w-4 h-4" />
                   <span className="text-muted-foreground hidden sm:inline">{session.user?.name || session.user?.email}</span>
