@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 
 const GOOGLE_CLIENT_ID = '1022859227926-trq1sat8le6tdbrf3a36ggqe544e8vce.apps.googleusercontent.com'
-const REDIRECT_URI = 'https://image-background-remover.fx9038.workers.dev/auth/callback'
+const REDIRECT_URI = 'https://imagetoolss.com/auth/callback'
 
 function generateState(): string {
   const array = new Uint8Array(32)
