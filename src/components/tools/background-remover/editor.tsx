@@ -9,7 +9,7 @@ import { useSession } from "next-auth/react"
 import { SignInDialog } from "./sign-in-dialog"
 import { useLanguage } from "@/lib/i18n"
 
-export function EditorSection() {
+export function BackgroundRemoverEditor() {
   const { data: session, status } = useSession()
   const [showSignIn, setShowSignIn] = useState(false)
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)

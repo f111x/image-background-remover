@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Upload, LogIn, LogOut, Coins, UserCircle, Globe } from "lucide-react"
+import { Upload, LogIn, LogOut, Coins, UserCircle, Globe, ChevronDown, Scissors, Sparkles } from "lucide-react"
 import { signIn, signOut, useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
@@ -13,6 +13,7 @@ export function Header() {
   const [showSignIn, setShowSignIn] = useState(false)
   const [credits, setCredits] = useState<number | null>(null)
   const [showLangMenu, setShowLangMenu] = useState(false)
+  const [showToolsMenu, setShowToolsMenu] = useState(false)
   const { language, setLanguage, t } = useLanguage()
 
   useEffect(() => {
@@ -38,6 +39,45 @@ export function Header() {
               <span className="font-bold">ImageTools</span>
             </Link>
             <nav className="flex items-center gap-4">
+              {/* Tools Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowToolsMenu(!showToolsMenu)}
+                  className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary transition"
+                >
+                  Tools
+                  <ChevronDown className="w-3 h-3" />
+                </button>
+                {showToolsMenu && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setShowToolsMenu(false)} />
+                    <div className="absolute left-0 top-full mt-2 py-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-20 min-w-[220px]">
+                      <Link
+                        href="/tools/background-remover"
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                        onClick={() => setShowToolsMenu(false)}
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <Scissors className="w-4 h-4 text-primary" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium">Background Remover</div>
+                          <div className="text-xs text-muted-foreground">AI-powered background removal</div>
+                        </div>
+                      </Link>
+                      <div className="flex items-center gap-3 px-4 py-3 opacity-60 cursor-not-allowed">
+                        <div className="w-8 h-8 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
+                          <Sparkles className="w-4 h-4 text-yellow-500" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium">AI Image Editor</div>
+                          <div className="text-xs text-muted-foreground">Coming Soon</div>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
               <Link href="/pricing" className="text-sm font-medium text-muted-foreground hover:text-primary">
                 {t("nav_pricing")}
               </Link>
