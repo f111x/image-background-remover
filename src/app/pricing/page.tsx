@@ -5,6 +5,7 @@ import { Layout } from "@/components/layout"
 import { Check, CreditCard, Zap, RefreshCw, Shield, ArrowRight } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { PayPalCheckout } from "@/components/paypal/PayPalButtons"
+import { SubscriptionPayPal } from "@/components/paypal/SubscriptionPayPal"
 import { useSession } from "next-auth/react"
 
 const creditPackages = [
@@ -53,9 +54,8 @@ const creditPackages = [
 const monthlyPlans = [
   {
     name: "Basic",
-    monthlyPrice: "5",
-    monthlyCredits: 50,
-    rolloverCap: 100,
+    price: "5",
+    credits: 50,
     features: [
       "50 credits/month",
       "Credits refresh monthly",
@@ -68,9 +68,8 @@ const monthlyPlans = [
   },
   {
     name: "Pro",
-    monthlyPrice: "15",
-    monthlyCredits: 200,
-    rolloverCap: 400,
+    price: "15",
+    credits: 200,
     features: [
       "200 credits/month",
       "Credits refresh monthly",
@@ -187,7 +186,7 @@ export default function PricingPage() {
                     onClick={() => setPurchasing(pkg.name)}
                     className={`w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
                       pkg.popular
-                        ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-park-700 text-white shadow-lg"
+                        ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
                         : "bg-gray-100 hover:bg-gray-200 text-gray-900"
                     }`}
                   >
@@ -228,16 +227,16 @@ export default function PricingPage() {
                 </div>
 
                 <div className="text-center mb-6">
-                  <span className="text-5xl font-bold">${plan.monthlyPrice}</span>
+                  <span className="text-5xl font-bold">${plan.price}</span>
                   <span className="text-gray-400">/month</span>
                   <div className="mt-2">
                     <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-600 text-sm rounded-full">
                       <RefreshCw className="w-3 h-3" />
-                      {plan.monthlyCredits}/month
+                      {plan.credits}/month
                     </span>
                   </div>
                   <p className="text-xs text-gray-400 mt-2">
-                    Rollover cap: {plan.rolloverCap} credits
+                    Auto-renews monthly
                   </p>
                 </div>
 
@@ -250,9 +249,20 @@ export default function PricingPage() {
                   ))}
                 </ul>
 
-                <div className="text-center text-sm text-gray-400 py-3">
-                  月付订阅即将推出 · Coming soon
-                </div>
+                {!session ? (
+                  <a
+                    href="/"
+                    className="w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
+                  >
+                    登录后订阅
+                  </a>
+                ) : (
+                  <SubscriptionPayPal
+                    planName={plan.name}
+                    credits={plan.credits}
+                    price={plan.price}
+                  />
+                )}
               </div>
             ))}
           </div>
