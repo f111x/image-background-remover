@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get access token
-    const authResponse = await fetch("https://api-m.sandbox.paypal.com/v1/oauth2/token", {
+    const authResponse = await fetch("https://api-m.paypal.com/v1/oauth2/token", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     const accessToken = authData.access_token
 
     // Create subscription
-    const subscriptionResponse = await fetch("https://api-m.sandbox.paypal.com/v1/billing/subscriptions", {
+    const subscriptionResponse = await fetch("https://api-m.paypal.com/v1/billing/subscriptions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
