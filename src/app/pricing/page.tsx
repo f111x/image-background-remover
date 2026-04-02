@@ -4,6 +4,8 @@ import { useState } from "react"
 import { Layout } from "@/components/layout"
 import { Check, CreditCard, Zap, RefreshCw, Shield, ArrowRight } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
+import { PayPalCheckout } from "@/components/paypal/PayPalButtons"
+import { useSession } from "next-auth/react"
 
 const creditPackages = [
   {
@@ -84,10 +86,12 @@ const monthlyPlans = [
 
 export default function PricingPage() {
   const { t } = useLanguage()
-  const [loadingPackage, setLoadingPackage] = useState<string | null>(null)
+  const { data: session } = useSession()
+  const [purchasing, setPurchasing] = useState<string | null>(null)
 
-  const handlePurchase = async (packageName: string) => {
-    alert(`PayPal integration coming soon! Please contact us to purchase the ${packageName} package.`)
+  const handlePurchaseSuccess = (credits: number, packageName: string) => {
+    alert(`✅ 购买成功！${credits} 积分已添加到您的账户。`)
+    setPurchasing(null)
   }
 
   return (
@@ -156,18 +160,41 @@ export default function PricingPage() {
                   ))}
                 </ul>
 
-                <button
-                  onClick={() => handlePurchase(pkg.name)}
-                  disabled={true}
-                  className={`w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-                    pkg.popular
-                      ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
-                      : "bg-gray-100 hover:bg-gray-200 text-gray-900"
-                  }`}
-                >
-                  Coming Soon
-                  <ArrowRight className="w-4 h-4" />
-                </button>
+                {!session ? (
+                  <a
+                    href="/"
+                    className="w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
+                  >
+                    登录后购买
+                  </a>
+                ) : purchasing === pkg.name ? (
+                  <div className="space-y-3">
+                    <PayPalCheckout
+                      packageName={pkg.name}
+                      price={pkg.price}
+                      credits={pkg.credits}
+                      onSuccess={(credits) => handlePurchaseSuccess(credits, pkg.name)}
+                    />
+                    <button
+                      onClick={() => setPurchasing(null)}
+                      className="w-full py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                    >
+                      取消
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setPurchasing(pkg.name)}
+                    className={`w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
+                      pkg.popular
+                        ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-park-700 text-white shadow-lg"
+                        : "bg-gray-100 hover:bg-gray-200 text-gray-900"
+                    }`}
+                  >
+                    <CreditCard className="w-4 h-4" />
+                    立即购买
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -223,13 +250,9 @@ export default function PricingPage() {
                   ))}
                 </ul>
 
-                <button
-                  onClick={() => handlePurchase(`${plan.name} Monthly`)}
-                  disabled={true}
-                  className={`w-full py-3 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg`}
-                >
-                  Coming Soon
-                </button>
+                <div className="text-center text-sm text-gray-400 py-3">
+                  月付订阅即将推出 · Coming soon
+                </div>
               </div>
             ))}
           </div>

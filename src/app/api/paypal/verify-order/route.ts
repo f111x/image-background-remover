@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { createClient } from "@/lib/supabase/server"
 
 export async function POST(request: NextRequest) {
   try {
@@ -6,6 +9,12 @@ export async function POST(request: NextRequest) {
 
     if (!orderID || !credits) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    }
+
+    // Check user session
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized - please log in" }, { status: 401 })
     }
 
     const clientId = process.env.PAYPAL_CLIENT_ID
@@ -47,23 +56,51 @@ export async function POST(request: NextRequest) {
     }
 
     const captureData = await captureResponse.json()
-    
-    // Check if the order is already captured (idempotency)
+
     if (captureData.status !== "COMPLETED") {
       return NextResponse.json({ error: `Payment status: ${captureData.status}` }, { status: 400 })
     }
 
-    // TODO: Add credits to user's account here
-    // You would typically:
-    // 1. Get user ID from session/auth
-    // 2. Update user's credits in database (Supabase)
-    
-    console.log(`Payment captured! Order ID: ${orderID}, Credits: ${credits}`)
+    // Add credits to user's Supabase profile
+    const supabase = await createClient()
+    const userId = session.user.id
 
-    return NextResponse.json({ 
-      success: true, 
+    // Get current credits
+    const { data: profile, error: fetchError } = await supabase
+      .from("profiles")
+      .select("credits, total_credits")
+      .eq("id", userId)
+      .single()
+
+    if (fetchError && fetchError.code !== "PGRST116") {
+      console.error("Failed to fetch profile:", fetchError)
+      return NextResponse.json({ error: "Failed to fetch user profile" }, { status: 500 })
+    }
+
+    const currentCredits = profile?.credits || 0
+    const currentTotal = profile?.total_credits || 0
+
+    // Update credits
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({
+        credits: currentCredits + credits,
+        total_credits: currentTotal + credits,
+      })
+      .eq("id", userId)
+
+    if (updateError) {
+      console.error("Failed to update credits:", updateError)
+      return NextResponse.json({ error: "Failed to add credits to account" }, { status: 500 })
+    }
+
+    console.log(`✅ Credits added! Order ID: ${orderID}, User: ${userId}, Credits: ${credits}`)
+
+    return NextResponse.json({
+      success: true,
       message: `Successfully purchased ${credits} credits`,
       orderID: orderID,
+      newBalance: currentCredits + credits,
     })
 
   } catch (error) {
