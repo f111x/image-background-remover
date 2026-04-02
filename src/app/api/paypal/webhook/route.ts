@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 
 const PLAN_CREDITS: Record<string, number> = {
-  [process.env.PAYPAL_PLAN_BASIC || "P-95H69185J73647828NHHISWY"]: 50,  // Basic
-  [process.env.PAYPAL_PLAN_PRO || "P-1FR21346V6551815CNHHISZA"]: 200, // Pro
+  [process.env.PAYPAL_PLAN_BASIC || "P-8A321606Y3031753VNHHKA2A"]: 50,  // Basic
+  [process.env.PAYPAL_PLAN_PRO || "P-1E622203E00202506NHHKA5Q"]: 200, // Pro
 }
 
 export async function POST(request: NextRequest) {
