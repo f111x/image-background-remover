@@ -3,8 +3,8 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 
 const PLAN_IDS: Record<string, string> = {
-  Basic: "P-95H69185J73647828NHHISWY",
-  Pro: "P-1FR21346V6551815CNHHISZA",
+  Basic: process.env.PAYPAL_PLAN_BASIC || "P-95H69185J73647828NHHISWY",
+  Pro: process.env.PAYPAL_PLAN_PRO || "P-1FR21346V6551815CNHHISZA",
 }
 
 export async function POST(request: NextRequest) {
