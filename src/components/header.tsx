@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { Upload, LogIn, LogOut, Coins, UserCircle, Globe, Wand2, Scissors } from "lucide-react"
 import { signIn, signOut, useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
@@ -8,15 +9,12 @@ import { useState, useEffect } from "react"
 import { SignInDialog } from "./sign-in-dialog"
 import { useLanguage } from "@/lib/i18n"
 
-type Tool = "remove-bg" | "ai-editor"
-
 export function Header() {
+  const pathname = usePathname()
   const { data: session, status } = useSession()
   const [showSignIn, setShowSignIn] = useState(false)
   const [credits, setCredits] = useState<number | null>(null)
   const [showLangMenu, setShowLangMenu] = useState(false)
-  const [activeTool, setActiveTool] = useState<Tool>("remove-bg")
-  const [showToolMenu, setShowToolMenu] = useState(false)
   const { language, setLanguage, t } = useLanguage()
 
   useEffect(() => {
@@ -32,44 +30,20 @@ export function Header() {
     }
   }, [session])
 
-  // Determine active tool from current path
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const path = window.location.pathname
-      if (path.includes("ai-editor") || path.includes("generate")) {
-        setActiveTool("ai-editor")
-      } else {
-        setActiveTool("remove-bg")
-      }
-    }
-  }, [])
-
-  const tools = [
+  const navLinks = [
     {
-      id: "remove-bg" as Tool,
-      name: t("nav_remove_bg") || "Remove Background",
+      href: "/tools/background-remover",
+      label: t("nav_remove_bg") || "Remove Background",
       icon: Scissors,
-      href: "/#editor",
-      description: "Remove image backgrounds instantly",
+      isActive: pathname === "/tools/background-remover",
     },
     {
-      id: "ai-editor" as Tool,
-      name: t("nav_ai_editor") || "AI Editor",
+      href: "/tools/ai-editor",
+      label: t("nav_ai_editor") || "AI Editor",
       icon: Wand2,
-      href: "/#ai-editor",
-      description: "Edit images with AI prompts",
+      isActive: pathname === "/tools/ai-editor",
     },
   ]
-
-  const scrollToSection = (href: string) => {
-    const element = document.querySelector(href)
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" })
-    }
-    setShowToolMenu(false)
-  }
-
-  const currentTool = tools.find((tool) => tool.id === activeTool) || tools[0]
 
   return (
     <>
@@ -81,46 +55,23 @@ export function Header() {
               <span className="font-bold">ImageTools</span>
             </Link>
 
-            {/* Tool Switcher */}
-            <div className="relative">
-              <button
-                onClick={() => setShowToolMenu(!showToolMenu)}
-                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-              >
-                {currentTool.icon && <currentTool.icon className="w-4 h-4" />}
-                <span>{currentTool.name}</span>
-                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {showToolMenu && (
-                <>
-                  <div
-                    className="fixed inset-0 z-10"
-                    onClick={() => setShowToolMenu(false)}
-                  />
-                  <div className="absolute left-0 top-full mt-1 py-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-20 min-w-[200px]">
-                    {tools.map((tool) => (
-                      <button
-                        key={tool.id}
-                        onClick={() => scrollToSection(tool.href)}
-                        className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition ${
-                          activeTool === tool.id ? "bg-purple-50 dark:bg-purple-900/20" : ""
-                        }`}
-                      >
-                        <tool.icon className={`w-5 h-5 ${activeTool === tool.id ? "text-purple-500" : "text-gray-500"}`} />
-                        <div>
-                          <div className={`text-sm font-medium ${activeTool === tool.id ? "text-purple-600 dark:text-purple-400" : ""}`}>
-                            {tool.name}
-                          </div>
-                          <div className="text-xs text-muted-foreground">{tool.description}</div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
+            {/* Tools Navigation */}
+            <nav className="flex items-center gap-1">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition ${
+                    link.isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800"
+                  }`}
+                >
+                  <link.icon className="w-4 h-4" />
+                  <span>{link.label}</span>
+                </Link>
+              ))}
+            </nav>
 
             <nav className="flex items-center gap-4">
               <Link href="/pricing" className="text-sm font-medium text-muted-foreground hover:text-primary">
