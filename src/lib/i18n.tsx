@@ -63,10 +63,23 @@ const translations = {
     // Showcase
     showcase_title: "Gallery",
     showcase_subtitle: "See what's possible with ImageTools",
+    example: "Example",
+    img_product_title: "Product Photo",
+    img_portrait_title: "Portrait",
+    img_ecommerce_title: "E-commerce",
 
     // Testimonials
     testimonials_title: "What Our Users Say",
     testimonials_subtitle: "Join thousands of satisfied customers",
+    test_sarah_content: "This tool saved me hours of work on my product photography.",
+    test_sarah_name: "Sarah M.",
+    test_sarah_role: "E-commerce Seller",
+    test_marcus_content: "Fast, accurate, and completely free. Highly recommended!",
+    test_marcus_name: "John D.",
+    test_marcus_role: "Freelance Designer",
+    test_emily_content: "The quality is amazing. Can't believe it's free!",
+    test_emily_name: "Emily R.",
+    test_emily_role: "Social Media Manager",
 
     // FAQ
     faq_title: "Frequently Asked Questions",
@@ -167,6 +180,8 @@ const translations = {
     nav_home: "首页",
     nav_pricing: "定价",
     nav_faq: "常见问题",
+    nav_remove_bg: "去除背景",
+    nav_ai_editor: "AI 编辑器",
     login: "登录",
     logout: "退出登录",
     profile: "个人中心",
@@ -212,10 +227,23 @@ const translations = {
     // Showcase
     showcase_title: "作品展示",
     showcase_subtitle: "看看 ImageTools 能做什么",
+    example: "示例",
+    img_product_title: "产品图片",
+    img_portrait_title: "人像照片",
+    img_ecommerce_title: "电商图片",
 
     // Testimonials
     testimonials_title: "用户评价",
     testimonials_subtitle: "加入数千名满意客户的行列",
+    test_sarah_content: "这个工具为我节省了数小时的产品摄影工作。",
+    test_sarah_name: "Sarah M.",
+    test_sarah_role: "电商卖家",
+    test_marcus_content: "快速、准确、完全免费。强烈推荐！",
+    test_marcus_name: "John D.",
+    test_marcus_role: "自由设计师",
+    test_emily_content: "质量太棒了！不敢相信竟然是免费的！",
+    test_emily_name: "Emily R.",
+    test_emily_role: "社交媒体经理",
 
     // FAQ
     faq_title: "常见问题",
