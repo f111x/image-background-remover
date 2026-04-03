@@ -32,39 +32,52 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error("Signup error:", error)
+      
+      // Provide clearer error messages
+      if (error.message.includes("already registered") || error.message.includes("already exists")) {
+        return NextResponse.json(
+          { error: "This email is already registered. Try signing in instead." },
+          { status: 400 }
+        )
+      }
+      
       return NextResponse.json(
         { error: error.message },
         { status: 400 }
       )
     }
 
-    // Check if user was created or if email confirmation is required
-    if (data.user && data.session) {
-      // User was created and has a session (email confirmation disabled)
-      // Create profile for new user
-      await supabase.from("profiles").insert({
-        id: data.user.id,
-        email: email,
-        credits: 3, // New user bonus
-        total_credits: 0,
-      })
+    // Check if user was created
+    if (!data.user) {
+      return NextResponse.json(
+        { error: "Failed to create account. Please try again." },
+        { status: 400 }
+      )
+    }
 
-      return NextResponse.json({
-        success: true,
-        needsEmailConfirmation: false,
-        user: data.user,
-      })
-    } else if (data.user && !data.session) {
-      // User was created but needs email confirmation
+    // Check if email confirmation is required
+    if (!data.session) {
+      // Email confirmation is enabled - verification email should be sent
       return NextResponse.json({
         success: true,
         needsEmailConfirmation: true,
-        message: "Please check your email to verify your account before signing in.",
+        message: "A verification email has been sent. Please check your inbox (and spam folder) and click the link to activate your account.",
       })
     }
 
+    // Email confirmation is disabled - user is directly logged in
+    // Create profile for new user
+    await supabase.from("profiles").insert({
+      id: data.user.id,
+      email: email,
+      credits: 3, // New user bonus
+      total_credits: 0,
+    })
+
     return NextResponse.json({
       success: true,
+      needsEmailConfirmation: false,
+      user: data.user,
     })
   } catch (error) {
     console.error("Signup error:", error)

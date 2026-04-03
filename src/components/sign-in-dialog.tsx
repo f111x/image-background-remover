@@ -17,6 +17,7 @@ export function SignInDialog({ isOpen, onClose }: SignInDialogProps) {
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [successMessage, setSuccessMessage] = useState("")
   const { t } = useLanguage()
 
   if (!isOpen) return null
@@ -60,14 +61,15 @@ export function SignInDialog({ isOpen, onClose }: SignInDialogProps) {
 
       if (!res.ok) {
         setError(data.error || "Signup failed")
+        setIsLoading(false)
         return
       }
 
       if (data.needsEmailConfirmation) {
-        // Show success message instead of auto sign-in
+        // Show clear message about email verification
         setError("")
-        alert("Account created! Please check your email and click the confirmation link to activate your account, then sign in.")
-        setMode("select")
+        setSuccessMessage(data.message || "Verification email sent! Please check your inbox (including spam folder) and click the link to activate your account.")
+        setIsLoading(false)
         return
       }
 
@@ -200,6 +202,12 @@ export function SignInDialog({ isOpen, onClose }: SignInDialogProps) {
                 <p className="text-red-500 text-sm text-center">{error}</p>
               )}
 
+              {successMessage && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-green-700 text-sm text-center">
+                  {successMessage}
+                </div>
+              )}
+
               <Button
                 onClick={handleEmailSignIn}
                 disabled={isLoading || !email || !password}
@@ -218,7 +226,7 @@ export function SignInDialog({ isOpen, onClose }: SignInDialogProps) {
               </Button>
             </div>
 
-            <Button variant="ghost" onClick={() => setMode("select")} className="w-full mt-4">
+            <Button variant="ghost" onClick={() => { setMode("select"); setSuccessMessage(""); setError(""); }} className="w-full mt-4">
               ← Back to sign in options
             </Button>
           </>
