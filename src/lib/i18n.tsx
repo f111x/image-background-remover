@@ -189,8 +189,9 @@ const translations = {
     // Auth Dialog
     sign_in: "Sign In",
     choose_sign_in: "Choose how you want to sign in",
-    continue_with_google: "Continue with Google",
-    continue_with_github: "Continue with GitHub",
+    signin_google: "Continue with Google",
+    signin_github: "Continue with GitHub",
+    signin_email: "Sign in with Email",
     cancel: "Cancel",
 
     // Errors
@@ -379,8 +380,9 @@ const translations = {
     // Auth Dialog
     sign_in: "登录",
     choose_sign_in: "选择登录方式",
-    continue_with_google: "使用 Google 继续",
-    continue_with_github: "使用 GitHub 继续",
+    signin_google: "使用 Google 继续",
+    signin_github: "使用 GitHub 继续",
+    signin_email: "使用邮箱登录",
     cancel: "取消",
 
     // Errors
