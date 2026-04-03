@@ -34,7 +34,8 @@ export function SignInDialog({ isOpen, onClose }: SignInDialogProps) {
       })
 
       if (result?.error) {
-        setError("Invalid email or password")
+        // Check if it's an email confirmation issue
+        setError("Login failed. Please verify your email first, or check if your email needs confirmation.")
       } else {
         onClose()
         window.location.reload()
@@ -68,7 +69,21 @@ export function SignInDialog({ isOpen, onClose }: SignInDialogProps) {
       if (data.needsEmailConfirmation) {
         // Show clear message about email verification
         setError("")
-        setSuccessMessage(data.message || "Verification email sent! Please check your inbox (including spam folder) and click the link to activate your account.")
+        setSuccessMessage(data.message || "Account created! Please check your email (and spam folder) for a verification link, then sign in.")
+        setEmail("") // Clear email for next input
+        setPassword("") // Clear password
+        setMode("select") // Go back to selection
+        setIsLoading(false)
+        return
+      }
+
+      if (data.accountCreated && data.needsEmailConfirmation) {
+        // Account was created but needs email confirmation
+        setError("")
+        setSuccessMessage(data.message)
+        setEmail("")
+        setPassword("")
+        setMode("select")
         setIsLoading(false)
         return
       }
