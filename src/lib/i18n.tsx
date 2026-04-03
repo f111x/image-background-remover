@@ -336,8 +336,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }
 
   const t = (key: string): string => {
-    if (!mounted) return key
-    return translations[language][key as keyof typeof translations.en] || key
+    // Always use 'en' as default during SSR to avoid hydration mismatch
+    const lang = !mounted ? "en" : language
+    return translations[lang][key as keyof typeof translations.en] || translations.en[key as keyof typeof translations.en] || key
   }
 
   return (
@@ -353,7 +354,7 @@ export function useLanguage() {
     return {
       language: "zh" as Language,
       setLanguage: () => {},
-      t: (key: string) => key,
+      t: (key: string) => translations.zh[key as keyof typeof translations.zh] || translations.en[key as keyof typeof translations.en] || key,
     }
   }
   return context
