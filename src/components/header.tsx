@@ -1,19 +1,22 @@
 "use client"
 
 import Link from "next/link"
-import { Upload, LogIn, LogOut, Coins, UserCircle, Globe, ChevronDown, Scissors, Sparkles } from "lucide-react"
+import { Upload, LogIn, LogOut, Coins, UserCircle, Globe, Wand2, Scissors } from "lucide-react"
 import { signIn, signOut, useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 import { SignInDialog } from "./sign-in-dialog"
 import { useLanguage } from "@/lib/i18n"
 
+type Tool = "remove-bg" | "ai-editor"
+
 export function Header() {
   const { data: session, status } = useSession()
   const [showSignIn, setShowSignIn] = useState(false)
   const [credits, setCredits] = useState<number | null>(null)
   const [showLangMenu, setShowLangMenu] = useState(false)
-  const [showToolsMenu, setShowToolsMenu] = useState(false)
+  const [activeTool, setActiveTool] = useState<Tool>("remove-bg")
+  const [showToolMenu, setShowToolMenu] = useState(false)
   const { language, setLanguage, t } = useLanguage()
 
   useEffect(() => {
@@ -29,6 +32,45 @@ export function Header() {
     }
   }, [session])
 
+  // Determine active tool from current path
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const path = window.location.pathname
+      if (path.includes("ai-editor") || path.includes("generate")) {
+        setActiveTool("ai-editor")
+      } else {
+        setActiveTool("remove-bg")
+      }
+    }
+  }, [])
+
+  const tools = [
+    {
+      id: "remove-bg" as Tool,
+      name: t("nav_remove_bg") || "Remove Background",
+      icon: Scissors,
+      href: "/#editor",
+      description: "Remove image backgrounds instantly",
+    },
+    {
+      id: "ai-editor" as Tool,
+      name: t("nav_ai_editor") || "AI Editor",
+      icon: Wand2,
+      href: "/#ai-editor",
+      description: "Edit images with AI prompts",
+    },
+  ]
+
+  const scrollToSection = (href: string) => {
+    const element = document.querySelector(href)
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" })
+    }
+    setShowToolMenu(false)
+  }
+
+  const currentTool = tools.find((tool) => tool.id === activeTool) || tools[0]
+
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -38,46 +80,49 @@ export function Header() {
               <Upload className="h-5 w-5" />
               <span className="font-bold">ImageTools</span>
             </Link>
-            <nav className="flex items-center gap-4">
-              {/* Tools Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowToolsMenu(!showToolsMenu)}
-                  className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary transition"
-                >
-                  Tools
-                  <ChevronDown className="w-3 h-3" />
-                </button>
-                {showToolsMenu && (
-                  <>
-                    <div className="fixed inset-0 z-10" onClick={() => setShowToolsMenu(false)} />
-                    <div className="absolute left-0 top-full mt-2 py-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-20 min-w-[220px]">
-                      <Link
-                        href="/tools/background-remover"
-                        className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-                        onClick={() => setShowToolsMenu(false)}
+
+            {/* Tool Switcher */}
+            <div className="relative">
+              <button
+                onClick={() => setShowToolMenu(!showToolMenu)}
+                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+              >
+                {currentTool.icon && <currentTool.icon className="w-4 h-4" />}
+                <span>{currentTool.name}</span>
+                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {showToolMenu && (
+                <>
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setShowToolMenu(false)}
+                  />
+                  <div className="absolute left-0 top-full mt-1 py-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-20 min-w-[200px]">
+                    {tools.map((tool) => (
+                      <button
+                        key={tool.id}
+                        onClick={() => scrollToSection(tool.href)}
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition ${
+                          activeTool === tool.id ? "bg-purple-50 dark:bg-purple-900/20" : ""
+                        }`}
                       >
-                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <Scissors className="w-4 h-4 text-primary" />
-                        </div>
+                        <tool.icon className={`w-5 h-5 ${activeTool === tool.id ? "text-purple-500" : "text-gray-500"}`} />
                         <div>
-                          <div className="text-sm font-medium">Background Remover</div>
-                          <div className="text-xs text-muted-foreground">AI-powered background removal</div>
+                          <div className={`text-sm font-medium ${activeTool === tool.id ? "text-purple-600 dark:text-purple-400" : ""}`}>
+                            {tool.name}
+                          </div>
+                          <div className="text-xs text-muted-foreground">{tool.description}</div>
                         </div>
-                      </Link>
-                      <div className="flex items-center gap-3 px-4 py-3 opacity-60 cursor-not-allowed">
-                        <div className="w-8 h-8 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
-                          <Sparkles className="w-4 h-4 text-yellow-500" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium">AI Image Editor</div>
-                          <div className="text-xs text-muted-foreground">Coming Soon</div>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
+            <nav className="flex items-center gap-4">
               <Link href="/pricing" className="text-sm font-medium text-muted-foreground hover:text-primary">
                 {t("nav_pricing")}
               </Link>
@@ -86,6 +131,7 @@ export function Header() {
               </Link>
             </nav>
           </div>
+
           <div className="flex items-center gap-3 ml-auto">
             {/* Language Selector */}
             <div className="relative">
@@ -98,9 +144,9 @@ export function Header() {
               </button>
               {showLangMenu && (
                 <>
-                  <div 
-                    className="fixed inset-0 z-10" 
-                    onClick={() => setShowLangMenu(false)} 
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setShowLangMenu(false)}
                   />
                   <div className="absolute right-0 top-full mt-1 py-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-20 min-w-[100px]">
                     <button
