@@ -63,7 +63,15 @@ export function SignInDialog({ isOpen, onClose }: SignInDialogProps) {
         return
       }
 
-      // Auto sign in after successful signup
+      if (data.needsEmailConfirmation) {
+        // Show success message instead of auto sign-in
+        setError("")
+        alert("Account created! Please check your email and click the confirmation link to activate your account, then sign in.")
+        setMode("select")
+        return
+      }
+
+      // Auto sign in after successful signup (if email confirmation is disabled)
       const result = await signIn("credentials", {
         email,
         password,
@@ -71,7 +79,7 @@ export function SignInDialog({ isOpen, onClose }: SignInDialogProps) {
       })
 
       if (result?.error) {
-        setError("Account created but sign in failed. Please try manually.")
+        setError("Account created but sign in failed. Please try signing in manually.")
       } else {
         onClose()
         window.location.reload()

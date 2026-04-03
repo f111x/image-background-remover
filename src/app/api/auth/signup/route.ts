@@ -21,34 +21,26 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient()
 
-    // Check if user already exists
-    const { data: existingUser } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("email", email)
-      .single()
-
-    if (existingUser) {
-      return NextResponse.json(
-        { error: "An account with this email already exists" },
-        { status: 400 }
-      )
-    }
-
     // Sign up with Supabase Auth
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      },
     })
 
     if (error) {
+      console.error("Signup error:", error)
       return NextResponse.json(
         { error: error.message },
         { status: 400 }
       )
     }
 
-    if (data.user) {
+    // Check if user was created or if email confirmation is required
+    if (data.user && data.session) {
+      // User was created and has a session (email confirmation disabled)
       // Create profile for new user
       await supabase.from("profiles").insert({
         id: data.user.id,
@@ -56,12 +48,23 @@ export async function POST(request: NextRequest) {
         credits: 3, // New user bonus
         total_credits: 0,
       })
+
+      return NextResponse.json({
+        success: true,
+        needsEmailConfirmation: false,
+        user: data.user,
+      })
+    } else if (data.user && !data.session) {
+      // User was created but needs email confirmation
+      return NextResponse.json({
+        success: true,
+        needsEmailConfirmation: true,
+        message: "Please check your email to verify your account before signing in.",
+      })
     }
 
     return NextResponse.json({
       success: true,
-      message: "Account created successfully. Please check your email to verify your account.",
-      user: data.user,
     })
   } catch (error) {
     console.error("Signup error:", error)
