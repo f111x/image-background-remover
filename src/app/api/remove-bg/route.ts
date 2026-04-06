@@ -42,8 +42,13 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Failed to initialize user" }, { status: 500 })
       }
     } else if (profileError) {
-      console.error("Profile error:", profileError)
-      return NextResponse.json({ error: "Failed to check user profile" }, { status: 500 })
+      console.error("Profile error:", JSON.stringify(profileError))
+      return NextResponse.json({ 
+        error: "Failed to check user profile", 
+        details: profileError.message,
+        code: profileError.code,
+        hint: profileError.hint
+      }, { status: 500 })
     }
 
     const isSubscriber = profile?.is_subscriber || false
