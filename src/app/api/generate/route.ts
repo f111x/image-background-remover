@@ -19,34 +19,41 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient()
 
     // Check if user exists in Supabase profiles
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("id, is_subscriber")
-      .eq("id", userId)
-      .single()
-
-    // If user doesn't exist in profiles, create one
-    if (profileError && profileError.code === "PGRST116") {
-      const userEmail = session.user.email || ""
-      const { error: insertError } = await supabase
+    let isSubscriber = false
+    try {
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .insert({
-          id: userId,
-          email: userEmail,
-          credits: 3, // New user bonus
-          total_credits: 0,
-        })
+        .select("id, is_subscriber")
+        .eq("id", userId)
+        .maybeSingle()
 
-      if (insertError) {
-        console.error("Failed to create profile:", insertError)
-        return NextResponse.json({ error: "Failed to initialize user" }, { status: 500 })
+      if (profileError) {
+        console.error("Profile check error:", profileError)
+      } else if (profile) {
+        isSubscriber = profile.is_subscriber || false
       }
-    } else if (profileError) {
-      console.error("Profile error:", profileError)
-      return NextResponse.json({ error: "Failed to check user profile" }, { status: 500 })
-    }
 
-    const isSubscriber = profile?.is_subscriber || false
+      // If user doesn't exist in profiles, create one
+      if (!profile && !profileError) {
+        const userEmail = session.user.email || ""
+        const { error: insertError } = await supabase
+          .from("profiles")
+          .insert({
+            id: userId,
+            email: userEmail,
+            credits: 3, // New user bonus
+            total_credits: 0,
+          })
+
+        if (insertError) {
+          console.error("Failed to create profile:", insertError)
+          // Don't fail the request, continue without profile
+        }
+      }
+    } catch (e) {
+      console.error("Profile check exception:", e)
+      // Continue without profile check
+    }
 
     // Check credits
     const { data: creditsData, error: creditsError } = await supabase
