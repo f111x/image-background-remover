@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
     await supabase.from("profiles").insert({
       id: data.user.id,
       email: email,
-      credits: 3, // New user bonus
+      credits: 2, // New user bonus: 1 for background removal + 1 for AI editor
       total_credits: 0,
     })
 

@@ -29,7 +29,7 @@ export async function GET() {
         .insert({
           id: userId,
           email: userEmail,
-          credits: 3,
+          credits: 2, // New user bonus: 1 for background removal + 1 for AI editor
           total_credits: 0,
         })
 
@@ -38,12 +38,12 @@ export async function GET() {
       }
 
       return NextResponse.json({
-        credits: 3,
+        credits: 2,
         totalCredits: 0,
         isSubscriber: false,
         monthlyCredits: 0,
         rolloverCredits: 0,
-        oneTimeCredits: 3,
+        oneTimeCredits: 2,
       })
     }
 

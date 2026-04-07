@@ -194,7 +194,7 @@ const translations = {
     login_to_purchase: "Login to Purchase",
     login_to_subscribe: "Login to Subscribe",
     buy_now: "Buy Now",
-    free_credits_on_signup: "3 free credits when you sign up.",
+    free_credits_on_signup: "2 free credits when you sign up.",
 
     // Profile
     profile_title: "Your Profile",
@@ -436,7 +436,7 @@ const translations = {
     login_to_purchase: "登录后购买",
     login_to_subscribe: "登录后订阅",
     buy_now: "立即购买",
-    free_credits_on_signup: "注册即送 3 个免费积分。",
+    free_credits_on_signup: "注册即送 2 个免费积分。",
 
     // Profile
     profile_title: "个人中心",
