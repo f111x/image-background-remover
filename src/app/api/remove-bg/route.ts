@@ -1,22 +1,21 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { createClient } from "@/lib/supabase/server"
 
 export async function POST(request: NextRequest) {
   try {
-    // Check NextAuth session first (handles Google/GitHub login)
-    const session = await getServerSession(authOptions)
+    // Get user from Supabase Auth (works for all login methods: Google, GitHub, Email)
+    const supabase = await createClient()
+    
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-    if (!session?.user?.id) {
+    if (authError || !user) {
       return NextResponse.json({
         error: "Please sign in to use this feature",
         code: "UNAUTHORIZED"
       }, { status: 401 })
     }
 
-    const userId = session.user.id
-    const supabase = await createClient()
+    const userId = user.id
 
     // Check if user exists in Supabase profiles
     let isSubscriber = false

@@ -1,18 +1,19 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { createClient } from "@/lib/supabase/server"
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
+    // Get user from Supabase Auth (works for all login methods: Google, GitHub, Email)
+    const supabase = await createClient()
+    
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-    if (!session?.user?.id) {
+    if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const userId = session.user.id
-    const supabase = await createClient()
+    const userId = user.id
+    const userEmail = user.email || ""
 
     // Check if user exists, if not create
     const { data: profile, error: profileError } = await supabase
@@ -23,7 +24,6 @@ export async function GET() {
 
     // If profile doesn't exist, create it
     if (profileError && profileError.code === "PGRST116") {
-      const userEmail = session.user.email || ""
       const { error: insertError } = await supabase
         .from("profiles")
         .insert({
