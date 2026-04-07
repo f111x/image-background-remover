@@ -89,7 +89,7 @@ export default function PricingPage() {
   const [purchasing, setPurchasing] = useState<string | null>(null)
 
   const handlePurchaseSuccess = (credits: number, packageName: string) => {
-    alert(`✅ 购买成功！${credits} 积分已添加到您的账户。`)
+    alert(t("purchase_success").replace("{credits}", credits.toString()))
     setPurchasing(null)
   }
 
@@ -164,7 +164,7 @@ export default function PricingPage() {
                     href="/"
                     className="w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
                   >
-                    登录后购买
+                    {t("login_to_purchase")}
                   </a>
                 ) : purchasing === pkg.name ? (
                   <div className="space-y-3">
@@ -178,7 +178,7 @@ export default function PricingPage() {
                       onClick={() => setPurchasing(null)}
                       className="w-full py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
                     >
-                      取消
+                      {t("cancel")}
                     </button>
                   </div>
                 ) : (
@@ -191,7 +191,7 @@ export default function PricingPage() {
                     }`}
                   >
                     <CreditCard className="w-4 h-4" />
-                    立即购买
+                    {t("buy_now")}
                   </button>
                 )}
               </div>
@@ -254,7 +254,7 @@ export default function PricingPage() {
                     href="/"
                     className="w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
                   >
-                    登录后订阅
+                    {t("login_to_subscribe")}
                   </a>
                 ) : (
                   <SubscriptionPayPal
@@ -294,7 +294,7 @@ export default function PricingPage() {
         <div className="text-center bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-12 max-w-3xl mx-6 mb-8 border border-purple-100">
           <h2 className="text-2xl font-bold mb-4">{t("get_started_free")}</h2>
           <p className="text-gray-500 mb-6">
-            3 free credits when you sign up.
+            {t("free_credits_on_signup")}
           </p>
           <a
             href="/"
