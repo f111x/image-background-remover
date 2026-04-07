@@ -3,22 +3,24 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Upload, LogIn, LogOut, Coins, UserCircle, Globe, Wand2, Scissors } from "lucide-react"
-import { signIn, signOut, useSession } from "next-auth/react"
+import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 import { SignInDialog } from "./sign-in-dialog"
 import { useLanguage } from "@/lib/i18n"
+import { useSupabaseUser } from "@/hooks/use-supabase-user"
 
 export function Header() {
   const pathname = usePathname()
-  const { data: session, status } = useSession()
+  const { user, loading } = useSupabaseUser()
   const [showSignIn, setShowSignIn] = useState(false)
   const [credits, setCredits] = useState<number | null>(null)
   const [showLangMenu, setShowLangMenu] = useState(false)
   const { language, setLanguage, t } = useLanguage()
+  const supabase = createClient()
 
   useEffect(() => {
-    if (session) {
+    if (user) {
       fetch("/api/user/credits")
         .then((res) => res.ok ? res.json() : null)
         .then((data) => {
@@ -28,7 +30,12 @@ export function Header() {
     } else {
       setCredits(null)
     }
-  }, [session])
+  }, [user])
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    window.location.href = "/"
+  }
 
   const navLinks = [
     {
@@ -117,9 +124,9 @@ export function Header() {
               )}
             </div>
 
-            {status === "loading" ? (
+            {loading ? (
               <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
-            ) : session ? (
+            ) : user ? (
               <>
                 {/* Credits badge */}
                 {credits !== null && (
@@ -141,10 +148,10 @@ export function Header() {
                 </Link>
                 {/* User name */}
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span className="hidden md:inline">{session.user?.name || session.user?.email}</span>
+                  <span className="hidden md:inline">{user.user_metadata?.full_name || user.email}</span>
                 </div>
                 {/* Logout */}
-                <Button variant="ghost" size="sm" onClick={() => signOut()}>
+                <Button variant="ghost" size="sm" onClick={handleSignOut}>
                   <LogOut className="w-4 h-4" />
                 </Button>
               </>

@@ -2,19 +2,27 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
 export default function CallbackPage() {
   const router = useRouter()
+  const supabase = createClient()
 
   useEffect(() => {
-    // Let NextAuth handle the callback automatically
-    // Then redirect to home
-    const timer = setTimeout(() => {
+    // Handle Supabase OAuth callback
+    const handleCallback = async () => {
+      const { error } = await supabase.auth.getSession()
+      
+      if (error) {
+        console.error('Auth callback error:', error)
+      }
+      
+      // Redirect to home after processing
       router.push('/')
-    }, 2000)
+    }
 
-    return () => clearTimeout(timer)
-  }, [router])
+    handleCallback()
+  }, [router, supabase])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 to-pink-600">

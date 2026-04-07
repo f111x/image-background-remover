@@ -1,10 +1,11 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useSession, signOut } from "next-auth/react"
+import { createClient } from "@/lib/supabase/client"
 import { Coins, LogOut, CreditCard, Zap, Calendar, RefreshCw, Crown } from "lucide-react"
 import { Layout } from "@/components/layout"
 import { useLanguage } from "@/lib/i18n"
+import { useSupabaseUser } from "@/hooks/use-supabase-user"
 
 interface CreditInfo {
   credits: number
@@ -34,16 +35,17 @@ interface UsageRecord {
 }
 
 export default function ProfilePage() {
-  const { data: session, status } = useSession()
+  const { user, loading: userLoading } = useSupabaseUser()
   const [creditInfo, setCreditInfo] = useState<CreditInfo | null>(null)
   const [purchases, setPurchases] = useState<Purchase[]>([])
   const [usage, setUsage] = useState<UsageRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<"usage" | "purchases">("usage")
   const { t } = useLanguage()
+  const supabase = createClient()
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (!user && !userLoading) {
       setLoading(false)
       return
     }
@@ -72,12 +74,12 @@ export default function ProfilePage() {
       }
     }
 
-    if (status === "authenticated") {
+    if (user) {
       fetchData()
     }
-  }, [status])
+  }, [user, userLoading])
 
-  if (status === "unauthenticated") {
+  if (!user && !userLoading) {
     return (
       <Layout>
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -112,7 +114,7 @@ export default function ProfilePage() {
     )
   }
 
-  const user = session?.user
+  const userData = user
 
   return (
     <Layout>
@@ -122,15 +124,15 @@ export default function ProfilePage() {
           <div className="max-w-4xl mx-auto p-6">
             <div className="flex items-center gap-6 mb-8">
               <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-lg ring-4 ring-purple-500/20">
-                {user?.image ? (
-                  <img src={user.image} alt={user.name || ""} className="w-full h-full rounded-full object-cover" />
+                {userData?.user_metadata?.avatar_url || userData?.user_metadata?.picture ? (
+                  <img src={userData?.user_metadata?.avatar_url || userData?.user_metadata?.picture || ""} alt={userData?.user_metadata?.full_name || userData?.email || ""} className="w-full h-full rounded-full object-cover" />
                 ) : (
-                  user?.name?.[0]?.toUpperCase() || "U"
+                  userData?.user_metadata?.full_name?.[0]?.toUpperCase() || userData?.email?.[0]?.toUpperCase() || "U"
                 )}
               </div>
               <div className="flex-1">
-                <h1 className="text-2xl font-bold">{user?.name || "User"}</h1>
-                <p className="text-gray-500">{user?.email}</p>
+                <h1 className="text-2xl font-bold">{userData?.user_metadata?.full_name || userData?.email || "User"}</h1>
+                <p className="text-gray-500">{userData?.email}</p>
                 {creditInfo?.isSubscriber && (
                   <span className="inline-flex items-center gap-1 mt-2 px-3 py-1 bg-yellow-100 text-yellow-600 text-sm rounded-full">
                     <Crown className="w-3 h-3" />
@@ -139,7 +141,7 @@ export default function ProfilePage() {
                 )}
               </div>
               <button
-                onClick={() => signOut()}
+                onClick={() => { supabase.auth.signOut(); window.location.href = "/" }}
                 className="flex items-center gap-2 text-gray-500 hover:text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-100 transition"
               >
                 <LogOut className="w-4 h-4" />

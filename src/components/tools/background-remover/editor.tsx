@@ -5,12 +5,12 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Upload, ImageIcon, Download, Loader2, Coins, LogIn } from "lucide-react"
-import { useSession } from "next-auth/react"
 import { SignInDialog } from "./sign-in-dialog"
 import { useLanguage } from "@/lib/i18n"
+import { useSupabaseUser } from "@/hooks/use-supabase-user"
 
 export function BackgroundRemoverEditor() {
-  const { data: session, status } = useSession()
+  const { user, loading } = useSupabaseUser()
   const [showSignIn, setShowSignIn] = useState(false)
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [resultImage, setResultImage] = useState<string | null>(null)
@@ -21,7 +21,7 @@ export function BackgroundRemoverEditor() {
   const { t } = useLanguage()
 
   useEffect(() => {
-    if (session) {
+    if (user) {
       fetch("/api/user/credits")
         .then((res) => res.ok ? res.json() : null)
         .then((data) => {
@@ -31,7 +31,7 @@ export function BackgroundRemoverEditor() {
     } else {
       setCredits(null)
     }
-  }, [session])
+  }, [user])
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
@@ -64,11 +64,11 @@ export function BackgroundRemoverEditor() {
       return
     }
 
-    if (status === "loading") {
+    if (loading) {
       return
     }
 
-    if (!session) {
+    if (!user) {
       setShowSignIn(true)
       return
     }
@@ -154,7 +154,7 @@ export function BackgroundRemoverEditor() {
 
           {/* Credits Display */}
           <div className="flex justify-center mb-6">
-            {status === "authenticated" && credits !== null ? (
+            {!loading && user && credits !== null ? (
               <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
                 credits > 0 
                   ? "bg-yellow-500/20 text-yellow-400" 
@@ -163,7 +163,7 @@ export function BackgroundRemoverEditor() {
                 <Coins className="w-4 h-4" />
                 <span>{credits} credits available</span>
               </div>
-            ) : !session || status === "unauthenticated" ? (
+            ) : !loading && !user ? (
               <button
                 onClick={() => setShowSignIn(true)}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/20 text-purple-400 text-sm font-medium hover:bg-purple-500/30 transition"
@@ -216,7 +216,7 @@ export function BackgroundRemoverEditor() {
 
                 <Button
                   onClick={handleRemoveBackground}
-                  disabled={!file || isProcessing || status === "unauthenticated"}
+                  disabled={!file || isProcessing || (!user && !loading)}
                   className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold text-lg py-6 rounded-xl"
                 >
                   {isProcessing ? (
@@ -224,7 +224,7 @@ export function BackgroundRemoverEditor() {
                       <Loader2 className="w-6 h-6 mr-3 animate-spin" />
                       {t("processing")}
                     </>
-                  ) : status === "unauthenticated" ? (
+                  ) : !user && !loading ? (
                     <>
                       <LogIn className="w-6 h-6 mr-3" />
                       {t("login")}

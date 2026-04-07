@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { signIn } from "next-auth/react"
+import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useLanguage } from "@/lib/i18n"
@@ -19,8 +20,27 @@ export function SignInDialog({ isOpen, onClose }: SignInDialogProps) {
   const [error, setError] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
   const { t } = useLanguage()
+  const supabase = createClient()
 
   if (!isOpen) return null
+
+  const handleOAuthSignIn = async (provider: "google" | "github") => {
+    setIsLoading(true)
+    setError("")
+    
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
+
+    if (error) {
+      setError(error.message)
+      setIsLoading(false)
+    }
+    // If successful, Supabase will redirect
+  }
 
   const handleEmailSignIn = async () => {
     setIsLoading(true)
@@ -34,7 +54,6 @@ export function SignInDialog({ isOpen, onClose }: SignInDialogProps) {
       })
 
       if (result?.error) {
-        // Check if it's an email confirmation issue
         setError("Login failed. Please verify your email first, or check if your email needs confirmation.")
       } else {
         onClose()
@@ -67,20 +86,8 @@ export function SignInDialog({ isOpen, onClose }: SignInDialogProps) {
       }
 
       if (data.needsEmailConfirmation) {
-        // Show clear message about email verification
         setError("")
         setSuccessMessage(data.message || "Account created! Please check your email (and spam folder) for a verification link, then sign in.")
-        setEmail("") // Clear email for next input
-        setPassword("") // Clear password
-        setMode("select") // Go back to selection
-        setIsLoading(false)
-        return
-      }
-
-      if (data.accountCreated && data.needsEmailConfirmation) {
-        // Account was created but needs email confirmation
-        setError("")
-        setSuccessMessage(data.message)
         setEmail("")
         setPassword("")
         setMode("select")
@@ -88,7 +95,6 @@ export function SignInDialog({ isOpen, onClose }: SignInDialogProps) {
         return
       }
 
-      // Auto sign in after successful signup (if email confirmation is disabled)
       const result = await signIn("credentials", {
         email,
         password,
@@ -131,7 +137,8 @@ export function SignInDialog({ isOpen, onClose }: SignInDialogProps) {
 
             <div className="space-y-4">
               <Button
-                onClick={() => signIn("google", { callbackUrl: "/" })}
+                onClick={() => handleOAuthSignIn("google")}
+                disabled={isLoading}
                 className="w-full bg-white text-gray-800 hover:bg-gray-100 border border-gray-300 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 dark:border-gray-600"
               >
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
@@ -144,7 +151,8 @@ export function SignInDialog({ isOpen, onClose }: SignInDialogProps) {
               </Button>
 
               <Button
-                onClick={() => signIn("github", { callbackUrl: "/" })}
+                onClick={() => handleOAuthSignIn("github")}
+                disabled={isLoading}
                 className="w-full bg-[#24292e] text-white hover:bg-[#2f363d]"
               >
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">

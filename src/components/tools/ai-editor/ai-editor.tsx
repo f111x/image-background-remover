@@ -5,9 +5,9 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Upload, ImageIcon, Download, Loader2, Coins, LogIn, X, Plus, Sparkles } from "lucide-react"
-import { useSession } from "next-auth/react"
 import { SignInDialog } from "@/components/sign-in-dialog"
 import { useLanguage } from "@/lib/i18n"
+import { useSupabaseUser } from "@/hooks/use-supabase-user"
 
 interface GeneratedImage {
   url: string
@@ -16,7 +16,7 @@ interface GeneratedImage {
 }
 
 export function AIEditor() {
-  const { data: session, status } = useSession()
+  const { user, loading } = useSupabaseUser()
   const [showSignIn, setShowSignIn] = useState(false)
   const [mainImage, setMainImage] = useState<string | null>(null)
   const [mainImageFile, setMainImageFile] = useState<File | null>(null)
@@ -30,7 +30,7 @@ export function AIEditor() {
   const { t } = useLanguage()
 
   useEffect(() => {
-    if (session) {
+    if (user) {
       fetch("/api/user/credits")
         .then((res) => res.ok ? res.json() : null)
         .then((data) => {
@@ -40,7 +40,7 @@ export function AIEditor() {
     } else {
       setCredits(null)
     }
-  }, [session])
+  }, [user])
 
   const handleMainImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
@@ -108,11 +108,11 @@ export function AIEditor() {
       return
     }
 
-    if (status === "loading") {
+    if (loading) {
       return
     }
 
-    if (!session) {
+    if (!user) {
       setShowSignIn(true)
       return
     }
@@ -210,7 +210,7 @@ export function AIEditor() {
 
           {/* Credits Display */}
           <div className="flex justify-center mb-6">
-            {status === "authenticated" && credits !== null ? (
+            {!loading && user && credits !== null ? (
               <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
                 credits >= 2
                   ? "bg-yellow-500/20 text-yellow-400"
@@ -219,7 +219,7 @@ export function AIEditor() {
                 <Coins className="w-4 h-4" />
                 <span>{credits} credits available (2 credits/generation)</span>
               </div>
-            ) : !session || status === "unauthenticated" ? (
+            ) : !loading && !user ? (
               <button
                 onClick={() => setShowSignIn(true)}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/20 text-purple-400 text-sm font-medium hover:bg-purple-500/30 transition"
@@ -333,7 +333,7 @@ export function AIEditor() {
                   {/* Generate Button */}
                   <Button
                     onClick={handleGenerate}
-                    disabled={!prompt.trim() || isGenerating || status === "unauthenticated" || credits < 2}
+                    disabled={!prompt.trim() || isGenerating || (!user && !loading) || (credits !== null && credits < 2)}
                     className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold text-lg py-6 rounded-xl"
                   >
                     {isGenerating ? (
@@ -341,7 +341,7 @@ export function AIEditor() {
                         <Loader2 className="w-6 h-6 mr-3 animate-spin" />
                         {t("editor_generating")}
                       </>
-                    ) : status === "unauthenticated" ? (
+                    ) : !user && !loading ? (
                       <>
                         <LogIn className="w-6 h-6 mr-3" />
                         {t("login")}
