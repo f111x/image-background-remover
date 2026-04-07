@@ -21,13 +21,21 @@ export function Header() {
 
   useEffect(() => {
     if (user) {
+      console.log("Fetching credits for user:", user.id)
       fetch("/api/user/credits")
-        .then((res) => res.ok ? res.json() : null)
-        .then((data) => {
-          if (data) setCredits(data.credits)
+        .then((res) => {
+          console.log("Credits API status:", res.status)
+          return res.ok ? res.json() : null
         })
-        .catch(() => {})
+        .then((data) => {
+          console.log("Credits data:", data)
+          if (data) setCredits(data.credits ?? 0)
+        })
+        .catch((err) => {
+          console.error("Failed to fetch credits:", err)
+        })
     } else {
+      console.log("No user, not fetching credits")
       setCredits(null)
     }
   }, [user])
@@ -129,13 +137,13 @@ export function Header() {
             ) : user ? (
               <>
                 {/* Credits badge */}
-                {credits !== null && (
+                {user && (
                   <Link
                     href="/profile"
                     className="flex items-center gap-2 px-3 py-1.5 bg-yellow-500/20 text-yellow-400 rounded-full text-sm font-medium hover:bg-yellow-500/30 transition"
                   >
                     <Coins className="w-4 h-4" />
-                    {credits}
+                    <span>{credits !== null ? credits : '?'}</span>
                   </Link>
                 )}
                 {/* Profile link */}
