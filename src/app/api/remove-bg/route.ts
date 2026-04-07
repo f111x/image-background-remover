@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     const userId = user.id
+    const userEmail = user.email || ""
 
     // Check if user exists in Supabase profiles
     let isSubscriber = false
@@ -33,8 +34,7 @@ export async function POST(request: NextRequest) {
       }
 
       // If user doesn't exist in profiles, create one
-      if (!profile && !profileError) {
-        const userEmail = session.user.email || ""
+      if (!profile) {
         const { error: insertError } = await supabase
           .from("profiles")
           .insert({
