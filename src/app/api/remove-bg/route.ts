@@ -61,7 +61,11 @@ export async function POST(request: NextRequest) {
 
     if (creditsError) {
       console.error("Failed to check credits:", creditsError)
-      return NextResponse.json({ error: "Failed to check credits" }, { status: 500 })
+      return NextResponse.json({ 
+        error: "Failed to check credits", 
+        details: creditsError.message,
+        hint: "Check if RPC function exists and user has permission"
+      }, { status: 500 })
     }
 
     if (!creditsData?.success || creditsData.total_credits < 1) {
