@@ -99,7 +99,9 @@ export function BackgroundRemoverEditor() {
           setIsProcessing(false)
           return
         }
-        throw new Error(data.error || t("error_processing"))
+        // Show detailed error for debugging
+        const errorMsg = data.details ? `${data.error}: ${data.details}` : (data.error || t("error_processing"))
+        throw new Error(errorMsg)
       }
 
       const blob = await response.blob()

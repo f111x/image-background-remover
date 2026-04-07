@@ -55,8 +55,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Check credits
+    console.log("Checking credits for user:", userId)
     const { data: creditsData, error: creditsError } = await supabase
       .rpc("get_total_credits", { p_user_id: userId })
+
+    console.log("Credits response:", { creditsData, creditsError })
 
     if (creditsError) {
       console.error("Failed to check credits:", creditsError)
@@ -64,6 +67,14 @@ export async function POST(request: NextRequest) {
         error: "Failed to check credits", 
         details: creditsError.message,
         hint: "Check if RPC function exists and user has permission"
+      }, { status: 500 })
+    }
+
+    if (!creditsData) {
+      console.error("No credits data returned")
+      return NextResponse.json({ 
+        error: "Failed to check credits", 
+        details: "No data returned from RPC"
       }, { status: 500 })
     }
 
