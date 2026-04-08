@@ -26,13 +26,13 @@ const translations = {
     hero_badge: "AI Powered Background Removal",
     hero_title: "Remove Image Backgrounds",
     hero_title2: "in Seconds",
-    hero_subtitle: "Upload your image and get a transparent background instantly. No signup required. Free to use.",
+    hero_subtitle: "Upload your image and get a transparent background instantly. No signup required. Start with 2 free credits.",
     hero_button: "Get Started",
 
     // Editor
     editor_section: "AI Powered",
     editor_title: "Remove Image Background",
-    editor_subtitle: "Upload your image and get a transparent background in seconds. No signup required. Free to use.",
+    editor_subtitle: "Upload your image and get a transparent background in seconds. No signup required. Start with 2 free credits.",
     upload_image: "Upload Image",
     click_or_drag: "Click to upload or drag and drop",
     supported_formats: "JPG, PNG, WEBP up to 10MB",
@@ -268,13 +268,13 @@ const translations = {
     hero_badge: "AI 驱动背景消除",
     hero_title: "秒级消除图片背景",
     hero_title2: "",
-    hero_subtitle: "上传图片，即刻获得透明背景。无需注册，完全免费。",
+    hero_subtitle: "上传图片，即刻获得透明背景。无需注册，注册即送2积分。",
     hero_button: "开始使用",
 
     // Editor
     editor_section: "AI 驱动",
     editor_title: "消除图片背景",
-    editor_subtitle: "上传图片，秒级获得透明背景。无需注册，完全免费。",
+    editor_subtitle: "上传图片，秒级获得透明背景。无需注册，注册即送2积分。",
     upload_image: "上传图片",
     click_or_drag: "点击上传或拖拽图片到这里",
     supported_formats: "支持 JPG、PNG、WEBP，最大 10MB",
