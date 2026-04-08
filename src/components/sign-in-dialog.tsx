@@ -29,9 +29,6 @@ export function SignInDialog({ isOpen, onClose }: SignInDialogProps) {
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
     })
 
     if (error) {
