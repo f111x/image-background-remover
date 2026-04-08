@@ -6,7 +6,7 @@ import { Check, CreditCard, Zap, RefreshCw, Shield, ArrowRight } from "lucide-re
 import { useLanguage } from "@/lib/i18n"
 import { PayPalCheckout } from "@/components/paypal/PayPalButtons"
 import { SubscriptionPayPal } from "@/components/paypal/SubscriptionPayPal"
-import { useSession } from "next-auth/react"
+import { useSupabaseUser } from "@/hooks/use-supabase-user"
 
 const creditPackages = [
   {
@@ -85,7 +85,7 @@ const monthlyPlans = [
 
 export default function PricingPage() {
   const { t } = useLanguage()
-  const { data: session } = useSession()
+  const { user } = useSupabaseUser()
   const [purchasing, setPurchasing] = useState<string | null>(null)
 
   const handlePurchaseSuccess = (credits: number, packageName: string) => {
@@ -159,7 +159,7 @@ export default function PricingPage() {
                   ))}
                 </ul>
 
-                {!session ? (
+                {!user ? (
                   <a
                     href="/"
                     className="w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
@@ -249,7 +249,7 @@ export default function PricingPage() {
                   ))}
                 </ul>
 
-                {!session ? (
+                {!user ? (
                   <a
                     href="/"
                     className="w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
