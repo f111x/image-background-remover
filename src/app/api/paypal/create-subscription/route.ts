@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { getCurrentUser } from "@/lib/supabase/auth-helpers"
 
 const PLAN_IDS: Record<string, string> = {
   Basic: process.env.PAYPAL_PLAN_BASIC || "P-8A321606Y3031753VNHHKA2A",
@@ -15,8 +14,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid plan" }, { status: 400 })
     }
 
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.id || !session?.user?.email) {
+    const user = await getCurrentUser()
+    if (!user?.id || !user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -50,14 +49,14 @@ export async function POST(request: NextRequest) {
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${accessToken}`,
-        "PayPal-Request-Id": `${session.user.id}-${Date.now()}`,
+        "PayPal-Request-Id": `${user.id}-${Date.now()}`,
       },
       body: JSON.stringify({
         plan_id: PLAN_IDS[planName],
         subscriber: {
-          email_address: session.user.email,
+          email_address: user.email,
         },
-        custom_id: session.user.id,
+        custom_id: user.id,
         application_context: {
           return_url: "https://imagetoolss.com/profile?subscription=success",
           cancel_url: "https://imagetoolss.com/pricing?subscription=cancelled",

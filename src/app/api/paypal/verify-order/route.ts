@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { getCurrentUser } from "@/lib/supabase/auth-helpers"
 import { createClient } from "@/lib/supabase/server"
 
 export async function POST(request: NextRequest) {
@@ -11,9 +10,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    // Check user session
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
+    const user = await getCurrentUser()
+    if (!user?.id) {
       return NextResponse.json({ error: "Unauthorized - please log in" }, { status: 401 })
     }
 
@@ -63,19 +61,14 @@ export async function POST(request: NextRequest) {
 
     // Add credits to user's Supabase profile
     const supabase = await createClient()
-    const userId = session.user.id
+    const userId = user.id
 
     // Get current credits
     const { data: profile, error: fetchError } = await supabase
       .from("profiles")
       .select("credits, total_credits")
       .eq("id", userId)
-      .single()
-
-    if (fetchError && fetchError.code !== "PGRST116") {
-      console.error("Failed to fetch profile:", fetchError)
-      return NextResponse.json({ error: "Failed to fetch user profile" }, { status: 500 })
-    }
+      .maybeSingle()
 
     const currentCredits = profile?.credits || 0
     const currentTotal = profile?.total_credits || 0

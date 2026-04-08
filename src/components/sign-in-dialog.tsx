@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { signIn } from "next-auth/react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -27,7 +26,7 @@ export function SignInDialog({ isOpen, onClose }: SignInDialogProps) {
   const handleOAuthSignIn = async (provider: "google" | "github") => {
     setIsLoading(true)
     setError("")
-    
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
@@ -46,24 +45,19 @@ export function SignInDialog({ isOpen, onClose }: SignInDialogProps) {
     setIsLoading(true)
     setError("")
 
-    try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      })
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
 
-      if (result?.error) {
-        setError("Login failed. Please verify your email first, or check if your email needs confirmation.")
-      } else {
-        onClose()
-        window.location.reload()
-      }
-    } catch {
-      setError("An error occurred. Please try again.")
-    } finally {
+    if (signInError) {
+      setError(signInError.message)
       setIsLoading(false)
+      return
     }
+
+    onClose()
+    window.location.reload()
   }
 
   const handleSignUp = async () => {
@@ -95,21 +89,10 @@ export function SignInDialog({ isOpen, onClose }: SignInDialogProps) {
         return
       }
 
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      })
-
-      if (result?.error) {
-        setError("Account created but sign in failed. Please try signing in manually.")
-      } else {
-        onClose()
-        window.location.reload()
-      }
+      onClose()
+      window.location.reload()
     } catch {
       setError("An error occurred. Please try again.")
-    } finally {
       setIsLoading(false)
     }
   }

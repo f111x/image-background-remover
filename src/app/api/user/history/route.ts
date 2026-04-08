@@ -1,17 +1,16 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { getCurrentUser } from "@/lib/supabase/auth-helpers"
 import { createClient } from "@/lib/supabase/server"
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const user = await getCurrentUser()
 
-    if (!session?.user?.id) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const userId = session.user.id
+    const userId = user.id
     const supabase = await createClient()
 
     const { data: purchases, error: purchasesError } = await supabase
