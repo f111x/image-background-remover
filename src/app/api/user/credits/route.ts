@@ -1,35 +1,33 @@
 import { NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { createClient } from "@/lib/supabase/server"
 
 export async function GET() {
   try {
-    // Get user from Supabase Auth (works for all login methods: Google, GitHub, Email)
-    const supabase = await createClient()
-    
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const session = await getServerSession(authOptions)
 
-    if (authError || !user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const userId = user.id
-    const userEmail = user.email || ""
+    const userId = session.user.id
+    const supabase = await createClient()
 
-    // Check if user exists, if not create
+    // Check if user profile exists, if not create with 2 free credits
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("credits, total_credits, is_subscriber, rollover_credits")
       .eq("id", userId)
-      .single()
+      .maybeSingle()
 
     // If profile doesn't exist, create it
-    if (profileError && profileError.code === "PGRST116") {
+    if (!profile) {
       const { error: insertError } = await supabase
         .from("profiles")
         .insert({
           id: userId,
-          email: userEmail,
-          credits: 2, // New user bonus: 1 for background removal + 1 for AI editor
+          credits: 2,
           total_credits: 0,
         })
 
@@ -51,17 +49,17 @@ export async function GET() {
       return NextResponse.json({ error: "Failed to fetch credits" }, { status: 500 })
     }
 
-    // Get total credits including subscription
+    // Get total credits including subscription via RPC
     const { data: creditsData } = await supabase
       .rpc("get_total_credits", { p_user_id: userId })
 
     return NextResponse.json({
-      credits: creditsData?.total_credits || profile.credits,
-      totalCredits: profile.total_credits,
-      isSubscriber: profile.is_subscriber || false,
-      monthlyCredits: creditsData?.monthly_credits || 0,
-      rolloverCredits: profile.rollover_credits || 0,
-      oneTimeCredits: profile.credits,
+      credits: creditsData?.total_credits ?? profile.credits ?? 0,
+      totalCredits: profile.total_credits ?? 0,
+      isSubscriber: profile.is_subscriber ?? false,
+      monthlyCredits: creditsData?.monthly_credits ?? 0,
+      rolloverCredits: profile.rollover_credits ?? 0,
+      oneTimeCredits: profile.credits ?? 0,
     })
   } catch (error) {
     console.error("Credits API error:", error)
