@@ -308,7 +308,26 @@ export const translations = {
         footer_terms: "条款",
         footer_license: "许可",
         footer_disclaimer: "Nanobanana.ai 是一个独立产品，不隶属于 Google 或任何 AI 品牌。",
-        footer_copyright: "© 2025 Nano Banana. 保留所有权利。"
+        footer_copyright: "© 2025 Nano Banana. 保留所有权利。",
+
+        // Sign In Dialog
+        choose_sign_in: "选择登录方式",
+        signin_email: "邮箱登录",
+        cancel: "取消",
+        or: "或",
+        email: "邮箱",
+        email_placeholder: "you@example.com",
+        password: "密码",
+        password_placeholder: "••••••••",
+        signing_in: "登录中...",
+        create_account: "创建账号",
+        creating_account: "创建账号中...",
+        back_to_signin: "← 返回登录选项",
+        enter_email_password: "输入邮箱和密码",
+        continue_with_google: "使用 Google 继续",
+        continue_with_github: "使用 GitHub 继续",
+        login: "登录",
+        login_to_use: "登录后使用"
     }
 }
 

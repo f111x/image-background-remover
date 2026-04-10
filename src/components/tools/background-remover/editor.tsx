@@ -171,7 +171,7 @@ export function BackgroundRemoverEditor() {
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/20 text-purple-400 text-sm font-medium hover:bg-purple-500/30 transition"
               >
                 <LogIn className="w-4 h-4" />
-                {t("login")} to use
+                {t("login_to_use")}
               </button>
             ) : null}
           </div>
