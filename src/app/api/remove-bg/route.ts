@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       // Continue without profile check
     }
 
-    // Check credits via RPC
+    // Check credits via RPC with fallback for PGRST204 errors
     console.log("Checking credits for user:", userId)
     let creditsInfo: Record<string, any> | null = null
     let usingFallback = false
@@ -115,7 +115,6 @@ export async function POST(request: NextRequest) {
       // Normal path: RPC succeeded
       // Handle array response (multiple rows returned without error)
       const raw = Array.isArray(creditsData) ? creditsData[0] : creditsData
-      creditsInfo = raw
 
       if (!raw || !raw.success || raw.total_credits < 1) {
         return NextResponse.json({
@@ -124,6 +123,7 @@ export async function POST(request: NextRequest) {
           available: raw?.total_credits || 0
         }, { status: 402 })
       }
+      creditsInfo = raw
     }
 
     // Get form data
@@ -150,8 +150,34 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Service not configured" }, { status: 500 })
     }
 
+    // Step 1: Upload image to Supabase Storage to get a public URL
+    // This avoids Vercel's network restrictions on direct fetch to external APIs
+    const fileName = `${userId}/${Date.now()}-${imageFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+    const buffer = Buffer.from(await imageFile.arrayBuffer())
+    
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('reference-images')
+      .upload(fileName, buffer, {
+        contentType: imageFile.type,
+        upsert: false
+      })
+
+    if (uploadError) {
+      console.error("Failed to upload to Supabase Storage:", uploadError)
+      return NextResponse.json({ error: "Failed to upload image" }, { status: 500 })
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from('reference-images')
+      .getPublicUrl(fileName)
+
+    const imageUrl = urlData.publicUrl
+    console.log("Uploaded image to:", imageUrl)
+
+    // Step 2: Call Remove.bg with image_url (让他们下载)
     const removeBgFormData = new FormData()
-    removeBgFormData.append("image_file", imageFile)
+    removeBgFormData.append("image_url", imageUrl)
     removeBgFormData.append("size", "auto")
 
     const response = await fetch("https://api.remove.bg/v1.0/removebg", {
@@ -162,26 +188,63 @@ export async function POST(request: NextRequest) {
       body: removeBgFormData,
     })
 
+    // Clean up: delete the uploaded file after Remove.bg processing
+    await supabase.storage.from('reference-images').remove([fileName]).catch(() => {})
+
+    // Step 3: Read response body first (before any Supabase operations)
+    // ⚠️ IMPORTANT: Supabase's internal HTTP calls can "consume" the Response body stream
+    let imageBlob: Blob
+    let errorMessage = "Failed to process image"
+    
     if (!response.ok) {
-      // Log failed usage
+      // API call failed - read error details and return WITHOUT deducting credits
+      const errorText = await response.text()
+      console.error("Remove.bg API error:", errorText.slice(0, 200))
+      try {
+        const errorData = JSON.parse(errorText)
+        errorMessage = errorData.errors?.[0]?.title || errorMessage
+      } catch {}
+      
+      // Log failed attempt (no credit deduction)
       await supabase.from("usage_history").insert({
         user_id: userId,
-        credits_used: 1,
+        credits_used: 0, // No credits deducted for failed processing
         image_size: imageFile.size,
         source: isSubscriber ? "subscription" : "one-time",
         status: "failed",
-        error_message: "Remove.bg API error",
-      })
+        error_message: errorMessage,
+      }).catch(err => console.error("Failed to log usage:", err))
 
-      const errorData = await response.json().catch(() => ({}))
       return NextResponse.json({
-        error: errorData.errors?.[0]?.title || "Failed to process image",
+        error: errorMessage,
         code: "API_ERROR"
       }, { status: response.status })
     }
 
-    // Deduct credits (skip if using fallback to avoid RPC errors)
+    // Step 4: API succeeded - read the image blob
+    try {
+      imageBlob = await response.blob()
+    } catch (blobErr) {
+      console.error("Failed to read response blob:", blobErr)
+      // Blob read failed - don't deduct credits
+      await supabase.from("usage_history").insert({
+        user_id: userId,
+        credits_used: 0,
+        image_size: imageFile.size,
+        source: isSubscriber ? "subscription" : "one-time",
+        status: "failed",
+        error_message: "Failed to read processed image",
+      }).catch(err => console.error("Failed to log usage:", err))
+
+      return NextResponse.json({
+        error: "Failed to read processed image",
+        code: "BLOB_READ_ERROR"
+      }, { status: 500 })
+    }
+
+    // Step 5: Deduct credits AFTER confirmed API success and blob readable
     let deductResult: any = null
+    
     if (!usingFallback) {
       const { data: deductData, error: deductError } = await supabase
         .rpc("deduct_credits", {
@@ -196,7 +259,7 @@ export async function POST(request: NextRequest) {
         // Fallback: direct update
         const { data: profileUpdate } = await supabase
           .from("profiles")
-          .update({ credits: (creditsInfo?.one_time_credits || 1) - 1 })
+          .update({ credits: Math.max((creditsInfo?.one_time_credits || 1) - 1, 0) })
           .eq("id", userId)
           .select("credits")
           .single()
@@ -208,19 +271,17 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Log usage
+    // Step 6: Log success
     await supabase.from("usage_history").insert({
       user_id: userId,
       credits_used: 1,
       image_size: imageFile.size,
       source: isSubscriber ? "subscription" : "one-time",
       status: "success",
-    })
+    }).catch(err => console.error("Failed to log usage:", err))
 
-    // Return the processed image
-    const blob = await response.blob()
-
-    return new NextResponse(blob, {
+    // Step 7: Return the processed image
+    return new NextResponse(imageBlob, {
       status: 200,
       headers: {
         "Content-Type": "image/png",
