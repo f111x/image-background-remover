@@ -54,36 +54,76 @@ export async function POST(request: NextRequest) {
       // Continue without profile check
     }
 
-    // Check credits
+    // Check credits via RPC
     console.log("Checking credits for user:", userId)
+    let creditsInfo: Record<string, any> | null = null
+    let usingFallback = false
+
     const { data: creditsData, error: creditsError } = await supabase
       .rpc("get_total_credits", { p_user_id: userId })
 
     console.log("Credits response:", { creditsData, creditsError })
 
     if (creditsError) {
-      console.error("Failed to check credits:", creditsError)
-      return NextResponse.json({ 
-        error: "Failed to check credits", 
-        details: creditsError.message,
-        hint: "Check if RPC function exists and user has permission"
-      }, { status: 500 })
-    }
+      // Handle PGRST204: RPC returned multiple rows (data inconsistency)
+      if (creditsError.code === 'PGRST204') {
+        console.error("Credit check: PGRST204 multiple rows, using fallback direct query")
+      } else {
+        // Other RPC errors (including 22P02 invalid UUID)
+        console.error("Credit check RPC error:", creditsError)
+        return NextResponse.json({ 
+          error: "Failed to check credits", 
+          details: creditsError.message
+        }, { status: 500 })
+      }
 
-    if (!creditsData) {
-      console.error("No credits data returned")
-      return NextResponse.json({ 
-        error: "Failed to check credits", 
-        details: "No data returned from RPC"
-      }, { status: 500 })
-    }
+      // Fallback: directly query profiles table when RPC fails
+      const { data: profileData, error: profileQueryError } = await supabase
+        .from("profiles")
+        .select("credits, rollover_credits, is_subscriber")
+        .eq("id", userId)
+        .maybeSingle()
 
-    if (!creditsData?.success || creditsData.total_credits < 1) {
-      return NextResponse.json({
-        error: "Insufficient credits. Please purchase more credits.",
-        code: "INSUFFICIENT_CREDITS",
-        available: creditsData?.total_credits || 0
-      }, { status: 402 })
+      if (profileQueryError) {
+        console.error("Fallback profile query failed:", profileQueryError)
+        return NextResponse.json({ error: "Failed to check credits" }, { status: 500 })
+      }
+
+      if (!profileData) {
+        return NextResponse.json({ error: "User profile not found" }, { status: 404 })
+      }
+
+      const totalCredits = (profileData.credits || 0) + (profileData.rollover_credits || 0)
+      if (totalCredits < 1) {
+        return NextResponse.json({
+          error: "Insufficient credits. Please purchase more credits.",
+          code: "INSUFFICIENT_CREDITS",
+          available: totalCredits
+        }, { status: 402 })
+      }
+
+      creditsInfo = {
+        success: true,
+        total_credits: totalCredits,
+        one_time_credits: profileData.credits || 0,
+        rollover_credits: profileData.rollover_credits || 0,
+        is_subscriber: profileData.is_subscriber || false
+      }
+      isSubscriber = profileData.is_subscriber || false
+      usingFallback = true
+    } else {
+      // Normal path: RPC succeeded
+      // Handle array response (multiple rows returned without error)
+      const raw = Array.isArray(creditsData) ? creditsData[0] : creditsData
+      creditsInfo = raw
+
+      if (!raw || !raw.success || raw.total_credits < 1) {
+        return NextResponse.json({
+          error: "Insufficient credits. Please purchase more credits.",
+          code: "INSUFFICIENT_CREDITS",
+          available: raw?.total_credits || 0
+        }, { status: 402 })
+      }
     }
 
     // Get form data
@@ -140,16 +180,32 @@ export async function POST(request: NextRequest) {
       }, { status: response.status })
     }
 
-    // Deduct credits
-    const { data: deductResult, error: deductError } = await supabase
-      .rpc("deduct_credits", {
-        p_user_id: userId,
-        p_credits: 1,
-        p_source: isSubscriber ? "subscription" : "one-time"
-      })
+    // Deduct credits (skip if using fallback to avoid RPC errors)
+    let deductResult: any = null
+    if (!usingFallback) {
+      const { data: deductData, error: deductError } = await supabase
+        .rpc("deduct_credits", {
+          p_user_id: userId,
+          p_credits: 1,
+          p_source: isSubscriber ? "subscription" : "one-time"
+        })
 
-    if (deductError || !deductResult?.success) {
-      console.error("Failed to deduct credits:", deductError, deductResult)
+      deductResult = deductData
+      if (deductError) {
+        console.error("Failed to deduct credits via RPC:", deductError)
+        // Fallback: direct update
+        const { data: profileUpdate } = await supabase
+          .from("profiles")
+          .update({ credits: (creditsInfo?.one_time_credits || 1) - 1 })
+          .eq("id", userId)
+          .select("credits")
+          .single()
+        if (profileUpdate) {
+          deductResult = { success: true, total_credits: profileUpdate.credits }
+        }
+      } else if (!deductResult?.success) {
+        console.error("Deduct credits returned failure:", deductResult)
+      }
     }
 
     // Log usage
@@ -168,7 +224,7 @@ export async function POST(request: NextRequest) {
       status: 200,
       headers: {
         "Content-Type": "image/png",
-        "X-Credits-Remaining": deductResult?.total_credits || "unknown",
+        "X-Credits-Remaining": deductResult?.total_credits || creditsInfo?.total_credits || "unknown",
       },
     })
   } catch (error) {
