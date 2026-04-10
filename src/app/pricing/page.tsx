@@ -161,7 +161,7 @@ export default function PricingPage() {
 
                 {!user ? (
                   <a
-                    href="/"
+                    href="/tools/background-remover"
                     className="w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
                   >
                     {t("login_to_purchase")}
@@ -251,7 +251,7 @@ export default function PricingPage() {
 
                 {!user ? (
                   <a
-                    href="/"
+                    href="/tools/background-remover"
                     className="w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
                   >
                     {t("login_to_subscribe")}
@@ -297,7 +297,7 @@ export default function PricingPage() {
             {t("free_credits_on_signup")}
           </p>
           <a
-            href="/"
+            href="/tools/background-remover"
             className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg"
           >
             {t("get_started_free")}
