@@ -204,7 +204,7 @@ export function AIEditor() {
             </span>
             <h2 className="text-4xl md:text-5xl font-bold mt-2 mb-4">{t("editor_main_title")}</h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              {t("editor_subtitle")}
+              {t("editor_ai_subtitle")}
             </p>
           </div>
 

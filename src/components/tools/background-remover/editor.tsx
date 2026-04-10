@@ -150,7 +150,7 @@ export function BackgroundRemoverEditor() {
             <span className="text-primary font-semibold text-sm uppercase tracking-wide">{t("editor_section")}</span>
             <h2 className="text-4xl md:text-5xl font-bold mt-2 mb-4">{t("editor_title")}</h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              {t("editor_subtitle")}
+              {t("editor_removebg_subtitle")}
             </p>
           </div>
 

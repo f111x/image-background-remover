@@ -90,7 +90,7 @@ export const translations = {
         // Editor
         editor_section_start: "Get Started",
         editor_main_title: "Try The AI Editor",
-        editor_subtitle: "Experience the power of nano-banana's natural language image editing. Transform any photo with simple text commands.",
+        editor_ai_subtitle: "Experience the power of nano-banana's natural language image editing. Transform any photo with simple text commands.",
         editor_prompt_engine: "Prompt Engine",
         editor_transform_desc: "Transform your image with AI-powered editing",
         editor_batch: "Batch Processing",
@@ -116,7 +116,7 @@ export const translations = {
         // Editor Section (Remove BG)
         editor_section: "Editor",
         editor_title: "AI-Powered Background Removal",
-        editor_subtitle: "Remove backgrounds from images instantly with one click",
+        editor_removebg_subtitle: "Remove backgrounds from images instantly with one click",
         upload_image: "Upload Image",
         click_or_drag: "Click or drag image to upload",
         supported_formats: "Supports JPG, PNG, WEBP",
@@ -245,7 +245,7 @@ export const translations = {
         // Editor
         editor_section_start: "开始使用",
         editor_main_title: "试用 AI 编辑器",
-        editor_subtitle: "体验 Nano-banana 自然语言图像编辑的强大功能。通过简单的文字指令转换任何照片。",
+        editor_ai_subtitle: "体验 Nano-banana 自然语言图像编辑的强大功能。通过简单的文字指令转换任何照片。",
         editor_prompt_engine: "提示引擎",
         editor_transform_desc: "使用 AI 驱动的编辑转换您的图像",
         editor_batch: "批量处理",
@@ -271,7 +271,7 @@ export const translations = {
         // Editor Section (Remove BG)
         editor_section: "编辑器",
         editor_title: "AI 驱动的背景去除",
-        editor_subtitle: "一键即时去除图片背景",
+        editor_removebg_subtitle: "一键即时去除图片背景",
         upload_image: "上传图片",
         click_or_drag: "点击或拖拽图片上传",
         supported_formats: "支持 JPG、PNG、WEBP",
