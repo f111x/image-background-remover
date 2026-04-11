@@ -7,6 +7,12 @@ export async function GET(request: NextRequest) {
   const error = requestUrl.searchParams.get("error")
   const next = requestUrl.searchParams.get("next") || "/"
 
+  // 校验 next 参数，防止开放重定向
+  if (next && !next.startsWith("/")) {
+    console.warn("[Auth Callback] Invalid next param, defaulting to /")
+  }
+  const safeNext = next.startsWith("/") ? next : "/"
+
   if (error) {
     console.error("[Auth Callback] OAuth error:", error)
     return NextResponse.redirect(new URL("/?auth_error=" + encodeURIComponent(error), requestUrl.origin))
@@ -21,23 +27,42 @@ export async function GET(request: NextRequest) {
 
   if (sessionError) {
     console.error("[Auth Callback] Session exchange error:", sessionError.message)
-    // Fallback: try to sign in with the code directly
-    const { error: signInError } = await supabase.auth.signInWithOAuth({
-      provider: "github",
-      options: {
-        queryParams: { code },
-        redirectTo: requestUrl.origin + next,
-      },
-    })
-    if (signInError) {
-      return NextResponse.redirect(new URL("/?auth_error=" + encodeURIComponent(sessionError.message), requestUrl.origin))
-    }
+    // 直接显示错误，不再盲目重试 OAuth
+    return NextResponse.redirect(
+      new URL("/?auth_error=" + encodeURIComponent(sessionError.message), requestUrl.origin)
+    )
   }
 
   if (data.session) {
     console.log("[Auth Callback] Session established for user:", data.session.user.email)
+
+    // 确保 profiles 表有记录（新 OAuth 用户首次登录时创建）
+    const userId = data.session.user.id
+    const userEmail = data.session.user.email || ""
+
+    try {
+      const { data: existingProfile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", userId)
+        .maybeSingle()
+
+      if (!existingProfile) {
+        console.log("[Auth Callback] Creating profile for new user:", userId)
+        await supabase.from("profiles").insert({
+          id: userId,
+          email: userEmail,
+          credits: 2, // 新用户初始积分
+          total_credits: 0,
+        })
+        console.log("[Auth Callback] Profile created successfully")
+      }
+    } catch (e) {
+      // profile 创建失败不影响登录流程
+      console.error("[Auth Callback] Profile creation error (non-fatal):", e)
+    }
   }
 
-  // Redirect to the next page
-  return NextResponse.redirect(new URL(next, requestUrl.origin))
+  // 重定向到目标页面
+  return NextResponse.redirect(new URL(safeNext, requestUrl.origin))
 }

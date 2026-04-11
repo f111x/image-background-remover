@@ -22,8 +22,8 @@ export default function ImageUploader() {
       setError('Please upload a JPG, PNG, or WEBP image')
       return
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setError('File size must be less than 5MB')
+    if (file.size > 10 * 1024 * 1024) {
+      setError('File size must be less than 10MB')
       return
     }
     setFile(file)
@@ -123,7 +123,7 @@ export default function ImageUploader() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
             </svg>
             <p className="text-lg">Drag and drop an image here, or click to select</p>
-            <p className="text-sm mt-2">Supports JPG, PNG, WEBP • Max 5MB</p>
+            <p className="text-sm mt-2">Supports JPG, PNG, WEBP • Max 10MB</p>
           </div>
         </div>
       )}
