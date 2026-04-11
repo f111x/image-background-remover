@@ -16,6 +16,7 @@ export function Header() {
   const [showSignIn, setShowSignIn] = useState(false)
   const [credits, setCredits] = useState<number | null>(null)
   const [showLangMenu, setShowLangMenu] = useState(false)
+  const [showToolsMenu, setShowToolsMenu] = useState(false)
   const { language, setLanguage, t } = useLanguage()
   const supabase = createClient()
 
@@ -60,6 +61,12 @@ export function Header() {
     },
   ]
 
+  const toolsMenuItems = [
+    { href: "/tools", label: t("nav_tools") || "All Tools", icon: null },
+    { href: "/tools/background-remover", label: t("nav_remove_bg") || "Remove Background", icon: Scissors },
+    { href: "/tools/ai-editor", label: t("nav_ai_editor") || "AI Editor", icon: Wand2 },
+  ]
+
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -86,6 +93,36 @@ export function Header() {
                   <span>{link.label}</span>
                 </Link>
               ))}
+              {/* Tools Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowToolsMenu(!showToolsMenu)}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition text-muted-foreground hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800"
+                >
+                  <span>Tools</span>
+                  <svg className={`w-3 h-3 transition-transform ${showToolsMenu ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                </button>
+                {showToolsMenu && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setShowToolsMenu(false)} />
+                    <div className="absolute left-0 top-full mt-1 py-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-20 min-w-[180px]">
+                      {toolsMenuItems.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setShowToolsMenu(false)}
+                          className={`flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                            item.href === "/" ? "text-muted-foreground border-b border-gray-100 dark:border-gray-700" : "text-gray-700 dark:text-gray-200"
+                          }`}
+                        >
+                          {item.icon && <item.icon className="w-4 h-4 text-muted-foreground" />}
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
             </nav>
 
             <nav className="flex items-center gap-4">
