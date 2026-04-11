@@ -89,8 +89,8 @@ export default function PricingPage() {
   const [purchasing, setPurchasing] = useState<string | null>(null)
 
   const handlePurchaseSuccess = (credits: number, packageName: string) => {
-    alert(t("purchase_success").replace("{credits}", credits.toString()))
     setPurchasing(null)
+    window.location.href = "/profile?purchase=success&credits=" + credits
   }
 
   return (

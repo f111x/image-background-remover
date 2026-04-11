@@ -41,8 +41,19 @@ export default function ProfilePage() {
   const [usage, setUsage] = useState<UsageRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<"usage" | "purchases">("usage")
+  const [purchaseSuccess, setPurchaseSuccess] = useState<string | null>(null)
   const { t } = useLanguage()
   const supabase = createClient()
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get("purchase") === "success") {
+      const credits = params.get("credits")
+      setPurchaseSuccess(credits ? `+${credits}` : null)
+      // Clean URL
+      window.history.replaceState({}, "", "/profile")
+    }
+  }, [])
 
   useEffect(() => {
     if (!user && !userLoading) {
@@ -208,6 +219,14 @@ export default function ProfilePage() {
             <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
               <p className="text-red-600 flex items-center gap-2">
                 ❌ {t("credits_empty")} <a href="/pricing" className="underline font-semibold">{t("purchase_credits")}</a>
+              </p>
+            </div>
+          )}
+
+          {purchaseSuccess && (
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
+              <p className="text-green-600 flex items-center gap-2">
+                ✅ Purchase successful! {purchaseSuccess} credits added to your account.
               </p>
             </div>
           )}

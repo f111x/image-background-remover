@@ -4,6 +4,96 @@
 -- =====================================================
 
 -- =====================================================
+-- TABLE: usage_history (if not exists)
+-- =====================================================
+CREATE TABLE IF NOT EXISTS public.usage_history (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+  credits_used INTEGER NOT NULL DEFAULT 0,
+  image_size BIGINT,
+  source TEXT DEFAULT 'one-time',
+  status TEXT NOT NULL DEFAULT 'success',
+  error_message TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.usage_history ENABLE ROW LEVEL SECURITY;
+CREATE POLICY IF NOT EXISTS "Allow all for authenticated" ON public.usage_history FOR ALL USING (true) WITH CHECK (true);
+
+-- =====================================================
+-- TABLE: purchases (if not exists)
+-- =====================================================
+CREATE TABLE IF NOT EXISTS public.purchases (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+  package_name TEXT NOT NULL,
+  credits INTEGER NOT NULL,
+  amount_paid TEXT DEFAULT '0',
+  status TEXT NOT NULL DEFAULT 'pending',
+  paypal_order_id TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.purchases ENABLE ROW LEVEL SECURITY;
+CREATE POLICY IF NOT EXISTS "Allow all for authenticated" ON public.purchases FOR ALL USING (true) WITH CHECK (true);
+
+-- =====================================================
+-- TABLE: subscriptions (if not exists)
+-- =====================================================
+CREATE TABLE IF NOT EXISTS public.subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE UNIQUE,
+  plan TEXT NOT NULL DEFAULT 'basic',
+  status TEXT NOT NULL DEFAULT 'active',
+  subscription_id TEXT UNIQUE,
+  subscription_plan TEXT,
+  subscription_status TEXT DEFAULT 'active',
+  monthly_credits INTEGER NOT NULL DEFAULT 50,
+  rollover_cap INTEGER NOT NULL DEFAULT 100,
+  next_billing TIMESTAMPTZ,
+  last_subscription_credit INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY IF NOT EXISTS "Allow all for authenticated" ON public.subscriptions FOR ALL USING (true) WITH CHECK (true);
+
+-- =====================================================
+-- PROFILES TABLE: Add missing subscription columns (if not exist)
+-- Run these as ALTER TABLE (idempotent)
+-- =====================================================
+DO $$ BEGIN
+  ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS subscription_id TEXT;
+EXCEPTION WHEN others THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS subscription_plan TEXT;
+EXCEPTION WHEN others THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS subscription_status TEXT DEFAULT 'inactive';
+EXCEPTION WHEN others THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS last_subscription_credit INTEGER DEFAULT 0;
+EXCEPTION WHEN others THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS rollover_credits INTEGER DEFAULT 0;
+EXCEPTION WHEN others THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+EXCEPTION WHEN others THEN NULL;
+END $$;
+
+-- =====================================================
 -- FUNCTION: Get total available credits
 -- =====================================================
 CREATE OR REPLACE FUNCTION public.get_total_credits(p_user_id UUID)

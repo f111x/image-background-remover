@@ -48,7 +48,7 @@ export function PayPalCheckout({ packageName, price, credits, onSuccess }: PayPa
             const verifyResponse = await fetch("/api/paypal/verify-order", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ orderID: data.orderID, credits }),
+              body: JSON.stringify({ orderID: data.orderID, credits, packageName }),
             })
             
             const verifyData = await verifyResponse.json()

@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getCurrentUser } from "@/lib/supabase/auth-helpers"
 
 export async function POST(request: NextRequest) {
   try {
     const { packageName, price, credits } = await request.json()
+
+    const user = await getCurrentUser()
+    if (!user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
 
     if (!packageName || !price || !credits) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
@@ -48,6 +54,7 @@ export async function POST(request: NextRequest) {
               currency_code: "USD",
               value: price,
             },
+            custom_id: user.id,
           },
         ],
       }),
