@@ -18,6 +18,7 @@ export function BackgroundRemoverEditor() {
   const [file, setFile] = useState<File | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [credits, setCredits] = useState<number | null>(null)
+  const [isSubscriber, setIsSubscriber] = useState(false)
   const { t } = useLanguage()
 
   useEffect(() => {
@@ -25,11 +26,15 @@ export function BackgroundRemoverEditor() {
       fetch("/api/user/credits")
         .then((res) => res.ok ? res.json() : null)
         .then((data) => {
-          if (data) setCredits(data.credits)
+          if (data) {
+            setCredits(data.credits)
+            setIsSubscriber(data.isSubscriber ?? false)
+          }
         })
         .catch(() => {})
     } else {
       setCredits(null)
+      setIsSubscriber(false)
     }
   }, [user])
 
@@ -286,6 +291,19 @@ export function BackgroundRemoverEditor() {
                   <Download className="w-5 h-5 mr-2" />
                   {t("download_result")}
                 </Button>
+              )}
+
+              {/* Watermark status */}
+              {resultImage && (
+                <div className={`mt-3 text-center text-xs px-3 py-2 rounded-lg ${
+                  !user
+                    ? "bg-yellow-500/10 text-yellow-400"
+                    : isSubscriber
+                    ? "bg-green-500/10 text-green-400"
+                    : "bg-blue-500/10 text-blue-400"
+                }`}>
+                  {t(!user ? "watermark_free" : isSubscriber ? "watermark_paid" : "watermark_logged_in")}
+                </div>
               )}
             </Card>
           </div>
