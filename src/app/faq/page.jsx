@@ -2,7 +2,7 @@
 
 import { useLanguage } from "@/lib/i18n"
 import { Layout } from "@/components/layout"
-import { Shield, ArrowRight } from "lucide-react"
+import { Shield } from "lucide-react"
 
 export default function FAQPage() {
   const { t } = useLanguage()
