@@ -6,16 +6,17 @@ const PLAN_CREDITS: Record<string, number> = {
   [process.env.PAYPAL_PLAN_PRO || "P-1E622203E00202506NHHKA5Q"]: 200, // Pro
 }
 
+const PLAN_NAMES: Record<string, string> = {
+  [process.env.PAYPAL_PLAN_BASIC || "P-8A321606Y3031753VNHHKA2A"]: "Basic",
+  [process.env.PAYPAL_PLAN_PRO || "P-1E622203E00202506NHHKA5Q"]: "Pro",
+}
+
 export async function POST(request: NextRequest) {
   try {
     const webhookEvent = await request.json()
     const eventType = webhookEvent.event_type
-    const webhookId = process.env.PAYPAL_WEBHOOK_ID
 
     console.log(`📌 PayPal Webhook: ${eventType}`)
-
-    // Verify webhook signature (in production, you should verify this)
-    // For now, we'll trust the webhook
 
     const supabase = await createClient()
 
@@ -26,70 +27,74 @@ export async function POST(request: NextRequest) {
         const planId = subscription.plan_id
         const subscriptionId = subscription.id
 
-        if (!userId || !PLAN_CREDITS[planId]) {
-          console.error("Missing userId or planId in ACTIVATED event")
+        if (!userId) {
+          console.error("Missing userId in ACTIVATED event")
           break
         }
 
-        const credits = PLAN_CREDITS[planId]
+        const monthlyCredits = PLAN_CREDITS[planId] || 50
+        const planName = PLAN_NAMES[planId] || "Basic"
 
-        // Get current profile
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("credits, is_subscriber, subscription_id, subscription_plan")
-          .eq("id", userId)
-          .single()
+        // Upsert subscription record (for deduct_credits RPC to read monthly_credits)
+        await supabase.from("subscriptions").upsert({
+          user_id: userId,
+          plan: planName,
+          status: "active",
+          subscription_id: subscriptionId,
+          subscription_plan: planId,
+          subscription_status: "active",
+          monthly_credits: monthlyCredits,
+          next_billing: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          last_subscription_credit: monthlyCredits,
+        }, {
+          onConflict: "user_id",
+        }).catch(err => console.error("subscriptions upsert error:", err))
 
-        const currentCredits = profile?.credits || 0
-
-        // Update profile with subscription info
+        // Update profile (no longer stores credits directly — only subscriptions table does)
         await supabase
           .from("profiles")
           .update({
-            credits: currentCredits + credits,
             is_subscriber: true,
-            subscription_id: subscriptionId,
-            subscription_plan: planId,
             subscription_status: "active",
-            last_subscription_credit: credits,
           })
           .eq("id", userId)
+          .catch(err => console.error("profiles update error:", err))
 
-        console.log(`✅ Subscription activated: user=${userId}, plan=${planId}, credits=${credits}`)
+        console.log(`✅ Subscription activated: user=${userId}, plan=${planName}, monthly=${monthlyCredits}`)
         break
       }
 
       case "PAYMENT.SALE.COMPLETED": {
-        // Monthly renewal - add credits
+        // Monthly renewal — add monthly_credits to subscriptions table
         const payment = webhookEvent.resource
         const subscriptionId = payment.billing_agreement_id
 
         if (!subscriptionId) break
 
-        // Find user by subscription_id
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("id, subscription_plan, credits")
+        const { data: sub } = await supabase
+          .from("subscriptions")
+          .select("id, user_id, plan, monthly_credits")
           .eq("subscription_id", subscriptionId)
           .single()
 
-        if (!profile || !PLAN_CREDITS[profile.subscription_plan]) {
-          console.error("Profile not found for subscription:", subscriptionId)
+        if (!sub) {
+          console.error("Subscription not found for:", subscriptionId)
           break
         }
 
-        const credits = PLAN_CREDITS[profile.subscription_plan]
-        const currentCredits = profile.credits || 0
+        const planCredits = PLAN_CREDITS[sub.plan] || 50
 
         await supabase
-          .from("profiles")
+          .from("subscriptions")
           .update({
-            credits: currentCredits + credits,
-            last_subscription_credit: credits,
+            monthly_credits: planCredits,
+            last_subscription_credit: planCredits,
+            next_billing: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
           })
-          .eq("id", profile.id)
+          .eq("id", sub.id)
+          .catch(err => console.error("subscriptions update error:", err))
 
-        console.log(`✅ Renewal payment completed: user=${profile.id}, credits=${credits}`)
+        console.log(`✅ Renewal payment completed: user=${sub.user_id}, monthly_credits reset to=${planCredits}`)
         break
       }
 
@@ -99,12 +104,16 @@ export async function POST(request: NextRequest) {
         const subscriptionId = subscription.id
 
         await supabase
-          .from("profiles")
-          .update({
-            is_subscriber: false,
-            subscription_status: "cancelled",
-          })
+          .from("subscriptions")
+          .update({ status: "cancelled", subscription_status: "cancelled" })
           .eq("subscription_id", subscriptionId)
+          .catch(err => console.error("subscriptions cancel error:", err))
+
+        await supabase
+          .from("profiles")
+          .update({ is_subscriber: false, subscription_status: "cancelled" })
+          .eq("subscription_id", subscriptionId)
+          .catch(err => console.error("profiles cancel error:", err))
 
         console.log(`❌ Subscription cancelled/expired: ${subscriptionId}`)
         break
@@ -115,11 +124,10 @@ export async function POST(request: NextRequest) {
         const subscriptionId = subscription.id
 
         await supabase
-          .from("profiles")
-          .update({
-            subscription_status: "suspended",
-          })
+          .from("subscriptions")
+          .update({ subscription_status: "suspended" })
           .eq("subscription_id", subscriptionId)
+          .catch(err => console.error("subscriptions suspend error:", err))
 
         console.log(`⚠️ Subscription suspended: ${subscriptionId}`)
         break

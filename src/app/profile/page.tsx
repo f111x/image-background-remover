@@ -53,6 +53,10 @@ export default function ProfilePage() {
       // Clean URL
       window.history.replaceState({}, "", "/profile")
     }
+    if (params.get("subscription") === "success") {
+      setPurchaseSuccess("订阅已激活！")
+      window.history.replaceState({}, "", "/profile")
+    }
   }, [])
 
   useEffect(() => {
