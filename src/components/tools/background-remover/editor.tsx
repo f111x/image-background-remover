@@ -94,9 +94,11 @@ export function BackgroundRemoverEditor() {
         body: formData,
       })
 
-      const data = await response.json().catch(() => ({}))
-
+      // Only read JSON on error (response.json() consumes the body stream)
+      let data: Record<string, any> = {}
       if (!response.ok) {
+        data = await response.json().catch(() => ({}))
+        
         if (data.code === "UNAUTHORIZED") {
           setShowSignIn(true)
           setIsProcessing(false)
@@ -107,7 +109,6 @@ export function BackgroundRemoverEditor() {
           setIsProcessing(false)
           return
         }
-        // Show detailed error for debugging
         const errorMsg = data.details ? `${data.error}: ${data.details}` : (data.error || t("error_processing"))
         throw new Error(errorMsg)
       }
