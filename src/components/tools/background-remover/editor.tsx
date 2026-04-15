@@ -73,9 +73,12 @@ export function BackgroundRemoverEditor() {
       return
     }
 
+    // Allow guest users to try the tool (they will see a watermark notice)
+    // For now, we show sign-in dialog for guests but still allow them to proceed
     if (!user) {
+      // Guest user - allow trial with watermark
       setShowSignIn(true)
-      return
+      // Continue processing for guests (they just won't get credits deducted)
     }
 
     setIsProcessing(true)
@@ -152,14 +155,14 @@ export function BackgroundRemoverEditor() {
       <section id="editor" className="py-20 px-4 bg-secondary/30">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
-            <span className="text-primary font-semibold text-sm uppercase tracking-wide">{t("editor_section")}</span>
-            <h2 className="text-4xl md:text-5xl font-bold mt-2 mb-4">{t("editor_title")}</h2>
+            <span className="text-primary font-semibold text-sm uppercase tracking-wide">{t("bg_editor_section")}</span>
+            <h2 className="text-4xl md:text-5xl font-bold mt-2 mb-4">{t("bg_editor_title")}</h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               {t("editor_removebg_subtitle")}
             </p>
           </div>
 
-          {/* Credits Display */}
+          {/* Credits / Guest Notice Display */}
           <div className="flex justify-center mb-6">
             {!loading && user && credits !== null ? (
               <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
@@ -171,13 +174,9 @@ export function BackgroundRemoverEditor() {
                 <span>{credits} credits available</span>
               </div>
             ) : !loading && !user ? (
-              <button
-                onClick={() => setShowSignIn(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/20 text-purple-400 text-sm font-medium hover:bg-purple-500/30 transition"
-              >
-                <LogIn className="w-4 h-4" />
-                {t("login_to_use")}
-              </button>
+              <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-purple-500/20 text-purple-300 text-sm">
+                <span>👋 Guest Mode — <button onClick={() => setShowSignIn(true)} className="underline hover:text-purple-200">{t("login")} to save your work</button></span>
+              </div>
             ) : null}
           </div>
 
@@ -223,7 +222,7 @@ export function BackgroundRemoverEditor() {
 
                 <Button
                   onClick={handleRemoveBackground}
-                  disabled={!file || isProcessing || (!user && !loading)}
+                  disabled={!file || isProcessing || loading}
                   className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold text-lg py-6 rounded-xl"
                 >
                   {isProcessing ? (
@@ -231,10 +230,10 @@ export function BackgroundRemoverEditor() {
                       <Loader2 className="w-6 h-6 mr-3 animate-spin" />
                       {t("processing")}
                     </>
-                  ) : !user && !loading ? (
+                  ) : !user ? (
                     <>
-                      <LogIn className="w-6 h-6 mr-3" />
-                      {t("login")}
+                      <Upload className="w-6 h-6 mr-3" />
+                      {t("remove_bg")} (Guest)
                     </>
                   ) : (
                     `✨ ${t("remove_bg")}`

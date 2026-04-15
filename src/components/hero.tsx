@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Upload, Zap, Globe, Gift } from "lucide-react"
+import { Upload, Zap, Globe, Gift, LogIn } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 
 export function Hero() {
@@ -35,14 +35,25 @@ export function Hero() {
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-          <Button
-            size="lg"
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 shadow-lg hover:shadow-xl transition-all duration-300"
-            onClick={handleStartEditing}
-          >
-            <Upload className="w-5 h-5 mr-2" />
-            {t("hero_button")}
-          </Button>
+          <Link href="/tools/background-remover">
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <Upload className="w-5 h-5 mr-2" />
+              {t("hero_button")}
+            </Button>
+          </Link>
+          <Link href="/login">
+            <Button
+              size="lg"
+              variant="outline"
+              className="px-8 shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <LogIn className="w-5 h-5 mr-2" />
+              {t("login")}
+            </Button>
+          </Link>
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
