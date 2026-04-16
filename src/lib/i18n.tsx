@@ -68,7 +68,7 @@ const translations = {
     // AI Editor
     editor_section_start: "Get Started",
     editor_main_title: "Try The AI Editor",
-    editor_ai_subtitle: "Experience the power of nano-banana's natural language image editing. Transform any photo with simple text commands.",
+    editor_ai_subtitle: "Experience the power of ImageTools's natural language image editing. Transform any photo with simple text commands.",
     editor_prompt_engine: "Prompt Engine",
     editor_transform_desc: "Transform your image with AI-powered editing",
     editor_batch: "Batch Processing",
@@ -338,7 +338,7 @@ const translations = {
     // AI Editor
     editor_section_start: "开始使用",
     editor_main_title: "试用 AI 编辑器",
-    editor_ai_subtitle: "体验 Nano-banana 自然语言图像编辑的强大功能。通过简单的文字指令转换任何照片。",
+    editor_ai_subtitle: "体验 ImageTools 自然语言图像编辑的强大功能。通过简单的文字指令转换任何照片。",
     editor_prompt_engine: "提示引擎",
     editor_transform_desc: "使用 AI 驱动的编辑转换您的图像",
     editor_batch: "批量处理",
