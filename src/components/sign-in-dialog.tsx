@@ -27,8 +27,15 @@ export function SignInDialog({ isOpen, onClose }: SignInDialogProps) {
     setIsLoading(true)
     setError("")
 
+    const redirectTo = `${window.location.origin}/auth/callback`
+    
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
+      options: {
+        redirectTo,
+        skipBrowserRedirect: false,
+        flowType: "implicit",
+      },
     })
 
     if (error) {

@@ -3,80 +3,93 @@ import { createClient } from "@/lib/supabase/server"
 
 export async function POST(request: NextRequest) {
   try {
-    // Get user from Supabase Auth (works for all login methods: Google, GitHub, Email)
     const supabase = await createClient()
     
+    // Allow guest users to try the tool
     const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const userId = user?.id || null
+    const userEmail = user?.email || ""
+    const isGuest = !user || !!authError
 
-    if (authError || !user) {
-      return NextResponse.json({
-        error: "Please sign in to use this feature",
-        code: "UNAUTHORIZED"
-      }, { status: 401 })
-    }
-
-    const userId = user.id
-    const userEmail = user.email || ""
-
-    // Check if user exists in Supabase profiles
     let isSubscriber = false
-    try {
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("id, is_subscriber")
-        .eq("id", userId)
-        .maybeSingle()
+    let creditsInfo: Record<string, any> | null = null
 
-      if (profileError) {
-        console.error("Profile check error:", profileError)
-      } else if (profile) {
-        isSubscriber = profile.is_subscriber || false
-      }
-
-      // If user doesn't exist in profiles, create one
-      if (!profile && !profileError) {
-        const { error: insertError } = await supabase
+    // Only check/deduct credits for logged-in users
+    if (!isGuest && userId) {
+      // Check if user exists in Supabase profiles
+      try {
+        const { data: profile, error: profileError } = await supabase
           .from("profiles")
-          .insert({
-            id: userId,
-            email: userEmail,
-            credits: 2, // New user bonus: 1 for background removal + 1 for AI editor
-            total_credits: 0,
-          })
+          .select("id, is_subscriber")
+          .eq("id", userId)
+          .maybeSingle()
 
-        if (insertError) {
-          console.error("Failed to create profile:", insertError)
-          // Don't fail the request, continue without profile
+        if (profileError) {
+          console.error("Profile check error:", profileError)
+        } else if (profile) {
+          isSubscriber = profile.is_subscriber || false
         }
+
+        // If user doesn't exist in profiles, create one
+        if (!profile) {
+          const { error: insertError } = await supabase
+            .from("profiles")
+            .insert({
+              id: userId,
+              email: userEmail,
+              credits: 2,
+              total_credits: 0,
+            })
+
+          if (insertError) {
+            console.error("Failed to create profile:", insertError)
+          }
+        }
+      } catch (e) {
+        console.error("Profile check exception:", e)
       }
-    } catch (e) {
-      console.error("Profile check exception:", e)
-      // Continue without profile check
-    }
 
-    // Check credits
-    const { data: creditsData, error: creditsError } = await supabase
-      .rpc("get_total_credits", { p_user_id: userId })
+      // Check credits
+      const { data: creditsData, error: creditsError } = await supabase
+        .rpc("get_total_credits", { p_user_id: userId })
 
-    if (creditsError) {
-      console.error("Failed to check credits:", creditsError)
-      return NextResponse.json({ 
-        error: "Failed to check credits", 
-        details: creditsError.message,
-        hint: "Check if RPC function exists and user has permission"
-      }, { status: 500 })
-    }
+      if (creditsError) {
+        console.error("Failed to check credits:", creditsError)
+        // Fallback to direct query
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("credits, rollover_credits, is_subscriber")
+          .eq("id", userId)
+          .maybeSingle()
 
-    // AI Editor costs 2 credits per generation
-    const generationCost = 2
-
-    if (!creditsData?.success || creditsData.total_credits < generationCost) {
-      return NextResponse.json({
-        error: "Insufficient credits. Please purchase more credits.",
-        code: "INSUFFICIENT_CREDITS",
-        available: creditsData?.total_credits || 0,
-        required: generationCost
-      }, { status: 402 })
+        if (profileData) {
+          const totalCredits = (profileData.credits || 0) + (profileData.rollover_credits || 0)
+          if (totalCredits < 2) {
+            return NextResponse.json({
+              error: "Insufficient credits. Please purchase more credits.",
+              code: "INSUFFICIENT_CREDITS",
+              available: totalCredits,
+              required: 2
+            }, { status: 402 })
+          }
+          creditsInfo = {
+            success: true,
+            total_credits: totalCredits,
+            is_subscriber: profileData.is_subscriber || false
+          }
+          isSubscriber = profileData.is_subscriber || false
+        }
+      } else {
+        if (!creditsData?.success || creditsData.total_credits < 2) {
+          return NextResponse.json({
+            error: "Insufficient credits. Please purchase more credits.",
+            code: "INSUFFICIENT_CREDITS",
+            available: creditsData?.total_credits || 0,
+            required: 2
+          }, { status: 402 })
+        }
+        creditsInfo = creditsData
+      }
     }
 
     // Parse request body
@@ -97,8 +110,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "AI service not configured" }, { status: 500 })
     }
 
-    // Use Stability AI through OpenRouter for image generation
-    // OpenRouter supports various image generation models
     const response = await fetch("https://openrouter.ai/api/v1/images/generate", {
       method: "POST",
       headers: {
@@ -118,14 +129,17 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
 
-      // Log failed usage
-      await supabase.from("usage_history").insert({
-        user_id: userId,
-        credits_used: generationCost,
-        source: isSubscriber ? "subscription" : "one-time",
-        status: "failed",
-        error_message: errorData.error?.message || "OpenRouter API error",
-      })
+      if (userId) {
+        try {
+          await supabase.from("usage_history").insert({
+            user_id: userId,
+            credits_used: 0,
+            source: isSubscriber ? "subscription" : "one-time",
+            status: "failed",
+            error_message: errorData.error?.message || "OpenRouter API error",
+          })
+        } catch {}
+      }
 
       return NextResponse.json({
         error: errorData.error?.message || "Failed to generate image",
@@ -136,35 +150,56 @@ export async function POST(request: NextRequest) {
     const data = await response.json()
 
     if (!data.data || !data.data[0]?.url) {
+      if (userId) {
+        try {
+          await supabase.from("usage_history").insert({
+            user_id: userId,
+            credits_used: 0,
+            source: isSubscriber ? "subscription" : "one-time",
+            status: "failed",
+            error_message: "No image URL in response",
+          })
+        } catch {}
+      }
       return NextResponse.json({ error: "No image generated" }, { status: 500 })
     }
 
     const imageUrl = data.data[0].url
 
-    // Deduct credits
-    const { data: deductResult, error: deductError } = await supabase
-      .rpc("deduct_credits", {
-        p_user_id: userId,
-        p_credits: generationCost,
-        p_source: isSubscriber ? "subscription" : "one-time"
-      })
+    // Deduct credits for logged-in users only
+    let deductResult: any = null
+    
+    if (userId && !isGuest) {
+      const { data: deductData, error: deductError } = await supabase
+        .rpc("deduct_credits", {
+          p_user_id: userId,
+          p_credits: 2,
+          p_source: isSubscriber ? "subscription" : "one-time"
+        })
 
-    if (deductError || !deductResult?.success) {
-      console.error("Failed to deduct credits:", deductError, deductResult)
+      deductResult = deductData
+      if (deductError || !deductResult?.success) {
+        console.error("Failed to deduct credits:", deductError, deductResult)
+      }
     }
 
     // Log usage
-    await supabase.from("usage_history").insert({
-      user_id: userId,
-      credits_used: generationCost,
-      source: isSubscriber ? "subscription" : "one-time",
-      status: "success",
-    })
+    if (userId) {
+      try {
+        await supabase.from("usage_history").insert({
+          user_id: userId,
+          credits_used: isGuest ? 0 : 2,
+          source: isSubscriber ? "subscription" : (isGuest ? "guest" : "one-time"),
+          status: "success",
+        })
+      } catch {}
+    }
 
     return NextResponse.json({
       success: true,
       imageUrl: imageUrl,
-      creditsRemaining: deductResult?.total_credits || "unknown",
+      creditsRemaining: deductResult?.total_credits || creditsInfo?.total_credits || (isGuest ? "guest" : "unknown"),
+      isGuest: isGuest,
     })
 
   } catch (error) {

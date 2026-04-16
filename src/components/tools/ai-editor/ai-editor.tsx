@@ -112,9 +112,10 @@ export function AIEditor() {
       return
     }
 
+    // Allow guest users to try the tool
     if (!user) {
       setShowSignIn(true)
-      return
+      // Continue processing for guests (they just won't get credits deducted)
     }
 
     setIsGenerating(true)
@@ -133,9 +134,11 @@ export function AIEditor() {
         }),
       })
 
-      const data = await response.json().catch(() => ({}))
-
+      // Only read JSON on error (response.json() consumes the body stream)
+      let data: Record<string, any> = {}
       if (!response.ok) {
+        data = await response.json().catch(() => ({}))
+        
         if (data.code === "UNAUTHORIZED") {
           setShowSignIn(true)
           setIsGenerating(false)
@@ -208,7 +211,7 @@ export function AIEditor() {
             </p>
           </div>
 
-          {/* Credits Display */}
+          {/* Credits / Guest Notice Display */}
           <div className="flex justify-center mb-6">
             {!loading && user && credits !== null ? (
               <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
@@ -220,13 +223,9 @@ export function AIEditor() {
                 <span>{credits} credits available (2 credits/generation)</span>
               </div>
             ) : !loading && !user ? (
-              <button
-                onClick={() => setShowSignIn(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/20 text-purple-400 text-sm font-medium hover:bg-purple-500/30 transition"
-              >
-                <LogIn className="w-4 h-4" />
-                {t("login")} to use
-              </button>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/20 text-purple-300 text-sm">
+                <span>👋 Guest Mode — <button onClick={() => setShowSignIn(true)} className="underline hover:text-purple-200">{t("login")} to save your work</button></span>
+              </div>
             ) : null}
           </div>
 
@@ -333,7 +332,7 @@ export function AIEditor() {
                   {/* Generate Button */}
                   <Button
                     onClick={handleGenerate}
-                    disabled={!prompt.trim() || isGenerating || (!user && !loading) || (credits !== null && credits < 2)}
+                    disabled={!prompt.trim() || isGenerating || loading || (!user && credits !== null && credits < 2)}
                     className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold text-lg py-6 rounded-xl"
                   >
                     {isGenerating ? (
@@ -341,10 +340,10 @@ export function AIEditor() {
                         <Loader2 className="w-6 h-6 mr-3 animate-spin" />
                         {t("editor_generating")}
                       </>
-                    ) : !user && !loading ? (
+                    ) : !user ? (
                       <>
-                        <LogIn className="w-6 h-6 mr-3" />
-                        {t("login")}
+                        <Sparkles className="w-6 h-6 mr-3" />
+                        {t("editor_generate_btn")} (Guest)
                       </>
                     ) : (
                       <>
