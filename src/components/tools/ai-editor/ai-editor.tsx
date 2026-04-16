@@ -23,6 +23,7 @@ export function AIEditor() {
   const [referenceImages, setReferenceImages] = useState<string[]>([])
   const [referenceFiles, setReferenceFiles] = useState<File[]>([])
   const [prompt, setPrompt] = useState("")
+  const [selectedStyle, setSelectedStyle] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([])
   const [credits, setCredits] = useState<number | null>(null)
@@ -319,13 +320,40 @@ export function AIEditor() {
                     <label className="text-sm font-medium mb-2 block">{t("editor_main_prompt")}</label>
                     <textarea
                       value={prompt}
-                      onChange={(e) => setPrompt(e.target.value)}
+                      onChange={(e) => { setPrompt(e.target.value); setSelectedStyle(null) }}
                       placeholder={t("editor_prompt_placeholder")}
                       className="w-full h-32 px-4 py-3 rounded-lg border border-input bg-background text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                       maxLength={2000}
                     />
                     <div className="flex justify-between text-xs text-muted-foreground mt-1">
                       <span>{prompt.length}/2000</span>
+                    </div>
+                  </div>
+
+                  {/* Example Prompts */}
+                  <div>
+                    <span className="text-xs font-medium text-muted-foreground mb-2 block">Quick Examples:</span>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        { label: "🎨 Artistic", prompt: "A majestic lion portrait in classical oil painting style, golden hour lighting, renaissance masterpiece" },
+                        { label: "🌆 Urban", prompt: "Cyberpunk cityscape at night with neon lights, rainy streets reflecting colorful signs, futuristic atmosphere" },
+                        { label: "🐱 Cute", prompt: "Adorable kitten playing with colorful yarn balls in a sunny garden, soft pastel colors, kawaii style" },
+                        { label: "🏔️ Landscape", prompt: "Epic mountain landscape at sunrise, mist rolling through valleys, golden light peaks, photorealistic" },
+                        { label: "👤 Portrait", prompt: "Professional headshot portrait, studio lighting, confident smile, business casual attire, sharp details" },
+                        { label: "✨ Fantasy", prompt: "Magical forest with glowing fireflies, enchanted trees, fairy tale atmosphere, ethereal lighting, detailed" },
+                      ].map((example) => (
+                        <button
+                          key={example.label}
+                          onClick={() => { setPrompt(example.prompt); setSelectedStyle(example.label) }}
+                          className={`text-xs px-3 py-1.5 rounded-full border transition-all hover:border-purple-500/50 hover:bg-purple-500/10 ${
+                            selectedStyle === example.label 
+                              ? 'border-purple-500 bg-purple-500/20 text-purple-300' 
+                              : 'border-border bg-muted/50 text-muted-foreground'
+                          }`}
+                        >
+                          {example.label}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
