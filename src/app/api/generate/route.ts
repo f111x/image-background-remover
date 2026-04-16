@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 
 const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN
-const MODEL_VERSION = "black-forest-labs/flux-schnell:ae7d2c5b9a8c9e7d6b5c4a3f2e1d0c9b" // Latest flux schnell version
+const MODEL_NAME = "black-forest-labs/flux-schnell"
 
 async function pollPrediction(predictionUrl: string, maxAttempts = 60): Promise<any> {
   for (let i = 0; i < maxAttempts; i++) {
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        version: MODEL_VERSION,
+        version: "ae7d2c5b9a8c9e7d6b5c4a3f2e1d0c9b",
         input: {
           prompt: prompt.trim(),
           go_fast: true,
