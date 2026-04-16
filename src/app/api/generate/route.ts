@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "AI service not configured" }, { status: 500 })
     }
 
-    // Create prediction on Replicate
+    // Create prediction on Replicate (use model name, Replicate will use latest version)
     const createResponse = await fetch("https://api.replicate.com/v1/predictions", {
       method: "POST",
       headers: {
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        version: "ae7d2c5b9a8c9e7d6b5c4a3f2e1d0c9b",
+        version: "black-forest-labs/flux-schnell",
         input: {
           prompt: prompt.trim(),
           go_fast: true,
