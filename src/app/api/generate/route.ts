@@ -1,6 +1,38 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 
+const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN
+const MODEL_VERSION = "black-forest-labs/flux-schnell:ae7d2c5b9a8c9e7d6b5c4a3f2e1d0c9b" // Latest flux schnell version
+
+async function pollPrediction(predictionUrl: string, maxAttempts = 60): Promise<any> {
+  for (let i = 0; i < maxAttempts; i++) {
+    const response = await fetch(predictionUrl, {
+      headers: {
+        "Authorization": `Bearer ${REPLICATE_API_TOKEN}`,
+      },
+    })
+    
+    if (!response.ok) {
+      throw new Error(`Failed to get prediction status: ${response.statusText}`)
+    }
+    
+    const prediction = await response.json()
+    
+    if (prediction.status === "succeeded") {
+      return prediction
+    }
+    
+    if (prediction.status === "failed") {
+      throw new Error(prediction.error || "Prediction failed")
+    }
+    
+    // Wait 1 second before next poll
+    await new Promise(resolve => setTimeout(resolve, 1000))
+  }
+  
+  throw new Error("Prediction timed out")
+}
+
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
@@ -94,7 +126,7 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json()
-    const { prompt, referenceImages = [] } = body
+    const { prompt } = body
 
     if (!prompt || typeof prompt !== "string" || prompt.trim().length === 0) {
       return NextResponse.json({ error: "Prompt is required" }, { status: 400 })
@@ -104,30 +136,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Prompt too long (max 2000 characters)" }, { status: 400 })
     }
 
-    // Call OpenRouter API for image generation
-    const apiKey = process.env.OPENROUTER_API_KEY
-    if (!apiKey) {
+    // Check Replicate API token
+    if (!REPLICATE_API_TOKEN) {
       return NextResponse.json({ error: "AI service not configured" }, { status: 500 })
     }
 
-    const response = await fetch("https://openrouter.ai/api/v1/images/generate", {
+    // Create prediction on Replicate
+    const createResponse = await fetch("https://api.replicate.com/v1/predictions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${apiKey}`,
+        "Authorization": `Bearer ${REPLICATE_API_TOKEN}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "https://imagetoolss.com",
-        "X-Title": "ImageTools AI Editor",
       },
       body: JSON.stringify({
-        model: "stabilityai/stable-diffusion-xl-base-1.0",
-        prompt: prompt.trim(),
-        n: 1,
-        size: "1024x1024",
+        version: MODEL_VERSION,
+        input: {
+          prompt: prompt.trim(),
+          go_fast: true,
+          guidance_scale: 3.5,
+          num_inference_steps: 4,
+          negative_prompt: "blurry, low quality, watermark, signature",
+        },
       }),
     })
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
+    if (!createResponse.ok) {
+      const errorData = await createResponse.json().catch(() => ({}))
+      console.error("Replicate API error:", errorData)
 
       if (userId) {
         try {
@@ -136,20 +171,26 @@ export async function POST(request: NextRequest) {
             credits_used: 0,
             source: isSubscriber ? "subscription" : "one-time",
             status: "failed",
-            error_message: errorData.error?.message || "OpenRouter API error",
+            error_message: errorData.error || "Replicate API error",
           })
         } catch {}
       }
 
       return NextResponse.json({
-        error: errorData.error?.message || "Failed to generate image",
+        error: errorData.error || "Failed to start image generation",
         code: "API_ERROR"
-      }, { status: response.status })
+      }, { status: createResponse.status })
     }
 
-    const data = await response.json()
+    const prediction = await createResponse.json()
+    
+    // Poll for completion
+    let completedPrediction: any
+    try {
+      completedPrediction = await pollPrediction(prediction.urls.next)
+    } catch (pollError: any) {
+      console.error("Polling error:", pollError)
 
-    if (!data.data || !data.data[0]?.url) {
       if (userId) {
         try {
           await supabase.from("usage_history").insert({
@@ -157,14 +198,34 @@ export async function POST(request: NextRequest) {
             credits_used: 0,
             source: isSubscriber ? "subscription" : "one-time",
             status: "failed",
-            error_message: "No image URL in response",
+            error_message: pollError.message || "Polling failed",
+          })
+        } catch {}
+      }
+
+      return NextResponse.json({
+        error: pollError.message || "Image generation timed out",
+        code: "TIMEOUT"
+      }, { status: 500 })
+    }
+
+    // Get the generated image URL
+    const imageUrl = completedPrediction.output?.[0]
+    
+    if (!imageUrl) {
+      if (userId) {
+        try {
+          await supabase.from("usage_history").insert({
+            user_id: userId,
+            credits_used: 0,
+            source: isSubscriber ? "subscription" : "one-time",
+            status: "failed",
+            error_message: "No image in response",
           })
         } catch {}
       }
       return NextResponse.json({ error: "No image generated" }, { status: 500 })
     }
-
-    const imageUrl = data.data[0].url
 
     // Deduct credits for logged-in users only
     let deductResult: any = null
