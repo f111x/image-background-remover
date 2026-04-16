@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 
-const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN
+const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN || process.env.REPLICATE_API_KEY
 const MODEL_NAME = "black-forest-labs/flux-schnell"
 
 async function pollPrediction(predictionUrl: string, maxAttempts = 60): Promise<any> {
