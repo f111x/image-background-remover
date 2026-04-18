@@ -1,6 +1,6 @@
 import { Metadata } from "next"
 import Link from "next/link"
-import { Scissors, Wand2, ArrowRight, CheckCircle } from "lucide-react"
+import { Scissors, Wand2, ArrowRight, CheckCircle, Eraser } from "lucide-react"
 import { Layout } from "@/components/layout"
 
 export const metadata: Metadata = {
@@ -17,6 +17,15 @@ const tools = [
     icon: Scissors,
     status: "live" as const,
     features: ["One-click background removal", "Supports JPG, PNG, WEBP", "Up to 10MB", "High quality output"],
+  },
+  {
+    id: "watermark-remover",
+    name: "Watermark Remover",
+    description: "Remove watermarks, text, or unwanted objects from images with AI-powered inpainting.",
+    href: "/tools/watermark-remover",
+    icon: Eraser,
+    status: "live" as const,
+    features: ["Paint to remove", "AI-powered inpainting", "Supports JPG, PNG, WEBP", "Natural looking results"],
   },
   {
     id: "ai-editor",
@@ -45,7 +54,7 @@ export default function ToolsPage() {
 
         {/* Tools Grid */}
         <div className="max-w-4xl mx-auto px-6 py-12">
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {tools.map((tool) => (
               <Link
                 key={tool.id}

@@ -216,7 +216,18 @@ export const translations = {
         subscription: "Subscription",
         onetime: "One-time",
         no_purchases: "No purchase records yet",
-        view_pricing_plans: "View pricing plans"
+        view_pricing_plans: "View pricing plans",
+
+        // Watermark Remover
+        watermark_remover_title: "AI Watermark Removal",
+        watermark_remover_subtitle: "Upload your image and paint over the watermark area to remove it with AI",
+        watermark_paint_area: "Paint over the watermark or text area",
+        watermark_selected: "Red = selected for removal",
+        watermark_processing: "Removing watermark...",
+        watermark_processing_hint: "This may take a few seconds",
+        watermark_brush_size: "Brush Size",
+        watermark_btn_process: "Remove Watermark",
+        watermark_success: "Watermark removed successfully!"
     },
     zh: {
         // Header
@@ -433,7 +444,18 @@ export const translations = {
         subscription: "订阅",
         onetime: "一次性",
         no_purchases: "暂无购买记录",
-        view_pricing_plans: "查看定价方案"
+        view_pricing_plans: "查看定价方案",
+
+        // Watermark Remover
+        watermark_remover_title: "AI 去水印",
+        watermark_remover_subtitle: "上传图片，在水印区域涂抹，AI 帮你去除",
+        watermark_paint_area: "在水印或文字区域上涂抹",
+        watermark_selected: "红色 = 已选中待去除区域",
+        watermark_processing: "正在去除水印...",
+        watermark_processing_hint: "这可能需要几秒钟",
+        watermark_brush_size: "画笔大小",
+        watermark_btn_process: "去除水印",
+        watermark_success: "水印去除成功！"
     }
 }
 
