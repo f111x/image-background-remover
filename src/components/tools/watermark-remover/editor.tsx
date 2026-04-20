@@ -23,6 +23,8 @@ export function WatermarkRemoverEditor() {
   const [brushSize, setBrushSize] = useState(30)
   const [maskHistory, setMaskHistory] = useState<ImageData[]>([])
   const [brushMode, setBrushMode] = useState<"draw" | "erase">("draw")
+  // Track if image has been uploaded and canvas is ready
+  const [canvasReady, setCanvasReady] = useState(false)
   const { t } = useLanguage()
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -103,6 +105,7 @@ export function WatermarkRemoverEditor() {
         
         // Reset mask history
         setMaskHistory([])
+        setCanvasReady(true)
       }
       img.src = uploadedImage
     }
@@ -129,79 +132,74 @@ export function WatermarkRemoverEditor() {
     return { x, y }
   }, [scale])
 
+  // Simplified draw function - handles both draw and erase modes
   const draw = useCallback((e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>, isStart: boolean) => {
-    const coords = getCanvasCoords(e)
-    if (!coords) return
-    
     const canvas = canvasRef.current
     const maskCanvas = maskCanvasRef.current
     const imageCanvas = imageCanvasRef.current
-    if (!canvas || !maskCanvas || !imageCanvas) return
+    if (!canvas || !maskCanvas || !imageCanvas || !canvasReady) return
     
     const ctx = canvas.getContext("2d")
     const maskCtx = maskCanvas.getContext("2d")
-    const imageCtx = imageCanvas.getContext("2d")
-    if (!ctx || !maskCtx || !imageCtx) return
+    if (!ctx || !maskCtx) return
     
-    if (isStart) {
-      // Save state for undo
-      setMaskHistory(prev => [...prev, maskCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height)])
-      if (maskHistory.length > 20) {
-        setMaskHistory(prev => prev.slice(-20))
-      }
+    // Get canvas coordinates with proper scaling
+    const rect = canvas.getBoundingClientRect()
+    const displayWidth = rect.width
+    const displayHeight = rect.height
+    const scaleX = canvas.width / displayWidth
+    const scaleY = canvas.height / displayHeight
+    
+    let clientX: number, clientY: number
+    if ("touches" in e) {
+      clientX = e.touches[0].clientX
+      clientY = e.touches[0].clientY
+    } else {
+      clientX = e.clientX
+      clientY = e.clientY
     }
     
-    const currentScale = canvasSize.width / canvas.clientWidth
+    // Convert to canvas coordinates
+    const canvasX = (clientX - rect.left) * scaleX
+    const canvasY = (clientY - rect.top) * scaleY
     
+    // Save state for undo on start
+    if (isStart) {
+      const currentMask = maskCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height)
+      setMaskHistory(prev => {
+        const newHistory = [...prev, currentMask]
+        return newHistory.slice(-20) // Keep max 20 states
+      })
+    }
+    
+    // Draw or erase on mask
     if (brushMode === "draw") {
-      // Draw white on mask (area to remove)
       maskCtx.fillStyle = "rgba(255, 255, 255, 1)"
       maskCtx.beginPath()
-      maskCtx.arc(coords.x, coords.y, brushSize * currentScale, 0, Math.PI * 2)
+      maskCtx.arc(canvasX, canvasY, brushSize, 0, Math.PI * 2)
       maskCtx.fill()
     } else {
-      // Erase mask
-      maskCtx.clearRect(coords.x - brushSize * currentScale, coords.y - brushSize * currentScale, brushSize * currentScale * 2, brushSize * currentScale * 2)
+      maskCtx.clearRect(canvasX - brushSize, canvasY - brushSize, brushSize * 2, brushSize * 2)
     }
     
-    // Redraw main canvas: image + mask overlay
+    // Redraw main canvas: image + red mask overlay
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.drawImage(imageCanvas, 0, 0)
     
-    // Draw mask with red semi-transparent overlay for visibility
+    // Draw semi-transparent red mask overlay
     ctx.globalCompositeOperation = "source-over"
-    ctx.fillStyle = "rgba(255, 0, 0, 0.3)"
-    ctx.fillRect(0, 0, maskCanvas.width, maskCanvas.height)
-    
-    // Apply mask image data (where white = show red overlay)
     const maskData = maskCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height)
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
     
     for (let i = 0; i < maskData.data.length; i += 4) {
-      if (maskData.data[i + 3] > 0) { // If pixel is painted (not transparent)
-        // Keep the red overlay
-      } else {
-        // Remove red overlay where not painted - but we need original image
-      }
-    }
-    
-    // Simply redraw image and overlay mask in source-over mode
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    ctx.drawImage(imageCanvas, 0, 0)
-    
-    // Apply mask - use mask as clipping/inpainting indicator
-    // Draw semi-transparent red to show masked areas
-    ctx.globalCompositeOperation = "source-over"
-    const maskDataImg = maskCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height)
-    for (let i = 0; i < maskDataImg.data.length; i += 4) {
-      if (maskDataImg.data[i + 3] > 128) { // Painted area
-        imageData.data[i] = Math.min(255, imageData.data[i] + 80) // Add red tint
+      if (maskData.data[i + 3] > 128) { // Painted area - add red tint
+        imageData.data[i] = Math.min(255, imageData.data[i] + 80)
         imageData.data[i + 1] = Math.max(0, imageData.data[i + 1] - 40)
         imageData.data[i + 2] = Math.max(0, imageData.data[i + 2] - 40)
       }
     }
     ctx.putImageData(imageData, 0, 0)
-  }, [brushMode, brushSize, getCanvasCoords, canvasSize, maskHistory.length])
+  }, [brushMode, brushSize, canvasReady])
 
   const handleUndo = () => {
     const maskCanvas = maskCanvasRef.current
