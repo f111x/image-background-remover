@@ -59,7 +59,7 @@ export function Hero() {
         <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <Zap className="w-4 h-4 text-primary" />
-            <span>{t("hero_badge")}</span>
+            <span>{t("feat_fast_title")}</span>
           </div>
           <div className="flex items-center gap-2">
             <Globe className="w-4 h-4 text-primary" />

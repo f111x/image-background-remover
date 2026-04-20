@@ -299,7 +299,7 @@ const translations = {
     // Hero
     hero_badge: "AI 驱动背景消除",
     hero_title: "秒级消除图片背景",
-    hero_title2: "",
+    hero_title2: "几秒完成",
     hero_subtitle: "上传图片，即刻获得透明背景。无需注册，注册即送2积分。",
     hero_button: "开始使用",
 
