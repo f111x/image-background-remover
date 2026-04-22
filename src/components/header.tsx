@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Upload, LogIn, LogOut, Coins, UserCircle, Globe, Wand2, Scissors } from "lucide-react"
+import { Upload, LogIn, LogOut, Coins, UserCircle, Globe, Wand2, Scissors, Eraser, FileText } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
@@ -54,17 +54,31 @@ export function Header() {
       isActive: pathname === "/tools/background-remover",
     },
     {
+      href: "/tools/watermark-remover",
+      label: t("nav_watermark_remover") || "Watermark Remover",
+      icon: Eraser,
+      isActive: pathname === "/tools/watermark-remover",
+    },
+    {
       href: "/tools/ai-editor",
       label: t("nav_ai_editor") || "AI Editor",
       icon: Wand2,
       isActive: pathname === "/tools/ai-editor",
+    },
+    {
+      href: "/tools/image-to-pdf",
+      label: t("nav_image_to_pdf") || "Image to PDF",
+      icon: FileText,
+      isActive: pathname === "/tools/image-to-pdf",
     },
   ]
 
   const toolsMenuItems = [
     { href: "/tools", label: t("nav_tools") || "All Tools", icon: null },
     { href: "/tools/background-remover", label: t("nav_remove_bg") || "Remove Background", icon: Scissors },
+    { href: "/tools/watermark-remover", label: t("nav_watermark_remover") || "Watermark Remover", icon: Eraser },
     { href: "/tools/ai-editor", label: t("nav_ai_editor") || "AI Editor", icon: Wand2 },
+    { href: "/tools/image-to-pdf", label: t("nav_image_to_pdf") || "Image to PDF", icon: FileText },
   ]
 
   return (
