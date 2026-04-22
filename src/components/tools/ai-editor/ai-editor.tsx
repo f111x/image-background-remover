@@ -225,7 +225,7 @@ export function AIEditor() {
               </div>
             ) : !loading && !user ? (
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/20 text-purple-300 text-sm">
-                <span>👋 Guest Mode — <button onClick={() => setShowSignIn(true)} className="underline hover:text-purple-200">{t("login")} to save your work</button></span>
+                <span>👋 Guest Mode — No login required to try · <button onClick={() => setShowSignIn(true)} className="underline hover:text-purple-200">{t("login")} to use credits</button></span>
               </div>
             ) : null}
           </div>
