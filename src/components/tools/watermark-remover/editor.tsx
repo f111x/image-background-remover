@@ -159,9 +159,9 @@ export function WatermarkRemoverEditor() {
       clientY = e.clientY
     }
     
-    // Convert to canvas coordinates
-    const canvasX = (clientX - rect.left) * scaleX
-    const canvasY = (clientY - rect.top) * scaleY
+    // Convert to canvas coordinates (round to avoid sub-pixel alignment issues on Retina displays)
+    const canvasX = Math.round((clientX - rect.left) * scaleX)
+    const canvasY = Math.round((clientY - rect.top) * scaleY)
     
     // Save state for undo on start
     if (isStart) {
@@ -201,25 +201,43 @@ export function WatermarkRemoverEditor() {
     ctx.putImageData(imageData, 0, 0)
   }, [brushMode, brushSize, canvasReady])
 
+  // Reusable: redraw the red overlay on main canvas from current mask state
+  const redrawOverlay = useCallback(() => {
+    const canvas = canvasRef.current
+    const maskCanvas = maskCanvasRef.current
+    const imageCanvas = imageCanvasRef.current
+    if (!canvas || !maskCanvas || !imageCanvas) return
+    const ctx = canvas.getContext("2d")
+    const maskCtx = maskCanvas.getContext("2d")
+    if (!ctx || !maskCtx) return
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    ctx.drawImage(imageCanvas, 0, 0)
+    const maskData = maskCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height)
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    for (let i = 0; i < maskData.data.length; i += 4) {
+      if (maskData.data[i + 3] > 128) {
+        imageData.data[i] = Math.min(255, imageData.data[i] + 80)
+        imageData.data[i + 1] = Math.max(0, imageData.data[i + 1] - 40)
+        imageData.data[i + 2] = Math.max(0, imageData.data[i + 2] - 40)
+      }
+    }
+    ctx.putImageData(imageData, 0, 0)
+  }, [])
+
   const handleUndo = () => {
     const maskCanvas = maskCanvasRef.current
     const canvas = canvasRef.current
     const imageCanvas = imageCanvasRef.current
     if (!maskCanvas || !canvas || !imageCanvas) return
-    
+
     const maskCtx = maskCanvas.getContext("2d")
-    const ctx = canvas.getContext("2d")
-    const imageCtx = imageCanvas.getContext("2d")
-    if (!maskCtx || !ctx || !imageCtx) return
-    
+    if (!maskCtx) return
+
     if (maskHistory.length > 0) {
       const lastState = maskHistory[maskHistory.length - 1]
       maskCtx.putImageData(lastState, 0, 0)
       setMaskHistory(prev => prev.slice(0, -1))
-      
-      // Redraw main canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(imageCanvas, 0, 0)
+      redrawOverlay()
     }
   }
 
