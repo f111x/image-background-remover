@@ -25,6 +25,8 @@ export function WatermarkRemoverEditor() {
   const [brushMode, setBrushMode] = useState<"draw" | "erase">("draw")
   // Track if image has been uploaded and canvas is ready
   const [canvasReady, setCanvasReady] = useState(false)
+  // Track active touch identifier to handle multi-touch correctly
+  const [activeTouchId, setActiveTouchId] = useState<number | null>(null)
   const { t } = useLanguage()
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -50,6 +52,19 @@ export function WatermarkRemoverEditor() {
       setIsSubscriber(false)
     }
   }, [user])
+
+  // Global mouseup to catch releases outside the canvas
+  useEffect(() => {
+    if (!canvasReady) return
+    const handleGlobalMouseUp = () => { setIsDrawing(false) }
+    const handleGlobalTouchEnd = () => { setIsDrawing(false); setActiveTouchId(null) }
+    window.addEventListener("mouseup", handleGlobalMouseUp)
+    window.addEventListener("touchend", handleGlobalTouchEnd)
+    return () => {
+      window.removeEventListener("mouseup", handleGlobalMouseUp)
+      window.removeEventListener("touchend", handleGlobalTouchEnd)
+    }
+  }, [canvasReady])
 
   // Load image onto canvas when uploaded
   useEffect(() => {
@@ -494,9 +509,28 @@ export function WatermarkRemoverEditor() {
                         onMouseMove={(e) => { if (isDrawing) draw(e, false) }}
                         onMouseUp={() => setIsDrawing(false)}
                         onMouseLeave={() => setIsDrawing(false)}
-                        onTouchStart={(e) => { setIsDrawing(true); draw(e, true) }}
-                        onTouchMove={(e) => { if (isDrawing) draw(e, false) }}
-                        onTouchEnd={() => setIsDrawing(false)}
+                        onTouchStart={(e) => {
+                          const touch = e.touches[0]
+                          setActiveTouchId(touch.identifier)
+                          setIsDrawing(true)
+                          draw(e as any, true)
+                        }}
+                        onTouchMove={(e) => {
+                          const touch = Array.from(e.touches).find(t => t.identifier === activeTouchId)
+                          if (touch && isDrawing) {
+                            const mouseEvent = { clientX: touch.clientX, clientY: touch.clientY } as any
+                            draw(mouseEvent, false)
+                          }
+                        }}
+                        onTouchEnd={(e) => {
+                          Array.from(e.changedTouches).forEach(t => {
+                            if (t.identifier === activeTouchId) {
+                              setIsDrawing(false)
+                              setActiveTouchId(null)
+                            }
+                          })
+                        }}
+                        onTouchCancel={() => { setIsDrawing(false); setActiveTouchId(null) }}
                       />
                     </div>
                     

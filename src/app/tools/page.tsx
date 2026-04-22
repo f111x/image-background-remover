@@ -1,6 +1,6 @@
 import { Metadata } from "next"
 import Link from "next/link"
-import { Scissors, Wand2, ArrowRight, CheckCircle, Eraser } from "lucide-react"
+import { Scissors, Wand2, ArrowRight, CheckCircle, Eraser, FileText } from "lucide-react"
 import { Layout } from "@/components/layout"
 
 export const metadata: Metadata = {
@@ -35,6 +35,15 @@ const tools = [
     icon: Wand2,
     status: "live" as const,
     features: ["Text-based editing", "Reference image support", "Up to 9 reference images", "Creative transformations"],
+  },
+  {
+    id: "image-to-pdf",
+    name: "Image to PDF",
+    description: "Convert your images into professional PDF documents. Free to use, no credits required.",
+    href: "/tools/image-to-pdf",
+    icon: FileText,
+    status: "live" as const,
+    features: ["Free tool", "Up to 20 images", "Customizable layout", "Multiple page sizes"],
   },
 ]
 

@@ -7,7 +7,7 @@ type Language = "en" | "zh"
 interface LanguageContextType {
   language: Language
   setLanguage: (lang: Language) => void
-  t: (key: string) => string
+  t: (key: string, fallback?: string) => string
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
@@ -50,6 +50,25 @@ const translations = {
     upload_to_start: "Upload an image to get started",
     download_result: "Download Result",
     reset: "Reset",
+
+    // Image to PDF
+    pdf_section_tag: "Free Tool",
+    pdf_title: "Image to PDF",
+    pdf_subtitle: "Convert your images into professional PDF documents in seconds",
+    pdf_settings: "PDF Settings",
+    pdf_page_size: "Page Size",
+    pdf_orientation: "Orientation",
+    pdf_images_per_page: "Images per Page",
+    pdf_image_fit: "Image Fit",
+    pdf_margin: "Margin",
+    generating_pdf: "Generating PDF...",
+    generate_pdf: "Generate PDF",
+    pdf_free_note: "PDF generation is completely free — no credits, no watermark",
+    clear_all: "Clear All",
+    click_to_add_more: "Click or drag to add more images",
+    single_image_free: "Single image — free to use, no login required",
+    multi_image_ready: "Logged in",
+    multi_image_login_required: "Login to merge multiple images into one PDF",
 
     // Features
     features_title: "Why Choose ImageTools?",
@@ -321,6 +340,25 @@ const translations = {
     download_result: "下载结果",
     reset: "重置",
 
+    // Image to PDF
+    pdf_section_tag: "免费工具",
+    pdf_title: "图片转 PDF",
+    pdf_subtitle: "将图片转换为专业 PDF 文档，秒级完成",
+    pdf_settings: "PDF 设置",
+    pdf_page_size: "纸张尺寸",
+    pdf_orientation: "页面方向",
+    pdf_images_per_page: "每页图片数",
+    pdf_image_fit: "图片填充",
+    pdf_margin: "页边距",
+    generating_pdf: "正在生成 PDF...",
+    generate_pdf: "生成 PDF",
+    pdf_free_note: "PDF 生成完全免费 — 无需积分，无水印",
+    clear_all: "清空全部",
+    click_to_add_more: "点击或拖拽添加更多图片",
+    single_image_free: "单图免费使用，无需登录",
+    multi_image_ready: "已登录",
+    multi_image_login_required: "登录后可将多张图片合并为 PDF",
+
     // Features
     features_title: "为什么选择 ImageTools？",
     features_subtitle: "专业背景消除所需的一切功能",
@@ -575,10 +613,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("language", lang)
   }
 
-  const t = (key: string): string => {
+  const t = (key: string, fallback?: string): string => {
     // Always use 'en' as default during SSR to avoid hydration mismatch
     const lang = !mounted ? "en" : language
-    return translations[lang][key as keyof typeof translations.en] || translations.en[key as keyof typeof translations.en] || key
+    const dict = translations[lang] as Record<string, string>
+    return dict[key] || translations.en[key as keyof typeof translations.en] || fallback || key
   }
 
   return (
