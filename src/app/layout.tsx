@@ -5,12 +5,13 @@ import { PayPalProvider } from "@/components/paypal/PayPalProvider"
 import { Analytics } from "@vercel/analytics/next"
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://imagetoolss.com"),
   title: {
-    default: "ImageTools - Remove Image Background",
+    default: "ImageTools - Free AI Image Tools Online",
     template: "%s | ImageTools",
   },
-  description: "AI-powered background removal. Upload your image and get a transparent background in seconds. Start with 2 free credits.",
-  keywords: ["background removal", "AI", "image editing", "transparent background", "remove background"],
+  description: "Free online AI image tools to remove backgrounds, remove watermarks, edit images with AI, and convert images to PDF in seconds.",
+  keywords: ["AI image tools", "background remover", "watermark remover", "AI image editor", "image to PDF", "JPG to PDF"],
   authors: [{ name: "ImageTools" }],
   creator: "ImageTools",
   openGraph: {
@@ -18,13 +19,13 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://imagetoolss.com",
     siteName: "ImageTools",
-    title: "ImageTools - Remove Image Background",
-    description: "AI-powered background removal. Upload your image and get a transparent background in seconds.",
+    title: "ImageTools - Free AI Image Tools Online",
+    description: "Remove backgrounds, clean up images, edit photos with AI, and convert images to PDF online.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "ImageTools - Remove Image Background",
-    description: "AI-powered background removal. Upload your image and get a transparent background in seconds.",
+    title: "ImageTools - Free AI Image Tools Online",
+    description: "Remove backgrounds, clean up images, edit photos with AI, and convert images to PDF online.",
   },
   robots: {
     index: true,

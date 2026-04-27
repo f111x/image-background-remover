@@ -10,42 +10,42 @@ import { useSupabaseUser } from "@/hooks/use-supabase-user"
 
 const creditPackages = [
   {
-    name: "Trial",
+    name: "Starter",
     price: "1",
     credits: 10,
     features: [
       "10 one-time credits",
-      "Standard quality",
-      "High quality output",
-      "No watermark on request",
+      "Try background removal and AI cleanup",
+      "No subscription required",
+      "Good for first-time users",
       "Email support",
     ],
     popular: false,
   },
   {
-    name: "Starter",
+    name: "Value",
     price: "5",
-    credits: 50,
+    credits: 60,
     features: [
-      "50 one-time credits",
-      "High quality output",
-      "No watermark",
-      "Priority email support",
+      "60 one-time credits",
+      "Best for occasional image editing",
+      "Background remover, watermark remover, AI editor",
+      "No watermark for logged-in processing",
       "Credits never expire",
     ],
     popular: true,
   },
   {
-    name: "Value",
-    price: "15",
-    credits: 200,
+    name: "Pro Credits",
+    price: "10",
+    credits: 150,
     features: [
-      "200 one-time credits",
-      "Highest quality output",
-      "No watermark",
+      "150 one-time credits",
+      "Lower cost per image",
+      "Great for ecommerce product photos",
       "Priority support",
       "Credits never expire",
-      "Bulk discount",
+      "Bulk workflow friendly",
     ],
     popular: false,
   },
@@ -55,13 +55,13 @@ const monthlyPlans = [
   {
     name: "Basic",
     price: "5",
-    credits: 50,
+    credits: 75,
     features: [
-      "50 credits/month",
+      "75 credits/month",
       "Credits refresh monthly",
       "Unused credits roll over",
-      "Up to 100 rollover cap",
-      "High quality output",
+      "High quality downloads",
+      "No watermark for logged-in processing",
       "Email support",
     ],
     popular: false,
@@ -69,15 +69,15 @@ const monthlyPlans = [
   {
     name: "Pro",
     price: "15",
-    credits: 200,
+    credits: 300,
     features: [
-      "200 credits/month",
+      "300 credits/month",
       "Credits refresh monthly",
       "Unused credits roll over",
-      "Up to 400 rollover cap",
-      "Highest quality output",
-      "Priority support",
+      "Priority processing",
+      "Highest quality downloads",
       "No watermark",
+      "Best for ecommerce sellers and creators",
     ],
     popular: true,
   },
@@ -161,7 +161,7 @@ export default function PricingPage() {
 
                 {!user ? (
                   <a
-                    href="/tools/background-remover"
+                    href="/login"
                     className="w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
                   >
                     {t("login_to_purchase")}
@@ -251,7 +251,7 @@ export default function PricingPage() {
 
                 {!user ? (
                   <a
-                    href="/tools/background-remover"
+                    href="/login"
                     className="w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
                   >
                     {t("login_to_subscribe")}
@@ -297,7 +297,7 @@ export default function PricingPage() {
             {t("free_credits_on_signup")}
           </p>
           <a
-            href="/tools/background-remover"
+            href="/login"
             className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg"
           >
             {t("get_started_free")}

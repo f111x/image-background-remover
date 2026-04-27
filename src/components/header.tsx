@@ -49,7 +49,7 @@ export function Header() {
   const navLinks = [
     {
       href: "/tools/background-remover",
-      label: t("nav_remove_bg") || "Remove Background",
+      label: t("nav_remove_bg", "Remove Background"),
       icon: Scissors,
       isActive: pathname === "/tools/background-remover",
     },
@@ -61,7 +61,7 @@ export function Header() {
     },
     {
       href: "/tools/ai-editor",
-      label: t("nav_ai_editor") || "AI Editor",
+      label: t("nav_ai_editor", "AI Editor"),
       icon: Wand2,
       isActive: pathname === "/tools/ai-editor",
     },
@@ -75,9 +75,9 @@ export function Header() {
 
   const toolsMenuItems = [
     { href: "/tools", label: t("nav_tools") || "All Tools", icon: null },
-    { href: "/tools/background-remover", label: t("nav_remove_bg") || "Remove Background", icon: Scissors },
+    { href: "/tools/background-remover", label: t("nav_remove_bg", "Remove Background"), icon: Scissors },
     { href: "/tools/watermark-remover", label: t("nav_watermark_remover") || "Watermark Remover", icon: Eraser },
-    { href: "/tools/ai-editor", label: t("nav_ai_editor") || "AI Editor", icon: Wand2 },
+    { href: "/tools/ai-editor", label: t("nav_ai_editor", "AI Editor"), icon: Wand2 },
     { href: "/tools/image-to-pdf", label: t("nav_image_to_pdf") || "Image to PDF", icon: FileText },
   ]
 

@@ -596,7 +596,7 @@ const translations = {
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>("zh")
+  const [language, setLanguageState] = useState<Language>("en")
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -635,9 +635,9 @@ export function useLanguage() {
   const context = useContext(LanguageContext)
   if (!context) {
     return {
-      language: "zh" as Language,
+      language: "en" as Language,
       setLanguage: () => {},
-      t: (key: string) => translations.zh[key as keyof typeof translations.zh] || translations.en[key as keyof typeof translations.en] || key,
+      t: (key: string) => translations.en[key as keyof typeof translations.en] || key,
     }
   }
   return context

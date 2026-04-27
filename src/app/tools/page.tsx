@@ -4,8 +4,9 @@ import { Scissors, Wand2, ArrowRight, CheckCircle, Eraser, FileText } from "luci
 import { Layout } from "@/components/layout"
 
 export const metadata: Metadata = {
-  title: "Tools",
-  description: "Browse all AI-powered image tools available on ImageTools.",
+  title: "Free Online Image Tools",
+  description: "Explore free online image tools including background remover, watermark remover, AI image editor, and image to PDF converter.",
+  alternates: { canonical: "/tools" },
 }
 
 const tools = [
@@ -54,9 +55,9 @@ export default function ToolsPage() {
         {/* Hero */}
         <div className="bg-white border-b border-gray-200">
           <div className="max-w-4xl mx-auto px-6 py-16 text-center">
-            <h1 className="text-4xl font-bold mb-4">AI Image Tools</h1>
+            <h1 className="text-4xl font-bold mb-4">Free Online Image Tools</h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Powerful AI-powered image editing tools. Upload your image and get professional results in seconds.
+              Remove backgrounds, clean up images, edit photos with AI, and convert images to PDF with fast browser-based tools.
             </p>
           </div>
         </div>

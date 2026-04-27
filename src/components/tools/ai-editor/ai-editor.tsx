@@ -206,7 +206,7 @@ export function AIEditor() {
               <Sparkles className="w-4 h-4" />
               {t("editor_section_start")}
             </span>
-            <h2 className="text-4xl md:text-5xl font-bold mt-2 mb-4">{t("editor_main_title")}</h2>
+            <h1 className="text-4xl md:text-5xl font-bold mt-2 mb-4">{t("editor_main_title")}</h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               {t("editor_ai_subtitle")}
             </p>

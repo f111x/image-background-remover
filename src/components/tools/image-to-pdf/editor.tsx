@@ -178,9 +178,9 @@ export function ImageToPDFEditor() {
               <FileText className="w-4 h-4" />
               {t("pdf_section_tag", "Free Tool")}
             </span>
-            <h2 className="text-4xl md:text-5xl font-bold mt-2 mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold mt-2 mb-4">
               {t("pdf_title", "Image to PDF")}
-            </h2>
+            </h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               {t("pdf_subtitle", "Convert your images into professional PDF documents in seconds")}
             </p>

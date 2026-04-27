@@ -17,7 +17,7 @@ export function Footer() {
               <span className="font-bold text-lg">ImageTools</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              {t("footer_desc")}
+              Free online AI image tools for background removal, watermark cleanup, AI image editing, and image to PDF conversion.
             </p>
           </div>
 

@@ -8,6 +8,7 @@ import { Upload, ImageIcon, Download, Loader2, Coins, LogIn } from "lucide-react
 import { SignInDialog } from "./sign-in-dialog"
 import { useLanguage } from "@/lib/i18n"
 import { useSupabaseUser } from "@/hooks/use-supabase-user"
+import { track } from "@vercel/analytics"
 
 export function BackgroundRemoverEditor() {
   const { user, loading } = useSupabaseUser()
@@ -53,6 +54,7 @@ export function BackgroundRemoverEditor() {
     }
 
     setError(null)
+    track("background_remover_upload", { type: selectedFile.type, size: selectedFile.size })
     setFile(selectedFile)
     setResultImage(null)
 
@@ -82,6 +84,7 @@ export function BackgroundRemoverEditor() {
     }
 
     setIsProcessing(true)
+    track("background_remover_generate")
     setError(null)
     setResultImage(null)
 
@@ -116,6 +119,7 @@ export function BackgroundRemoverEditor() {
       const blob = await response.blob()
       const resultUrl = URL.createObjectURL(blob)
       setResultImage(resultUrl)
+      track("background_remover_success")
       
       const creditsRemaining = response.headers.get("X-Credits-Remaining")
       if (creditsRemaining) {
@@ -136,6 +140,7 @@ export function BackgroundRemoverEditor() {
 
   const handleDownload = () => {
     if (!resultImage) return
+    track("background_remover_download")
     const link = document.createElement("a")
     link.href = resultImage
     link.download = `background-removed-${Date.now()}.png`
@@ -157,7 +162,7 @@ export function BackgroundRemoverEditor() {
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
             <span className="text-primary font-semibold text-sm uppercase tracking-wide">{t("bg_editor_section")}</span>
-            <h2 className="text-4xl md:text-5xl font-bold mt-2 mb-4">{t("bg_editor_title")}</h2>
+            <h1 className="text-4xl md:text-5xl font-bold mt-2 mb-4">{t("bg_editor_title")}</h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               {t("editor_removebg_subtitle")}
             </p>

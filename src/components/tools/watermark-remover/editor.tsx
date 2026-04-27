@@ -431,7 +431,7 @@ export function WatermarkRemoverEditor() {
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
             <span className="text-primary font-semibold text-sm uppercase tracking-wide">Watermark Remover</span>
-            <h2 className="text-4xl md:text-5xl font-bold mt-2 mb-4">AI Watermark Removal</h2>
+            <h1 className="text-4xl md:text-5xl font-bold mt-2 mb-4">AI Watermark Removal</h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               Upload your image and paint over the watermark area to remove it with AI
             </p>
