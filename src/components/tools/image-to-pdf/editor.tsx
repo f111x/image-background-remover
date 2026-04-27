@@ -26,26 +26,26 @@ const PAGE_SIZES: { value: PageSize; label: string }[] = [
 ]
 
 const ORIENTATIONS: { value: Orientation; label: string }[] = [
-  { value: "portrait", label: "纵向" },
-  { value: "landscape", label: "横向" },
+  { value: "portrait", label: "Portrait" },
+  { value: "landscape", label: "Landscape" },
 ]
 
 const IMAGES_PER_PAGE_OPTIONS: { value: ImagesPerPage; label: string }[] = [
-  { value: 1, label: "1 张/页" },
-  { value: 2, label: "2 张/页" },
-  { value: 4, label: "4 张/页 (2×2)" },
-  { value: 6, label: "6 张/页 (2×3)" },
-  { value: 9, label: "9 张/页 (3×3)" },
+  { value: 1, label: "1 image / page" },
+  { value: 2, label: "2 images / page" },
+  { value: 4, label: "4 images / page (2×2)" },
+  { value: 6, label: "6 images / page (2×3)" },
+  { value: 9, label: "9 images / page (3×3)" },
 ]
 
 const IMAGE_FIT_OPTIONS: { value: ImageFit; label: string }[] = [
-  { value: "fit", label: "适应 (完整显示)" },
-  { value: "fill", label: "填充 (裁切填满)" },
-  { value: "center", label: "居中 (保留白边)" },
+  { value: "fit", label: "Fit (show full image)" },
+  { value: "fill", label: "Fill (crop to cover)" },
+  { value: "center", label: "Center (keep margins)" },
 ]
 
 const MARGIN_OPTIONS: { value: PageMargin; label: string }[] = [
-  { value: 0, label: "无" },
+  { value: 0, label: "None" },
   { value: 5, label: "5mm" },
   { value: 10, label: "10mm" },
   { value: 15, label: "15mm" },
@@ -79,7 +79,7 @@ export function ImageToPDFEditor() {
 
     const remaining = MAX_FILES - images.length
     if (remaining <= 0) {
-      setError(`最多只能上传 ${MAX_FILES} 张图片`)
+      setError(`You can upload up to ${MAX_FILES} images`)
       return
     }
 
@@ -88,11 +88,11 @@ export function ImageToPDFEditor() {
 
     const validFiles = toAdd.filter(f => {
       if (!validTypes.includes(f.type)) {
-        setError(`不支持的格式: ${f.name}，请使用 JPG/PNG/WEBP/GIF`)
+        setError(`Unsupported format: ${f.name}. Please use JPG, PNG, WEBP, or GIF`)
         return false
       }
       if (f.size > 10 * 1024 * 1024) {
-        setError(`文件过大: ${f.name}，最大 10MB`)
+        setError(`File too large: ${f.name}. Maximum size is 10MB`)
         return false
       }
       return true
@@ -122,7 +122,7 @@ export function ImageToPDFEditor() {
 
   const handleGenerate = async () => {
     if (images.length === 0) {
-      setError("请先上传至少一张图片")
+      setError("Please upload at least one image first")
       return
     }
 
@@ -145,7 +145,7 @@ export function ImageToPDFEditor() {
       })
       downloadPDF(blob, `imagetools-${Date.now()}.pdf`)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "生成 PDF 失败，请重试")
+      setError(err instanceof Error ? err.message : "PDF generation failed. Please try again")
     } finally {
       setIsGenerating(false)
     }
@@ -190,7 +190,7 @@ export function ImageToPDFEditor() {
           {isGuestWithMultiple && (
             <div className="bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-center py-3 px-4 rounded-lg mb-6 max-w-xl mx-auto flex items-center justify-center gap-2">
               <Lock className="w-4 h-4" />
-              <span>多图合并 PDF 需要登录 · <button onClick={() => setShowSignIn(true)} className="underline hover:text-yellow-300">{t("login")}</button></span>
+              <span>Sign in to merge multiple images into one PDF · <button onClick={() => setShowSignIn(true)} className="underline hover:text-yellow-300">{t("login")}</button></span>
             </div>
           )}
 
@@ -207,10 +207,10 @@ export function ImageToPDFEditor() {
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Upload className="w-5 h-5 text-primary" />
                 </div>
-                <h3 className="font-bold text-lg">{t("upload_image", "上传图片")}</h3>
+                <h3 className="font-bold text-lg">{t("upload_image", "Upload Image")}</h3>
                 {images.length > 0 && (
                   <span className="ml-auto text-sm text-muted-foreground">
-                    {images.length} / {MAX_FILES} 张
+                    {images.length} / {MAX_FILES} images
                   </span>
                 )}
               </div>
@@ -232,8 +232,8 @@ export function ImageToPDFEditor() {
                   />
                   <label htmlFor="pdf-image-upload" className="cursor-pointer">
                     <Upload className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground mb-1">{t("click_or_drag", "点击或拖拽上传图片")}</p>
-                    <p className="text-xs text-muted-foreground">{t("supported_formats", "支持 JPG, PNG, WEBP, GIF，最大 10MB")}</p>
+                    <p className="text-sm text-muted-foreground mb-1">{t("click_or_drag", "Click to upload or drag and drop")}</p>
+                    <p className="text-xs text-muted-foreground">{t("supported_formats", "JPG, PNG, WEBP, GIF up to 10MB")}</p>
                   </label>
                 </div>
               ) : (
@@ -285,7 +285,7 @@ export function ImageToPDFEditor() {
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground mt-2 text-center">
-                        {t("click_to_add_more", "点击或拖拽添加更多图片")}
+                        {t("click_to_add_more", "Click or drag to add more images")}
                       </p>
                     </label>
                   </div>
@@ -295,7 +295,7 @@ export function ImageToPDFEditor() {
                     onClick={() => setImages([])}
                     className="w-full"
                   >
-                    {t("clear_all", "清空全部")}
+                    {t("clear_all", "Clear All")}
                   </Button>
                 </div>
               )}
@@ -306,15 +306,15 @@ export function ImageToPDFEditor() {
                   {isGuestWithMultiple ? (
                     <div className="flex items-center gap-2 text-yellow-400">
                       <Lock className="w-4 h-4" />
-                      <span>{t("multi_image_login_required", "登录后可合并多张图片为 PDF")}</span>
+                      <span>{t("multi_image_login_required", "Sign in to merge multiple images into one PDF")}</span>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 text-green-400">
                       <Check className="w-4 h-4" />
                       <span>
                         {images.length === 1
-                          ? t("single_image_free", "单图免费使用，无需登录")
-                          : t("multi_image_ready", `已登录 · ${images.length} 张图片将合并为一个 PDF`)}
+                          ? t("single_image_free", "Single image — free to use, no login required")
+                          : t("multi_image_ready", `Signed in · ${images.length} images will be merged into one PDF`)}
                       </span>
                     </div>
                   )}
@@ -328,13 +328,13 @@ export function ImageToPDFEditor() {
                 <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
                   <FileText className="w-5 h-5 text-purple-500" />
                 </div>
-                <h3 className="font-bold text-lg">{t("pdf_settings", "PDF 设置")}</h3>
+                <h3 className="font-bold text-lg">{t("pdf_settings", "PDF Settings")}</h3>
               </div>
 
               <div className="space-y-5">
                 {/* Page Size */}
                 <div>
-                  <label className="text-sm font-medium mb-2 block">{t("pdf_page_size", "纸张尺寸")}</label>
+                  <label className="text-sm font-medium mb-2 block">{t("pdf_page_size", "Page Size")}</label>
                   <div className="flex flex-wrap gap-2">
                     {PAGE_SIZES.map(opt => (
                       <button
@@ -354,7 +354,7 @@ export function ImageToPDFEditor() {
 
                 {/* Orientation */}
                 <div>
-                  <label className="text-sm font-medium mb-2 block">{t("pdf_orientation", "页面方向")}</label>
+                  <label className="text-sm font-medium mb-2 block">{t("pdf_orientation", "Orientation")}</label>
                   <div className="flex flex-wrap gap-2">
                     {ORIENTATIONS.map(opt => (
                       <button
@@ -374,7 +374,7 @@ export function ImageToPDFEditor() {
 
                 {/* Images per page */}
                 <div>
-                  <label className="text-sm font-medium mb-2 block">{t("pdf_images_per_page", "每页图片数")}</label>
+                  <label className="text-sm font-medium mb-2 block">{t("pdf_images_per_page", "Images per Page")}</label>
                   <div className="flex flex-wrap gap-2">
                     {IMAGES_PER_PAGE_OPTIONS.map(opt => (
                       <button
@@ -394,7 +394,7 @@ export function ImageToPDFEditor() {
 
                 {/* Image fit */}
                 <div>
-                  <label className="text-sm font-medium mb-2 block">{t("pdf_image_fit", "图片填充方式")}</label>
+                  <label className="text-sm font-medium mb-2 block">{t("pdf_image_fit", "Image Fit")}</label>
                   <div className="flex flex-wrap gap-2">
                     {IMAGE_FIT_OPTIONS.map(opt => (
                       <button
@@ -414,7 +414,7 @@ export function ImageToPDFEditor() {
 
                 {/* Margin */}
                 <div>
-                  <label className="text-sm font-medium mb-2 block">{t("pdf_margin", "页边距")}</label>
+                  <label className="text-sm font-medium mb-2 block">{t("pdf_margin", "Margin")}</label>
                   <div className="flex flex-wrap gap-2">
                     {MARGIN_OPTIONS.map(opt => (
                       <button
@@ -441,15 +441,15 @@ export function ImageToPDFEditor() {
                   {isGenerating ? (
                     <>
                       <Loader2 className="w-6 h-6 mr-3 animate-spin" />
-                      {t("generating_pdf", "正在生成 PDF...")}
+                      {t("generating_pdf", "Generating PDF...")}
                     </>
                   ) : (
                     <>
                       <Download className="w-6 h-6 mr-3" />
-                      {t("generate_pdf", "生成 PDF")}
+                      {t("generate_pdf", "Generate PDF")}
                       {images.length > 0 && (
                         <span className="ml-2 text-sm opacity-75">
-                          ({images.length} {images.length === 1 ? "张图" : `张图 / ${Math.ceil(images.length / imagesPerPage)} 页`})
+                          ({images.length} {images.length === 1 ? "image" : `images / ${Math.ceil(images.length / imagesPerPage)} pages`})
                         </span>
                       )}
                     </>
@@ -459,7 +459,7 @@ export function ImageToPDFEditor() {
                 {/* Free notice */}
                 {images.length > 0 && (
                   <p className="text-xs text-center text-muted-foreground">
-                    {t("pdf_free_note", "PDF 生成完全免费，无需积分 · 无水印")}
+                    {t("pdf_free_note", "PDF generation is completely free — no credits, no watermark")}
                   </p>
                 )}
               </div>

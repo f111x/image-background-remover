@@ -264,8 +264,11 @@ const translations = {
     footer_terms: "Terms",
 
     // Auth Dialog
+    signin: "Sign in",
     sign_in: "Sign In",
     choose_sign_in: "Choose how you want to sign in",
+    continue_with_google: "Continue with Google",
+    continue_with_github: "Continue with GitHub",
     signin_google: "Continue with Google",
     signin_github: "Continue with GitHub",
     signin_email: "Sign in with Email",
@@ -277,6 +280,7 @@ const translations = {
     password_placeholder: "••••••••",
     signing_in: "Signing in...",
     creating_account: "Creating account...",
+    create_account: "Create account",
     back_to_signin: "← Back to sign in options",
     enter_email_password: "Enter your email and password",
     no_account: "Don't have an account?",
