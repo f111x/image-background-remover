@@ -113,7 +113,7 @@ export function Header() {
                   onClick={() => setShowToolsMenu(!showToolsMenu)}
                   className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition text-muted-foreground hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
-                  <span>Tools</span>
+                  <span>{t("nav_tools")}</span>
                   <svg className={`w-3 h-3 transition-transform ${showToolsMenu ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                 </button>
                 {showToolsMenu && (

@@ -21,6 +21,8 @@ const translations = {
     nav_tools: "All Tools",
     nav_watermark_remover: "Watermark Remover",
     nav_image_to_pdf: "Image to PDF",
+    nav_remove_bg: "Remove Background",
+    nav_ai_editor: "AI Editor",
     login: "Login",
     watermark_free: "Free plan — watermark will be added to your image",
     watermark_logged_in: "Logged in — no watermark",
@@ -220,6 +222,8 @@ const translations = {
     best_value: "Best Value",
     login_to_purchase: "Login to Purchase",
     login_to_subscribe: "Login to Subscribe",
+    redirecting_paypal: "Redirecting to PayPal...",
+    subscribe_monthly: "Subscribe ${price}/month",
     buy_now: "Buy Now",
     free_credits_on_signup: "2 free credits when you sign up.",
 
@@ -262,6 +266,8 @@ const translations = {
     footer_legal: "Legal",
     footer_privacy: "Privacy",
     footer_terms: "Terms",
+    privacy: "Privacy Policy",
+    terms: "Terms of Service",
 
     // Auth Dialog
     signin: "Sign in",
@@ -294,7 +300,6 @@ const translations = {
     signup_subtitle: "Join ImageTools to start editing",
     already_have_account: "Already have an account?",
     terms_agreement: "By signing up, you agree to our",
-    back_to_home: "← Back to Home",
     email_confirmation_sent: "Account created! Please check your email (and spam folder) for a verification link to activate your account, then sign in with your email and password.",
 
     // Errors
@@ -305,6 +310,7 @@ const translations = {
     error_unauthorized: "Please sign in to use this feature",
     error_insufficient: "Insufficient credits. Please purchase more credits.",
     purchase_success: "Purchase successful! {credits} credits have been added to your account.",
+    subscription_success: "Subscription activated!",
   },
   zh: {
     // Header
@@ -515,6 +521,8 @@ const translations = {
     best_value: "超值",
     login_to_purchase: "登录后购买",
     login_to_subscribe: "登录后订阅",
+    redirecting_paypal: "正在跳转 PayPal...",
+    subscribe_monthly: "订阅 ${price}/月",
     buy_now: "立即购买",
     free_credits_on_signup: "注册即送 2 个免费积分。",
 
@@ -557,10 +565,15 @@ const translations = {
     footer_legal: "法律",
     footer_privacy: "隐私",
     footer_terms: "条款",
+    privacy: "隐私政策",
+    terms: "服务条款",
 
     // Auth Dialog
+    signin: "登录",
     sign_in: "登录",
     choose_sign_in: "选择登录方式",
+    continue_with_google: "使用 Google 继续",
+    continue_with_github: "使用 GitHub 继续",
     signin_google: "使用 Google 继续",
     signin_github: "使用 GitHub 继续",
     signin_email: "使用邮箱登录",
@@ -572,6 +585,7 @@ const translations = {
     password_placeholder: "••••••••",
     signing_in: "登录中...",
     creating_account: "创建账号中...",
+    create_account: "创建账号",
     back_to_signin: "← 返回登录选项",
     enter_email_password: "输入邮箱和密码",
     no_account: "还没有账号？",
@@ -585,7 +599,6 @@ const translations = {
     signup_subtitle: "加入 ImageTools 开始编辑",
     already_have_account: "已有账号？",
     terms_agreement: "注册即表示同意我们的",
-    back_to_home: "← 返回首页",
     email_confirmation_sent: "账号创建成功！请查看邮箱（包括垃圾邮件文件夹）中的验证链接来激活账号，然后使用邮箱和密码登录。",
 
     // Errors
@@ -596,6 +609,7 @@ const translations = {
     error_unauthorized: "请登录后使用此功能",
     error_insufficient: "积分不足，请购买更多积分。",
     purchase_success: "购买成功！{credits} 积分已添加到您的账户。",
+    subscription_success: "订阅已激活！",
   },
 }
 

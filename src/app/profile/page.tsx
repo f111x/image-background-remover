@@ -54,10 +54,10 @@ export default function ProfilePage() {
       window.history.replaceState({}, "", "/profile")
     }
     if (params.get("subscription") === "success") {
-      setPurchaseSuccess("订阅已激活！")
+      setPurchaseSuccess(t("subscription_success"))
       window.history.replaceState({}, "", "/profile")
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     if (!user && !userLoading) {
