@@ -1,5 +1,6 @@
 import { Metadata } from "next"
 import { FAQContent } from "./faq-content"
+import { FAQJsonLd } from "@/components/seo/faq-json-ld"
 
 export const metadata: Metadata = {
   title: "FAQ - Frequently Asked Questions | ImageTools",
@@ -11,5 +12,10 @@ export const metadata: Metadata = {
 }
 
 export default function FAQPage() {
-  return <FAQContent />
+  return (
+    <>
+      <FAQJsonLd />
+      <FAQContent />
+    </>
+  )
 }

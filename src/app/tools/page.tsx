@@ -2,6 +2,7 @@ import { Metadata } from "next"
 import Link from "next/link"
 import { Scissors, Wand2, ArrowRight, CheckCircle, Eraser, FileText } from "lucide-react"
 import { Layout } from "@/components/layout"
+import { ToolsJsonLd } from "@/components/seo/tools-json-ld"
 
 export const metadata: Metadata = {
   title: "Free Online AI Image Tools - Background Removal, Watermark Clean & More | ImageTools",
@@ -50,6 +51,7 @@ const tools = [
 export default function ToolsPage() {
   return (
     <Layout>
+      <ToolsJsonLd />
       <div className="min-h-screen bg-gray-50">
         {/* Hero */}
         <div className="bg-white border-b border-gray-200">

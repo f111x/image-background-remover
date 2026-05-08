@@ -1,5 +1,6 @@
 import { Metadata } from "next"
 import { PricingContent } from "./pricing-content"
+import { PricingJsonLd } from "@/components/seo/pricing-json-ld"
 
 export const metadata: Metadata = {
   title: "Pricing - Credit Packages & Subscription Plans | ImageTools",
@@ -12,5 +13,10 @@ export const metadata: Metadata = {
 }
 
 export default function PricingPage() {
-  return <PricingContent />
+  return (
+    <>
+      <PricingJsonLd />
+      <PricingContent />
+    </>
+  )
 }
