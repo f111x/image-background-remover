@@ -4,8 +4,8 @@ import { Scissors, Wand2, ArrowRight, CheckCircle, Eraser, FileText } from "luci
 import { Layout } from "@/components/layout"
 
 export const metadata: Metadata = {
-  title: "Tools",
-  description: "Browse all AI-powered image tools available on ImageTools.",
+  title: "Free Online AI Image Tools - Background Removal, Watermark Clean & More | ImageTools",
+  description: "Browse all free AI-powered image tools online. Remove backgrounds, clean watermarks, edit photos with text prompts, and convert images to PDF. No signup required. Start with free credits on ImageTools.",
 }
 
 const tools = [

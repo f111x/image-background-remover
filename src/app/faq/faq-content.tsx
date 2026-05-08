@@ -4,7 +4,7 @@ import { useLanguage } from "@/lib/i18n"
 import { Layout } from "@/components/layout"
 import { Shield } from "lucide-react"
 
-export default function FAQPage() {
+export function FAQContent() {
   const { t } = useLanguage()
 
   return (
