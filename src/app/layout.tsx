@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { GlobalJsonLd } from "@/components/seo/global-json-ld"
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://imagetoolss.com"),
   title: {
     default: "ImageTools - Free AI Image Tools Online",
     template: "%s | ImageTools",

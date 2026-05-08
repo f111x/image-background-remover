@@ -9,6 +9,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  trailingSlash: true,
   webpack: (config, { isServer }) => {
     // Suppress warnings about Node.js APIs in Edge Runtime for Supabase
     if (!isServer) {
