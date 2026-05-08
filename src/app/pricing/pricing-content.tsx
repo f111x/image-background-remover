@@ -1,12 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Layout } from "@/components/layout"
 import { Check, CreditCard, Zap, RefreshCw, Shield, ArrowRight } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { PayPalCheckout } from "@/components/paypal/PayPalButtons"
 import { SubscriptionPayPal } from "@/components/paypal/SubscriptionPayPal"
 import { useSupabaseUser } from "@/hooks/use-supabase-user"
+import { analytics } from "@/lib/analytics"
 
 const creditPackages = [
   {
@@ -88,8 +89,13 @@ export function PricingContent() {
   const { user } = useSupabaseUser()
   const [purchasing, setPurchasing] = useState<string | null>(null)
 
+  useEffect(() => {
+    analytics.pricing.view()
+  }, [])
+
   const handlePurchaseSuccess = (credits: number, packageName: string) => {
     setPurchasing(null)
+    analytics.pricing.purchaseSuccess({ plan: packageName, credits })
     window.location.href = "/profile?purchase=success&credits=" + credits
   }
 
@@ -183,7 +189,10 @@ export function PricingContent() {
                   </div>
                 ) : (
                   <button
-                    onClick={() => setPurchasing(pkg.name)}
+                    onClick={() => {
+                      analytics.pricing.checkoutClick({ plan: pkg.name })
+                      setPurchasing(pkg.name)
+                    }}
                     className={`w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
                       pkg.popular
                         ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"

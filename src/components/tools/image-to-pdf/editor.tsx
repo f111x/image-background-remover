@@ -8,6 +8,7 @@ import { Upload, ImageIcon, Download, Loader2, FileText, X, Lock, Check } from "
 import { SignInDialog } from "@/components/sign-in-dialog"
 import { useLanguage } from "@/lib/i18n"
 import { useSupabaseUser } from "@/hooks/use-supabase-user"
+import { analytics } from "@/lib/analytics"
 import {
   type ImageFile,
   type PageSize,
@@ -112,6 +113,7 @@ export function ImageToPDFEditor() {
       })
     ).then(newImages => {
       setImages(prev => [...prev, ...newImages])
+      analytics.imageToPdf.upload?.()
       setError(null)
     })
   }, [images.length])
@@ -134,6 +136,7 @@ export function ImageToPDFEditor() {
 
     setIsGenerating(true)
     setError(null)
+    analytics.imageToPdf.convert()
 
     try {
       const blob = await generatePDF(images, {
@@ -144,7 +147,7 @@ export function ImageToPDFEditor() {
         margin,
       })
       downloadPDF(blob, `imagetools-${Date.now()}.pdf`)
-    } catch (err) {
+      analytics.imageToPdf.success()
       setError(err instanceof Error ? err.message : "生成 PDF 失败，请重试")
     } finally {
       setIsGenerating(false)

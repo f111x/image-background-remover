@@ -8,6 +8,7 @@ import { Upload, ImageIcon, Download, Loader2, Coins, Eraser, Undo, Trash2, Zoom
 import { SignInDialog } from "@/components/sign-in-dialog"
 import { useLanguage } from "@/lib/i18n"
 import { useSupabaseUser } from "@/hooks/use-supabase-user"
+import { analytics } from "@/lib/analytics"
 
 export function WatermarkRemoverEditor() {
   const { user, loading } = useSupabaseUser()
@@ -295,6 +296,7 @@ export function WatermarkRemoverEditor() {
     const reader = new FileReader()
     reader.onloadend = () => {
       setUploadedImage(reader.result as string)
+      analytics.watermarkRemover.upload()
     }
     reader.readAsDataURL(selectedFile)
   }
@@ -393,7 +395,8 @@ export function WatermarkRemoverEditor() {
       
       if (data.success && data.imageUrl) {
         setResultImage(data.imageUrl)
-        
+        analytics.watermarkRemover.success()
+
         if (data.creditsRemaining !== "guest") {
           setCredits(data.creditsRemaining)
         }
@@ -409,6 +412,7 @@ export function WatermarkRemoverEditor() {
 
   const handleDownload = () => {
     if (!resultImage) return
+    analytics.watermarkRemover.download?.()
     const link = document.createElement("a")
     link.href = resultImage
     link.download = `watermark-removed-${Date.now()}.png`

@@ -8,6 +8,7 @@ import { Upload, ImageIcon, Download, Loader2, Coins, LogIn, X, Plus, Sparkles }
 import { SignInDialog } from "@/components/sign-in-dialog"
 import { useLanguage } from "@/lib/i18n"
 import { useSupabaseUser } from "@/hooks/use-supabase-user"
+import { analytics } from "@/lib/analytics"
 
 interface GeneratedImage {
   url: string
@@ -121,6 +122,7 @@ export function AIEditor() {
 
     setIsGenerating(true)
     setError(null)
+    analytics.aiEditor.generate()
 
     try {
       const response = await fetch("/api/generate", {
@@ -158,6 +160,7 @@ export function AIEditor() {
         { url: data.imageUrl, prompt: prompt.trim(), timestamp: Date.now() },
         ...generatedImages
       ])
+      analytics.aiEditor.success()
 
       // Update credits
       if (data.creditsRemaining) {
@@ -180,6 +183,7 @@ export function AIEditor() {
   }
 
   const handleDownload = async (imageUrl: string, filename?: string) => {
+    analytics.aiEditor.download?.()
     try {
       const response = await fetch(imageUrl)
       const blob = await response.blob()

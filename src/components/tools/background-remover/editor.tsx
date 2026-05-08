@@ -3,6 +3,7 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
+import { analytics } from "@/lib/analytics"
 import { Card } from "@/components/ui/card"
 import { Upload, ImageIcon, Download, Loader2, Coins, LogIn } from "lucide-react"
 import { SignInDialog } from "./sign-in-dialog"
@@ -59,6 +60,7 @@ export function BackgroundRemoverEditor() {
     const reader = new FileReader()
     reader.onloadend = () => {
       setUploadedImage(reader.result as string)
+      analytics.backgroundRemover.upload()
     }
     reader.readAsDataURL(selectedFile)
   }
@@ -116,6 +118,7 @@ export function BackgroundRemoverEditor() {
       const blob = await response.blob()
       const resultUrl = URL.createObjectURL(blob)
       setResultImage(resultUrl)
+      analytics.backgroundRemover.success()
       
       const creditsRemaining = response.headers.get("X-Credits-Remaining")
       if (creditsRemaining) {
@@ -136,6 +139,7 @@ export function BackgroundRemoverEditor() {
 
   const handleDownload = () => {
     if (!resultImage) return
+    analytics.backgroundRemover.download()
     const link = document.createElement("a")
     link.href = resultImage
     link.download = `background-removed-${Date.now()}.png`
