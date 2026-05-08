@@ -3,8 +3,8 @@ import { Layout } from "@/components/layout"
 import { ImageToPDFEditor } from "@/components/tools/image-to-pdf/editor"
 
 export const metadata: Metadata = {
-  title: "Image to PDF",
-  description: "Convert your images into professional PDF documents. Free to use, no credits required. Supports JPG, PNG, WEBP, GIF up to 10MB.",
+  title: "Image to PDF Converter Online Free | ImageTools",
+  description: "Convert JPG, PNG, WEBP, or GIF images into professional PDF documents online. Merge multiple images into one PDF, customize page size, and download instantly. Free to use, no signup required.",
 }
 
 export default function ImageToPDFPage() {
