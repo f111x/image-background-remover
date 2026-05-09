@@ -434,10 +434,10 @@ export function WatermarkRemoverEditor() {
       <section id="editor" className="py-20 px-4 bg-secondary/30">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
-            <span className="text-primary font-semibold text-sm uppercase tracking-wide">Watermark Remover</span>
-            <h2 className="text-4xl md:text-5xl font-bold mt-2 mb-4">AI Watermark Removal</h2>
+            <span className="text-primary font-semibold text-sm uppercase tracking-wide">{t("watermark_section_tag", "Watermark Remover")}</span>
+            <h2 className="text-4xl md:text-5xl font-bold mt-2 mb-4">{t("watermark_remover_title")}</h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Upload your image and paint over the watermark area to remove it with AI
+              {t("watermark_remover_subtitle")}
             </p>
           </div>
 
@@ -582,7 +582,7 @@ export function WatermarkRemoverEditor() {
                     </div>
                     
                     <p className="text-xs text-muted-foreground mt-2">
-                      🎨 Paint over the watermark or text area (red = selected for removal)
+                      {t("watermark_paint_area", "Paint over the watermark or text area")} ({t("watermark_selected", "red = selected for removal")})
                     </p>
                   </div>
                 )}
@@ -608,8 +608,8 @@ export function WatermarkRemoverEditor() {
                 {isProcessing ? (
                   <div className="text-center">
                     <Loader2 className="w-16 h-16 mx-auto mb-4 text-primary animate-spin" />
-                    <p className="text-sm text-muted-foreground font-medium">Removing watermark...</p>
-                    <p className="text-xs text-muted-foreground mt-1">This may take a few seconds</p>
+                    <p className="text-sm text-muted-foreground font-medium">{t("watermark_processing", "Removing watermark...")}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t("watermark_processing_hint", "This may take a few seconds")}</p>
                   </div>
                 ) : resultImage ? (
                   <div className="w-full h-full flex flex-col">
@@ -621,7 +621,7 @@ export function WatermarkRemoverEditor() {
                   <div className="text-center p-8">
                     <ImageIcon className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
                     <p className="text-sm text-muted-foreground font-medium">{t("ready_to_process")}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Paint over watermark and click process</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t("watermark_paint_area_hint", "Paint over watermark and click process")}</p>
                   </div>
                 ) : (
                   <div className="text-center">

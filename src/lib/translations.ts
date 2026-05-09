@@ -227,6 +227,7 @@ export const translations = {
         // Watermark Remover
         watermark_remover_title: "AI Watermark Removal",
         watermark_remover_subtitle: "Upload your image and paint over the watermark area to remove it with AI",
+        watermark_section_tag: "Watermark Remover",
         watermark_paint_area: "Paint over the watermark or text area",
         watermark_selected: "Red = selected for removal",
         watermark_processing: "Removing watermark...",
@@ -461,6 +462,7 @@ export const translations = {
         // Watermark Remover
         watermark_remover_title: "AI 去水印",
         watermark_remover_subtitle: "上传图片，在水印区域涂抹，AI 帮你去除",
+        watermark_section_tag: "去水印工具",
         watermark_paint_area: "在水印或文字区域上涂抹",
         watermark_selected: "红色 = 已选中待去除区域",
         watermark_processing: "正在去除水印...",
