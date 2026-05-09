@@ -1,12 +1,12 @@
 import { Metadata } from "next"
 import Link from "next/link"
-import { Scissors, Wand2, ArrowRight, CheckCircle, Eraser, FileText } from "lucide-react"
+import { Scissors, Wand2, ArrowRight, CheckCircle, Eraser, FileText, Layers, Minimize2, Crop } from "lucide-react"
 import { Layout } from "@/components/layout"
 import { ToolsJsonLd } from "@/components/seo/tools-json-ld"
 
 export const metadata: Metadata = {
-  title: "Free Online AI Image Tools - Background Removal, Watermark Clean & More | ImageTools",
-  description: "Browse all free AI-powered image tools online. Remove backgrounds, clean watermarks, edit photos with text prompts, and convert images to PDF. No signup required. Start with free credits on ImageTools.",
+  title: "Free Online AI Image Tools — Background Removal, Watermark Clean & More",
+  description: "Browse all free AI-powered image tools online. Remove backgrounds, clean watermarks, edit photos with text prompts, convert images to PDF, merge, compress, and crop. No signup required.",
   alternates: { canonical: "https://imagetoolss.com/tools" },
   openGraph: {
     title: "Free AI Image Tools — Background Remover, Watermark Remover, AI Editor | ImageTools",
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Free AI Image Tools — Background Remover, Watermark Remover, AI Editor | ImageTools",
+    title: "Free AI Image Tools — ImageTools",
   },
 }
 
@@ -43,7 +43,7 @@ const tools = [
   },
   {
     id: "ai-editor",
-    name: "AI Editor",
+    name: "AI Image Editor",
     description: "Edit and transform your images using natural language prompts powered by AI.",
     href: "/tools/ai-editor",
     icon: Wand2,
@@ -58,6 +58,33 @@ const tools = [
     icon: FileText,
     status: "live" as const,
     features: ["Free tool", "Up to 20 images", "Customizable layout", "Multiple page sizes"],
+  },
+  {
+    id: "merge-images",
+    name: "Merge Images",
+    description: "Combine multiple images into one. Grid, horizontal, or vertical layouts with adjustable spacing.",
+    href: "/tools/merge-images",
+    icon: Layers,
+    status: "live" as const,
+    features: ["Merge up to 9 images", "Grid, horizontal, vertical layouts", "Adjustable spacing", "Free — no credits needed"],
+  },
+  {
+    id: "compress-image",
+    name: "Compress Image",
+    description: "Reduce image file size without losing quality. Adjust compression level from 10% to 100%.",
+    href: "/tools/compress-image",
+    icon: Minimize2,
+    status: "live" as const,
+    features: ["Quality slider 10%–100%", "JPG, PNG, WEBP output", "Real-time size preview", "Free — no watermarks"],
+  },
+  {
+    id: "crop-image",
+    name: "Crop & Split",
+    description: "Split one image into 3, 6, or 9 equal slices. Download individually or as a ZIP.",
+    href: "/tools/crop-image",
+    icon: Crop,
+    status: "live" as const,
+    features: ["Split into 3, 6, or 9 slices", "Horizontal or vertical cuts", "Download individual or ZIP", "Free — PNG output"],
   },
 ]
 
@@ -77,7 +104,7 @@ export default function ToolsPage() {
         </div>
 
         {/* Tools Grid */}
-        <div className="max-w-4xl mx-auto px-6 py-12">
+        <div className="max-w-5xl mx-auto px-6 py-12">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {tools.map((tool) => (
               <Link

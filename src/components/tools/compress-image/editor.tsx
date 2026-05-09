@@ -17,7 +17,7 @@ const MAX_QUALITY = 100
 const DEFAULT_QUALITY = 80
 
 const FORMAT_OPTIONS: { value: "image/jpeg" | "image/png" | "image/webp"; label: string }[] = [
-  { value: "image/jpeg", label: "JPG（推荐）" },
+  { value: "image/jpeg", label: "JPG (Recommended)" },
   { value: "image/png", label: "PNG" },
   { value: "image/webp", label: "WEBP" },
 ]

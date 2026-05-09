@@ -61,7 +61,7 @@ export default function WatermarkRemoverPage() {
           },
           {
             q: "Are there any restrictions on what I can remove?",
-            a: "Only remove content from images you own or have permission to edit. Do not use this tool to remove copyright watermarks,他人版权标识, or platform watermarks from images you don't own.",
+            a: "Only remove content from images you own or have permission to edit. Do not use this tool to remove copyright watermarks, third-party copyright marks, or platform watermarks from images you don't own.",
           },
           {
             q: "Is my image data secure?",

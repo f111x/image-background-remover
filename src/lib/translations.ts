@@ -194,6 +194,7 @@ export const translations = {
         terms: "Terms of Service",
         back_to_home: "Back to Home",
         hero_button: "Get Started",
+        hero_view_all: "View All Tools",
         email_confirmation_sent: "Account created! Please check your email (and spam folder) for a verification link to activate your account, then sign in with your email and password.",
 
         // Profile
@@ -427,6 +428,7 @@ export const translations = {
         terms: "服务条款",
         back_to_home: "返回首页",
         hero_button: "开始使用",
+        hero_view_all: "所有工具",
         email_confirmation_sent: "账号创建成功！请查看邮箱（包括垃圾邮件文件夹）中的验证链接来激活账号，然后使用邮箱和密码登录。",
 
         // Profile

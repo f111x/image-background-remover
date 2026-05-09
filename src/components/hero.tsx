@@ -58,7 +58,7 @@ export function Hero() {
               variant="outline"
               className="px-8 shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              View All Tools <ArrowRight className="w-4 h-4 ml-2" />
+              {t("hero_view_all") || t("nav_all_tools")} <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </Link>
         </div>
