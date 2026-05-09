@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Upload, LogIn, LogOut, Coins, UserCircle, Globe, Wand2, Scissors, Eraser, FileText } from "lucide-react"
+import { Upload, LogIn, LogOut, Coins, UserCircle, Globe, Wand2, Scissors, Eraser, FileText, Layers, Minimize2, Crop } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
@@ -47,38 +47,24 @@ export function Header() {
   }
 
   const navLinks = [
-    {
-      href: "/tools/background-remover",
-      label: t("nav_remove_bg") || "Remove Background",
-      icon: Scissors,
-      isActive: pathname === "/tools/background-remover",
-    },
-    {
-      href: "/tools/watermark-remover",
-      label: t("nav_watermark_remover") || "Watermark Remover",
-      icon: Eraser,
-      isActive: pathname === "/tools/watermark-remover",
-    },
-    {
-      href: "/tools/ai-editor",
-      label: t("nav_ai_editor") || "AI Editor",
-      icon: Wand2,
-      isActive: pathname === "/tools/ai-editor",
-    },
-    {
-      href: "/tools/image-to-pdf",
-      label: t("nav_image_to_pdf") || "Image to PDF",
-      icon: FileText,
-      isActive: pathname === "/tools/image-to-pdf",
-    },
+    { href: "/tools/background-remover", label: t("nav_remove_bg") || "Remove Background", icon: Scissors, isActive: pathname === "/tools/background-remover" },
+    { href: "/tools/watermark-remover", label: t("nav_watermark_remover") || "Watermark Remover", icon: Eraser, isActive: pathname === "/tools/watermark-remover" },
+    { href: "/tools/ai-editor", label: t("nav_ai_editor") || "AI Editor", icon: Wand2, isActive: pathname === "/tools/ai-editor" },
+    { href: "/tools/image-to-pdf", label: t("nav_image_to_pdf") || "Image to PDF", icon: FileText, isActive: pathname === "/tools/image-to-pdf" },
+    { href: "/tools/merge-images", label: t("nav_merge_images") || "Merge Images", icon: Layers, isActive: pathname === "/tools/merge-images" },
+    { href: "/tools/compress-image", label: t("nav_compress_image") || "Compress Image", icon: Minimize2, isActive: pathname === "/tools/compress-image" },
+    { href: "/tools/crop-image", label: t("nav_crop_image") || "Crop & Split", icon: Crop, isActive: pathname === "/tools/crop-image" },
   ]
 
   const toolsMenuItems = [
-    { href: "/tools", label: t("nav_tools") || "All Tools", icon: null },
+    { href: "/tools", label: t("nav_all_tools") || "All Tools", icon: null },
     { href: "/tools/background-remover", label: t("nav_remove_bg") || "Remove Background", icon: Scissors },
     { href: "/tools/watermark-remover", label: t("nav_watermark_remover") || "Watermark Remover", icon: Eraser },
     { href: "/tools/ai-editor", label: t("nav_ai_editor") || "AI Editor", icon: Wand2 },
     { href: "/tools/image-to-pdf", label: t("nav_image_to_pdf") || "Image to PDF", icon: FileText },
+    { href: "/tools/merge-images", label: t("nav_merge_images") || "Merge Images", icon: Layers },
+    { href: "/tools/compress-image", label: t("nav_compress_image") || "Compress Image", icon: Minimize2 },
+    { href: "/tools/crop-image", label: t("nav_crop_image") || "Crop & Split", icon: Crop },
   ]
 
   return (
