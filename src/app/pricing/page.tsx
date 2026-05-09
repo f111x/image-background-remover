@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://imagetoolss.com/pricing" },
   openGraph: {
     title: "Pricing — Credit Packages & Subscription Plans | ImageTools",
-    description: "",
+    description: "Affordable credit packages and monthly subscription plans. Pay only for what you use. Credits never expire. High quality output, no watermark on paid plans.",
     url: "https://imagetoolss.com/pricing",
     siteName: "ImageTools",
     locale: "en_US",

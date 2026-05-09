@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://imagetoolss.com/faq" },
   openGraph: {
     title: "Frequently Asked Questions | ImageTools",
-    description: "",
+    description: "Frequently asked questions about ImageTools. Learn how our free AI image tools work, what formats are supported, and how credits and subscriptions work.",
     url: "https://imagetoolss.com/faq",
     siteName: "ImageTools",
     locale: "en_US",

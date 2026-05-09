@@ -2,6 +2,7 @@ import { Metadata } from "next"
 import { Layout } from "@/components/layout"
 import { WatermarkRemoverEditor } from "@/components/tools/watermark-remover/editor"
 import { ToolMarketingSections } from "@/components/seo/tool-marketing-sections"
+import { ToolJsonLd } from "@/components/seo/tool-json-ld"
 
 export const metadata: Metadata = {
   title: "Remove Watermark Online Free | ImageTools",
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://imagetoolss.com/tools/watermark-remover" },
   openGraph: {
     title: "Remove Watermark Online Free | ImageTools",
-    description: "",
+    description: "Remove watermarks, text, logos, or unwanted objects from photos. AI-powered inpainting fills removed areas naturally. Free to try, supports JPG/PNG/WEBP.",
     url: "https://imagetoolss.com/tools/watermark-remover",
     siteName: "ImageTools",
     locale: "en_US",
@@ -26,6 +27,7 @@ export const metadata: Metadata = {
 export default function WatermarkRemoverPage() {
   return (
     <Layout>
+      <ToolJsonLd tool="watermark-remover" />
       <h1 className="sr-only">Remove Watermark Online Free</h1>
 
       <WatermarkRemoverEditor />

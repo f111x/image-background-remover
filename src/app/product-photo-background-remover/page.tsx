@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://imagetoolss.com/product-photo-background-remover" },
   openGraph: {
     title: "Product Photo Background Remover — E-Commerce Ready | ImageTools",
-    description: "",
+    description: "Remove backgrounds from product photos instantly. Get clean, professional cutouts perfect for e-commerce listings, catalogs, and marketing materials.",
     url: "https://imagetoolss.com/product-photo-background-remover",
     siteName: "ImageTools",
     locale: "en_US",

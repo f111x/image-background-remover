@@ -2,6 +2,7 @@ import { Metadata } from "next"
 import { Layout } from "@/components/layout"
 import { AIEditor } from "@/components/tools/ai-editor/ai-editor"
 import { ToolMarketingSections } from "@/components/seo/tool-marketing-sections"
+import { ToolJsonLd } from "@/components/seo/tool-json-ld"
 
 export const metadata: Metadata = {
   title: "AI Image Editor Online Free | ImageTools",
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://imagetoolss.com/tools/ai-editor" },
   openGraph: {
     title: "AI Image Editor — Edit Photos with Natural Language | ImageTools",
-    description: "",
+    description: "Edit photos with natural language AI prompts. Remove objects, change backgrounds, or transform images with text commands. Free AI image editor online.",
     url: "https://imagetoolss.com/tools/ai-editor",
     siteName: "ImageTools",
     locale: "en_US",
@@ -26,6 +27,7 @@ export const metadata: Metadata = {
 export default function AIEditorPage() {
   return (
     <Layout>
+      <ToolJsonLd tool="ai-editor" />
       <h1 className="sr-only">AI Image Editor Online Free</h1>
 
       <AIEditor />

@@ -2,6 +2,7 @@ import { Metadata } from "next"
 import { Layout } from "@/components/layout"
 import { ImageToPDFEditor } from "@/components/tools/image-to-pdf/editor"
 import { ToolMarketingSections } from "@/components/seo/tool-marketing-sections"
+import { ToolJsonLd } from "@/components/seo/tool-json-ld"
 
 export const metadata: Metadata = {
   title: "Image to PDF Converter Online Free | ImageTools",
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://imagetoolss.com/tools/image-to-pdf" },
   openGraph: {
     title: "Image to PDF Converter Online Free | ImageTools",
-    description: "",
+    description: "Convert JPG, PNG, WEBP, or GIF images into professional PDF documents. Merge up to 20 images, customize page size and layout. Free to use, no signup required.",
     url: "https://imagetoolss.com/tools/image-to-pdf",
     siteName: "ImageTools",
     locale: "en_US",
@@ -25,6 +26,7 @@ export const metadata: Metadata = {
 export default function ImageToPDFPage() {
   return (
     <Layout>
+      <ToolJsonLd tool="image-to-pdf" />
       <h1 className="sr-only">Image to PDF Converter Online Free</h1>
 
       <ImageToPDFEditor />

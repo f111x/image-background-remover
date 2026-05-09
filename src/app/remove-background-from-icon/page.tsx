@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://imagetoolss.com/remove-background-from-icon" },
   openGraph: {
     title: "Remove Background from Icon — Make Icons Transparent | ImageTools",
-    description: "",
+    description: "Remove background from icons instantly. Get clean transparent PNG icons perfect for apps, websites, presentations, and design projects.",
     url: "https://imagetoolss.com/remove-background-from-icon",
     siteName: "ImageTools",
     locale: "en_US",

@@ -2,6 +2,7 @@ import { Metadata } from "next"
 import { Layout } from "@/components/layout"
 import { MergeImagesEditor } from "@/components/tools/merge-images/editor"
 import { ToolMarketingSections } from "@/components/seo/tool-marketing-sections"
+import { ToolJsonLd } from "@/components/seo/tool-json-ld"
 
 export const metadata: Metadata = {
   title: "Merge Images Online Free — Combine Multiple Photos | ImageTools",
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://imagetoolss.com/tools/merge-images" },
   openGraph: {
     title: "Merge Images Online Free — Combine Photos | ImageTools",
-    description: "",
+    description: "Combine 2 to 9 images into one. Choose grid, horizontal, or vertical layout. Adjust spacing and background color. Free, no watermarks, PNG output.",
     url: "https://imagetoolss.com/tools/merge-images",
     siteName: "ImageTools",
     locale: "en_US",
@@ -26,6 +27,7 @@ export const metadata: Metadata = {
 export default function MergeImagesPage() {
   return (
     <Layout>
+      <ToolJsonLd tool="merge-images" />
       <h1 className="sr-only">Merge Images Online — Combine Multiple Photos for Free</h1>
 
       <MergeImagesEditor />

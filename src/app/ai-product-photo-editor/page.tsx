@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://imagetoolss.com/ai-product-photo-editor" },
   openGraph: {
     title: "AI Product Photo Editor — Create Studio Photos with AI | ImageTools",
-    description: "",
+    description: "Create professional studio-quality product photos with AI. Upload your product images and let AI enhance them with perfect lighting and backgrounds.",
     url: "https://imagetoolss.com/ai-product-photo-editor",
     siteName: "ImageTools",
     locale: "en_US",

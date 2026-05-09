@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://imagetoolss.com/make-image-background-white" },
   openGraph: {
     title: "Make Image Background White Online Free | ImageTools",
-    description: "",
+    description: "Make image background white online free. Replace any background with a pure white background for product photos, ID photos, and more.",
     url: "https://imagetoolss.com/make-image-background-white",
     siteName: "ImageTools",
     locale: "en_US",

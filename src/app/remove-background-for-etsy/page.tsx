@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://imagetoolss.com/remove-background-for-etsy" },
   openGraph: {
     title: "Remove Background for Etsy — Etsy Product Photo Tool | ImageTools",
-    description: "",
+    description: "Remove backgrounds from Etsy product photos instantly. Create clean, professional listings that stand out. Free to try, no signup required.",
     url: "https://imagetoolss.com/remove-background-for-etsy",
     siteName: "ImageTools",
     locale: "en_US",

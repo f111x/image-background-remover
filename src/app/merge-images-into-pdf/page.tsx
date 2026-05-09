@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://imagetoolss.com/merge-images-into-pdf" },
   openGraph: {
     title: "Merge Images into PDF — Combine & Convert | ImageTools",
-    description: "",
+    description: "Merge multiple images into a single PDF document. Combine photos, screenshots, or scanned documents into one easy-to-share PDF file.",
     url: "https://imagetoolss.com/merge-images-into-pdf",
     siteName: "ImageTools",
     locale: "en_US",

@@ -2,6 +2,7 @@ import { Metadata } from "next"
 import { Layout } from "@/components/layout"
 import { CropImageEditor } from "@/components/tools/crop-image/editor"
 import { ToolMarketingSections } from "@/components/seo/tool-marketing-sections"
+import { ToolJsonLd } from "@/components/seo/tool-json-ld"
 
 export const metadata: Metadata = {
   title: "Crop & Split Image Online Free — Divide Images into Multiple Slices | ImageTools",
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://imagetoolss.com/tools/crop-image" },
   openGraph: {
     title: "Crop & Split Image Online Free | ImageTools",
-    description: "",
+    description: "Split one image into 3, 6, or 9 equal slices. Horizontal or vertical cuts with visual preview. Download individual slices or all as a ZIP. Free, no watermarks.",
     url: "https://imagetoolss.com/tools/crop-image",
     siteName: "ImageTools",
     locale: "en_US",
@@ -26,6 +27,7 @@ export const metadata: Metadata = {
 export default function CropImagePage() {
   return (
     <Layout>
+      <ToolJsonLd tool="crop-image" />
       <h1 className="sr-only">Crop & Split Image Online — Divide Images into Multiple Equal Slices for Free</h1>
 
       <CropImageEditor />

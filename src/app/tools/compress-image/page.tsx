@@ -2,6 +2,7 @@ import { Metadata } from "next"
 import { Layout } from "@/components/layout"
 import { CompressImageEditor } from "@/components/tools/compress-image/editor"
 import { ToolMarketingSections } from "@/components/seo/tool-marketing-sections"
+import { ToolJsonLd } from "@/components/seo/tool-json-ld"
 
 export const metadata: Metadata = {
   title: "Compress Image Online Free — Reduce Image Size | ImageTools",
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://imagetoolss.com/tools/compress-image" },
   openGraph: {
     title: "Compress Image Online — Reduce File Size | ImageTools",
-    description: "",
+    description: "Reduce image file size without losing quality. Adjust compression from 10% to 100%, choose output format (JPG/PNG/WEBP), and download instantly. Free to use.",
     url: "https://imagetoolss.com/tools/compress-image",
     siteName: "ImageTools",
     locale: "en_US",
@@ -26,6 +27,7 @@ export const metadata: Metadata = {
 export default function CompressImagePage() {
   return (
     <Layout>
+      <ToolJsonLd tool="compress-image" />
       <h1 className="sr-only">Compress Image Online — Reduce Image File Size for Free</h1>
 
       <CompressImageEditor />

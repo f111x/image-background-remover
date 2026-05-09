@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://imagetoolss.com/tools" },
   openGraph: {
     title: "Free AI Image Tools — Background Remover, Watermark Remover, AI Editor | ImageTools",
-    description: "",
+    description: "Free AI image tools: background remover, watermark remover, AI editor, image to PDF, merge images, compress image, and crop/split. All free, no signup required.",
     url: "https://imagetoolss.com/tools",
     siteName: "ImageTools",
     locale: "en_US",

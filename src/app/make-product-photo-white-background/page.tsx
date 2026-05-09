@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://imagetoolss.com/make-product-photo-white-background" },
   openGraph: {
     title: "White Background Product Photos — AI-Powered | ImageTools",
-    description: "",
+    description: "Create perfect white background product photos with AI. Upload your product image and get a clean white background ready for any e-commerce platform.",
     url: "https://imagetoolss.com/make-product-photo-white-background",
     siteName: "ImageTools",
     locale: "en_US",

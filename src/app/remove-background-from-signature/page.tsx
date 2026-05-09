@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://imagetoolss.com/remove-background-from-signature" },
   openGraph: {
     title: "Remove Background from Signature — Clean Signatures | ImageTools",
-    description: "",
+    description: "Remove background from signature images. Get clean transparent signatures for digital documents, forms, and email. Works with scanned or photographed signatures.",
     url: "https://imagetoolss.com/remove-background-from-signature",
     siteName: "ImageTools",
     locale: "en_US",

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://imagetoolss.com/remove-date-stamp-from-photo" },
   openGraph: {
     title: "Remove Date Stamp from Photo — Clean Old Photos | ImageTools",
-    description: "",
+    description: "Remove date stamps and timestamps from photos. Restore old photographs by removing unwanted text and stamps. AI-powered inpainting fills areas naturally.",
     url: "https://imagetoolss.com/remove-date-stamp-from-photo",
     siteName: "ImageTools",
     locale: "en_US",

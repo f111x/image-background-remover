@@ -2,6 +2,7 @@ import { Metadata } from "next"
 import { Layout } from "@/components/layout"
 import { BackgroundRemoverEditor } from "@/components/tools/background-remover/editor"
 import { ToolMarketingSections } from "@/components/seo/tool-marketing-sections"
+import { ToolJsonLd } from "@/components/seo/tool-json-ld"
 
 export const metadata: Metadata = {
   title: "Remove Image Background Online Free | ImageTools",
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://imagetoolss.com/tools/background-remover" },
   openGraph: {
     title: "Remove Image Background Online Free | ImageTools",
-    description: "",
+    description: "Use AI to remove image backgrounds and get transparent PNGs in seconds. Upload JPG, PNG, or WEBP images and download results instantly. No signup required.",
     url: "https://imagetoolss.com/tools/background-remover",
     siteName: "ImageTools",
     locale: "en_US",
@@ -26,6 +27,7 @@ export const metadata: Metadata = {
 export default function BackgroundRemoverPage() {
   return (
     <Layout>
+      <ToolJsonLd tool="background-remover" />
       {/* Page-level H1 */}
       <h1 className="sr-only">Remove Image Background Online Free</h1>
 

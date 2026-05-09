@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://imagetoolss.com/make-image-background-transparent-online" },
   openGraph: {
     title: "Make Image Background Transparent Online Free | ImageTools",
-    description: "",
+    description: "Make any image background transparent online free. Upload your photo and download a transparent PNG in seconds. No signup required.",
     url: "https://imagetoolss.com/make-image-background-transparent-online",
     siteName: "ImageTools",
     locale: "en_US",

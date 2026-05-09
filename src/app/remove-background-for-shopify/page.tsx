@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://imagetoolss.com/remove-background-for-shopify" },
   openGraph: {
     title: "Remove Background for Shopify — Shopify Product Images | ImageTools",
-    description: "",
+    description: "Remove backgrounds from Shopify product images instantly. Get perfect white backgrounds that meet Shopify's recommended image requirements.",
     url: "https://imagetoolss.com/remove-background-for-shopify",
     siteName: "ImageTools",
     locale: "en_US",

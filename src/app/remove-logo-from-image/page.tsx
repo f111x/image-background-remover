@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://imagetoolss.com/remove-logo-from-image" },
   openGraph: {
     title: "Remove Logo from Image — Remove Watermarks & Logos | ImageTools",
-    description: "",
+    description: "Remove logos and watermarks from images. Clean up photos for personal or commercial use. AI-powered inpainting fills removed areas seamlessly.",
     url: "https://imagetoolss.com/remove-logo-from-image",
     siteName: "ImageTools",
     locale: "en_US",

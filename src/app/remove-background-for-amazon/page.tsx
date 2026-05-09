@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://imagetoolss.com/remove-background-for-amazon" },
   openGraph: {
     title: "Remove Background for Amazon — Amazon Image Requirements | ImageTools",
-    description: "",
+    description: "Meet Amazon's product image requirements with instant AI background removal. Get pure white background images that comply with Amazon's guidelines.",
     url: "https://imagetoolss.com/remove-background-for-amazon",
     siteName: "ImageTools",
     locale: "en_US",
