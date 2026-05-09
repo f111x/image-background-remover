@@ -6,6 +6,20 @@ import { ToolMarketingSections } from "@/components/seo/tool-marketing-sections"
 export const metadata: Metadata = {
   title: "Remove Watermark Online Free | ImageTools",
   description: "Remove watermarks, text, logos, or unwanted objects from your images with AI-powered inpainting. Upload JPG, PNG, or WEBP and get clean, natural results. For your own images only.",
+  alternates: { canonical: "https://imagetoolss.com/tools/watermark-remover" },
+  openGraph: {
+    title: "Remove Watermark Online Free | ImageTools",
+    description: "",
+    url: "https://imagetoolss.com/tools/watermark-remover",
+    siteName: "ImageTools",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Remove Watermark Online Free | ImageTools",
+  },
+
   keywords: ["remove watermark", "watermark remover", "remove text from image", "object removal", "AI inpainting"],
 }
 

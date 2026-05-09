@@ -4,6 +4,19 @@ import { ScenePageTemplate } from "@/components/seo/scene-page-template"
 export const metadata: Metadata = {
   title: "AI Product Photo Editor - Edit Product Images with AI | ImageTools",
   description: "Edit and enhance product photos with AI. Use natural language to remove objects, change backgrounds, adjust lighting, and transform product images for professional results.",
+  alternates: { canonical: "https://imagetoolss.com/ai-product-photo-editor" },
+  openGraph: {
+    title: "AI Product Photo Editor — Create Studio Photos with AI | ImageTools",
+    description: "",
+    url: "https://imagetoolss.com/ai-product-photo-editor",
+    siteName: "ImageTools",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AI Product Photo Editor — Create Studio Photos with AI | ImageTools",
+  },
   keywords: ["AI product photo editor", "product photo editing AI", "AI edit product photos", "product photo enhancement AI", "AI-powered product photo editing"],
 }
 

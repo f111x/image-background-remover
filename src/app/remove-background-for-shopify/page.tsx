@@ -4,6 +4,19 @@ import { ScenePageTemplate } from "@/components/seo/scene-page-template"
 export const metadata: Metadata = {
   title: "Remove Background from Product Images for Shopify | ImageTools",
   description: "Remove backgrounds from your Shopify product images instantly. Get perfect white backgrounds that meet Shopify's requirements. Upload your images and download transparent PNGs in seconds.",
+  alternates: { canonical: "https://imagetoolss.com/remove-background-for-shopify" },
+  openGraph: {
+    title: "Remove Background for Shopify — Shopify Product Images | ImageTools",
+    description: "",
+    url: "https://imagetoolss.com/remove-background-for-shopify",
+    siteName: "ImageTools",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Remove Background for Shopify — Shopify Product Images | ImageTools",
+  },
   keywords: ["remove background shopify", "shopify product image", "white background shopify", "product photo editor", "background remover for ecommerce"],
 }
 

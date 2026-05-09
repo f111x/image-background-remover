@@ -4,6 +4,19 @@ import { ScenePageTemplate } from "@/components/seo/scene-page-template"
 export const metadata: Metadata = {
   title: "Remove Date Stamp from Photo - Free AI Tool | ImageTools",
   description: "Remove date stamps, timestamps, and watermarks from photos instantly. Upload any photo and erase date stamps using AI-powered inpainting. Free to use, no signup required.",
+  alternates: { canonical: "https://imagetoolss.com/remove-date-stamp-from-photo" },
+  openGraph: {
+    title: "Remove Date Stamp from Photo — Clean Old Photos | ImageTools",
+    description: "",
+    url: "https://imagetoolss.com/remove-date-stamp-from-photo",
+    siteName: "ImageTools",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Remove Date Stamp from Photo — Clean Old Photos | ImageTools",
+  },
   keywords: ["remove date stamp from photo", "remove timestamp from photo", "erase date from image", "photo date stamp remover", "remove watermark from photo"],
 }
 

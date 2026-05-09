@@ -4,6 +4,19 @@ import { ScenePageTemplate } from "@/components/seo/scene-page-template"
 export const metadata: Metadata = {
   title: "Make Image Background White Online Free | ImageTools",
   description: "Make any image background white instantly. Upload a photo and get a pure white background perfect for ID photos, product images, and documents. Free, no signup required.",
+  alternates: { canonical: "https://imagetoolss.com/make-image-background-white" },
+  openGraph: {
+    title: "Make Image Background White Online Free | ImageTools",
+    description: "",
+    url: "https://imagetoolss.com/make-image-background-white",
+    siteName: "ImageTools",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Make Image Background White Online Free | ImageTools",
+  },
   keywords: ["make image background white", "white background maker", "change background to white online", "white background for photo", "free white background tool"],
 }
 

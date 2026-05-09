@@ -6,6 +6,20 @@ import { ToolMarketingSections } from "@/components/seo/tool-marketing-sections"
 export const metadata: Metadata = {
   title: "Image to PDF Converter Online Free | ImageTools",
   description: "Convert JPG, PNG, WEBP, or GIF images into professional PDF documents online. Merge multiple images into one PDF, customize page size, and download instantly. Free to use, no signup required.",
+  alternates: { canonical: "https://imagetoolss.com/tools/image-to-pdf" },
+  openGraph: {
+    title: "Image to PDF Converter Online Free | ImageTools",
+    description: "",
+    url: "https://imagetoolss.com/tools/image-to-pdf",
+    siteName: "ImageTools",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Image to PDF Converter Online Free | ImageTools",
+  },
+
 }
 
 export default function ImageToPDFPage() {

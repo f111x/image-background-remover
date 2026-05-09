@@ -6,6 +6,20 @@ import { ToolMarketingSections } from "@/components/seo/tool-marketing-sections"
 export const metadata: Metadata = {
   title: "Remove Image Background Online Free | ImageTools",
   description: "Use AI to remove image backgrounds and get transparent PNGs in seconds. Upload JPG, PNG, or WEBP images and download results instantly. No signup required.",
+  alternates: { canonical: "https://imagetoolss.com/tools/background-remover" },
+  openGraph: {
+    title: "Remove Image Background Online Free | ImageTools",
+    description: "",
+    url: "https://imagetoolss.com/tools/background-remover",
+    siteName: "ImageTools",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Remove Image Background Online Free | ImageTools",
+  },
+
   keywords: ["remove background", "background remover", "transparent background", "AI background removal", "remove bg"],
 }
 

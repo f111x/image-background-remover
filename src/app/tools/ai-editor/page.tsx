@@ -6,6 +6,20 @@ import { ToolMarketingSections } from "@/components/seo/tool-marketing-sections"
 export const metadata: Metadata = {
   title: "AI Image Editor Online Free | ImageTools",
   description: "Edit photos with natural language AI prompts. Remove objects, change backgrounds, or transform images with text commands. Upload any image and describe what you want — AI handles the rest.",
+  alternates: { canonical: "https://imagetoolss.com/tools/ai-editor" },
+  openGraph: {
+    title: "AI Image Editor — Edit Photos with Natural Language | ImageTools",
+    description: "",
+    url: "https://imagetoolss.com/tools/ai-editor",
+    siteName: "ImageTools",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AI Image Editor — Edit Photos with Natural Language | ImageTools",
+  },
+
   keywords: ["AI image editor", "photo editor", "AI edit", "remove objects", "change background AI"],
 }
 

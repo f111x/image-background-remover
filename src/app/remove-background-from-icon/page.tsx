@@ -4,6 +4,19 @@ import { ScenePageTemplate } from "@/components/seo/scene-page-template"
 export const metadata: Metadata = {
   title: "Remove Background from Icon - Free AI Tool | ImageTools",
   description: "Remove background from icons instantly with AI. Upload PNG or JPG icons and get clean transparent backgrounds. Free online tool, no signup required.",
+  alternates: { canonical: "https://imagetoolss.com/remove-background-from-icon" },
+  openGraph: {
+    title: "Remove Background from Icon — Make Icons Transparent | ImageTools",
+    description: "",
+    url: "https://imagetoolss.com/remove-background-from-icon",
+    siteName: "ImageTools",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Remove Background from Icon — Make Icons Transparent | ImageTools",
+  },
   keywords: ["remove background from icon", "icon background remover", "transparent icon maker", "PNG icon background removal", "free icon editor"],
 }
 

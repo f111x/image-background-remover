@@ -6,6 +6,20 @@ import { ToolMarketingSections } from "@/components/seo/tool-marketing-sections"
 export const metadata: Metadata = {
   title: "Compress Image Online Free — Reduce Image Size | ImageTools",
   description: "Reduce image file size without losing quality. Adjust compression level from 10% to 100%, choose output format, and download instantly. Free to use, no signup required.",
+  alternates: { canonical: "https://imagetoolss.com/tools/compress-image" },
+  openGraph: {
+    title: "Compress Image Online — Reduce File Size | ImageTools",
+    description: "",
+    url: "https://imagetoolss.com/tools/compress-image",
+    siteName: "ImageTools",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Compress Image Online — Reduce File Size | ImageTools",
+  },
+
   keywords: ["compress image", "image compressor", "reduce image size", "resize image", "image optimizer", "jpg compressor", "png compressor"],
 }
 

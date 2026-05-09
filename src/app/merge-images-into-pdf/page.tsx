@@ -4,6 +4,19 @@ import { ScenePageTemplate } from "@/components/seo/scene-page-template"
 export const metadata: Metadata = {
   title: "Merge Images into PDF - Free Online Tool | ImageTools",
   description: "Merge multiple images into one PDF document online free. Upload JPG, PNG, WEBP, or GIF images and combine them into a single PDF. No signup required.",
+  alternates: { canonical: "https://imagetoolss.com/merge-images-into-pdf" },
+  openGraph: {
+    title: "Merge Images into PDF — Combine & Convert | ImageTools",
+    description: "",
+    url: "https://imagetoolss.com/merge-images-into-pdf",
+    siteName: "ImageTools",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Merge Images into PDF — Combine & Convert | ImageTools",
+  },
   keywords: ["merge images into pdf", "combine images into pdf", "multiple images to pdf", "join images pdf", "images to pdf converter free"],
 }
 

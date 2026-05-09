@@ -4,6 +4,19 @@ import { ScenePageTemplate } from "@/components/seo/scene-page-template"
 export const metadata: Metadata = {
   title: "Make Image Background Transparent Online Free | ImageTools",
   description: "Make any image background transparent online free. Upload JPG, PNG, or WEBP and get transparent backgrounds in seconds. No signup required. AI-powered instant results.",
+  alternates: { canonical: "https://imagetoolss.com/make-image-background-transparent-online" },
+  openGraph: {
+    title: "Make Image Background Transparent Online Free | ImageTools",
+    description: "",
+    url: "https://imagetoolss.com/make-image-background-transparent-online",
+    siteName: "ImageTools",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Make Image Background Transparent Online Free | ImageTools",
+  },
   keywords: ["make image background transparent", "transparent background maker", "remove image background online", "free transparent background", "transparent PNG maker"],
 }
 

@@ -4,6 +4,19 @@ import { ScenePageTemplate } from "@/components/seo/scene-page-template"
 export const metadata: Metadata = {
   title: "Remove Background from Product Images for Etsy | ImageTools",
   description: "Create stunning Etsy product images with instant AI background removal. Perfect for handmade goods, vintage items, and digital products. Stand out in Etsy search with professional photos.",
+  alternates: { canonical: "https://imagetoolss.com/remove-background-for-etsy" },
+  openGraph: {
+    title: "Remove Background for Etsy — Etsy Product Photo Tool | ImageTools",
+    description: "",
+    url: "https://imagetoolss.com/remove-background-for-etsy",
+    siteName: "ImageTools",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Remove Background for Etsy — Etsy Product Photo Tool | ImageTools",
+  },
   keywords: ["remove background etsy", "etsy product image", "etsy shop photo", "handmade product photo", "etsy listing image"],
 }
 

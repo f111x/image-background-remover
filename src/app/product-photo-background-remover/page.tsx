@@ -4,6 +4,19 @@ import { ScenePageTemplate } from "@/components/seo/scene-page-template"
 export const metadata: Metadata = {
   title: "Product Photo Background Remover - Free AI Tool | ImageTools",
   description: "Remove background from product photos instantly with AI. Upload your product images and get clean, transparent backgrounds perfect for ecommerce, advertising, and catalogs.",
+  alternates: { canonical: "https://imagetoolss.com/product-photo-background-remover" },
+  openGraph: {
+    title: "Product Photo Background Remover — E-Commerce Ready | ImageTools",
+    description: "",
+    url: "https://imagetoolss.com/product-photo-background-remover",
+    siteName: "ImageTools",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Product Photo Background Remover — E-Commerce Ready | ImageTools",
+  },
   keywords: ["product photo background remover", "remove background from product photo", "product image background removal", "ecommerce background remover", "free product photo editor"],
 }
 

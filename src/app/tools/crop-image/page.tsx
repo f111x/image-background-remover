@@ -6,6 +6,20 @@ import { ToolMarketingSections } from "@/components/seo/tool-marketing-sections"
 export const metadata: Metadata = {
   title: "Crop & Split Image Online Free — Divide Images into Multiple Slices | ImageTools",
   description: "Split one image into 3, 6, or 9 equal slices. Choose horizontal or vertical cuts and download all slices as a ZIP. Free to use, no signup required.",
+  alternates: { canonical: "https://imagetoolss.com/tools/crop-image" },
+  openGraph: {
+    title: "Crop & Split Image Online Free | ImageTools",
+    description: "",
+    url: "https://imagetoolss.com/tools/crop-image",
+    siteName: "ImageTools",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Crop & Split Image Online Free | ImageTools",
+  },
+
   keywords: ["crop image", "split image", "image slicer", "divide image", "image cropper", "slice image", "image splitter"],
 }
 

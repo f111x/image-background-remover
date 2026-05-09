@@ -4,6 +4,19 @@ import { ScenePageTemplate } from "@/components/seo/scene-page-template"
 export const metadata: Metadata = {
   title: "Remove Background from Signature - Free Online Tool | ImageTools",
   description: "Remove background from your signature image instantly. Upload a scanned or photographed signature and get a clean transparent PNG. Free, no signup required.",
+  alternates: { canonical: "https://imagetoolss.com/remove-background-from-signature" },
+  openGraph: {
+    title: "Remove Background from Signature — Clean Signatures | ImageTools",
+    description: "",
+    url: "https://imagetoolss.com/remove-background-from-signature",
+    siteName: "ImageTools",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Remove Background from Signature — Clean Signatures | ImageTools",
+  },
   keywords: ["remove background from signature", "signature background remover", "transparent signature", "signature image editor", "remove signature background"],
 }
 

@@ -4,6 +4,19 @@ import { ScenePageTemplate } from "@/components/seo/scene-page-template"
 export const metadata: Metadata = {
   title: "Make Product Photo White Background Online Free | ImageTools",
   description: "Make your product photos have a pure white background online. Upload any product image and get a perfect white background in seconds. No signup required. Perfect for ecommerce and marketplace listings.",
+  alternates: { canonical: "https://imagetoolss.com/make-product-photo-white-background" },
+  openGraph: {
+    title: "White Background Product Photos — AI-Powered | ImageTools",
+    description: "",
+    url: "https://imagetoolss.com/make-product-photo-white-background",
+    siteName: "ImageTools",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "White Background Product Photos — AI-Powered | ImageTools",
+  },
   keywords: ["make product photo white background", "white background product photo", "product photo white background online", "ecommerce white background", "remove background white"],
 }
 

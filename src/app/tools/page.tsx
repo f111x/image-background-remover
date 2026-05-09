@@ -7,6 +7,19 @@ import { ToolsJsonLd } from "@/components/seo/tools-json-ld"
 export const metadata: Metadata = {
   title: "Free Online AI Image Tools - Background Removal, Watermark Clean & More | ImageTools",
   description: "Browse all free AI-powered image tools online. Remove backgrounds, clean watermarks, edit photos with text prompts, and convert images to PDF. No signup required. Start with free credits on ImageTools.",
+  alternates: { canonical: "https://imagetoolss.com/tools" },
+  openGraph: {
+    title: "Free AI Image Tools — Background Remover, Watermark Remover, AI Editor | ImageTools",
+    description: "",
+    url: "https://imagetoolss.com/tools",
+    siteName: "ImageTools",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Free AI Image Tools — Background Remover, Watermark Remover, AI Editor | ImageTools",
+  },
 }
 
 const tools = [

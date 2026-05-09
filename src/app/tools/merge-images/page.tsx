@@ -6,6 +6,20 @@ import { ToolMarketingSections } from "@/components/seo/tool-marketing-sections"
 export const metadata: Metadata = {
   title: "Merge Images Online Free — Combine Multiple Photos | ImageTools",
   description: "Merge up to 9 images into one photo instantly. Supports grid, horizontal, and vertical layouts. Free to use, no signup required, no watermarks.",
+  alternates: { canonical: "https://imagetoolss.com/tools/merge-images" },
+  openGraph: {
+    title: "Merge Images Online Free — Combine Photos | ImageTools",
+    description: "",
+    url: "https://imagetoolss.com/tools/merge-images",
+    siteName: "ImageTools",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Merge Images Online Free — Combine Photos | ImageTools",
+  },
+
   keywords: ["merge images", "combine images", "image joiner", "merge photos", "photo grid maker", "combine pictures"],
 }
 

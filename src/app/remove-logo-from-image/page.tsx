@@ -4,6 +4,19 @@ import { ScenePageTemplate } from "@/components/seo/scene-page-template"
 export const metadata: Metadata = {
   title: "Remove Logo from Image - Free AI Tool | ImageTools",
   description: "Remove logos from images using AI-powered inpainting. Paint over the logo you want removed and get a clean, natural result. Free to use, for your own images only.",
+  alternates: { canonical: "https://imagetoolss.com/remove-logo-from-image" },
+  openGraph: {
+    title: "Remove Logo from Image — Remove Watermarks & Logos | ImageTools",
+    description: "",
+    url: "https://imagetoolss.com/remove-logo-from-image",
+    siteName: "ImageTools",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Remove Logo from Image — Remove Watermarks & Logos | ImageTools",
+  },
   keywords: ["remove logo from image", "logo remover from photo", "erase logo from image", "remove brand logo", "remove trademark from image"],
 }
 
