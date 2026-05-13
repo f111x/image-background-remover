@@ -15,6 +15,9 @@ export function PricingContent() {
   const { user } = useSupabaseUser()
   const [purchasing, setPurchasing] = useState<string | null>(null)
 
+  const loginHref = (type: "credits" | "subscription", planId: string) =>
+    `/login?next=${encodeURIComponent(`/pricing?checkout=${type}:${planId}`)}`
+
   const creditPackages = [
     { name: t("plan_trial"), id: "Trial", price: "1", credits: 10, features: [t("feature_trial_credits"), t("feature_standard_quality"), t("feature_high_quality"), t("feature_no_watermark"), t("feature_email_support")], popular: false },
     { name: t("plan_starter"), id: "Starter", price: "5", credits: 50, features: [t("feature_50_credits"), t("feature_high_quality"), t("feature_no_watermark"), t("feature_priority_email_support"), t("feature_credits_never_expire")], popular: true },
@@ -58,10 +61,11 @@ export function PricingContent() {
 
         {/* One-time Credit Packages */}
         <div className="mb-20 px-6">
-          <div className="flex items-center justify-center gap-3 mb-8">
+          <div className="flex items-center justify-center gap-3 mb-3">
             <CreditCard className="w-5 h-5 text-gray-400" />
             <h2 className="text-2xl font-bold">{t("credit_packages")}</h2>
           </div>
+          <p className="text-sm text-gray-500 text-center mb-8">{t("one_time_credit_note")}</p>
 
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {creditPackages.map((pkg) => (
@@ -107,10 +111,10 @@ export function PricingContent() {
 
                 {!user ? (
                   <a
-                    href="/tools/background-remover"
+                    href={loginHref("credits", pkg.id)}
                     className="w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
                   >
-                    {t("login_to_purchase")}
+                    {t("buy_now")}
                   </a>
                 ) : purchasing === pkg.id ? (
                   <div className="space-y-3">
@@ -150,10 +154,11 @@ export function PricingContent() {
 
         {/* Monthly Subscription */}
         <div className="mb-20 px-6">
-          <div className="flex items-center justify-center gap-3 mb-8">
+          <div className="flex items-center justify-center gap-3 mb-3">
             <RefreshCw className="w-5 h-5 text-gray-400" />
             <h2 className="text-2xl font-bold">{t("monthly_subscription")}</h2>
           </div>
+          <p className="text-sm text-gray-500 text-center mb-8">{t("subscription_credit_note")}</p>
 
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             {monthlyPlans.map((plan) => (
@@ -200,10 +205,10 @@ export function PricingContent() {
 
                 {!user ? (
                   <a
-                    href="/tools/background-remover"
+                    href={loginHref("subscription", plan.id)}
                     className="w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
                   >
-                    {t("login_to_subscribe")}
+                    {t("subscribe_now")}
                   </a>
                 ) : (
                   <SubscriptionPayPal
@@ -246,7 +251,7 @@ export function PricingContent() {
             {t("free_credits_on_signup")}
           </p>
           <a
-            href="/tools/background-remover"
+            href="/signup?next=/tools/background-remover"
             className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg"
           >
             {t("get_started_free")}

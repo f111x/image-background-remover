@@ -2,6 +2,7 @@ import { Layout } from "@/components/layout"
 import { Hero } from "@/components/hero"
 import { Features } from "@/components/features"
 import { Showcase } from "@/components/showcase"
+import { ConversionProof } from "@/components/conversion-proof"
 import { Testimonials } from "@/components/testimonials"
 import { FAQ } from "@/components/faq"
 import { Metadata } from "next"
@@ -30,6 +31,7 @@ export default function Home() {
     <Layout>
       <Hero />
       <Features />
+      <ConversionProof />
       <Showcase />
       <Testimonials />
       <FAQ />

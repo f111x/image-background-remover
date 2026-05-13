@@ -19,6 +19,7 @@ const nextConfig = {
       { source: "/ai-image-editor", destination: "/tools/ai-editor", permanent: true },
       { source: "/image-to-pdf-converter", destination: "/tools/image-to-pdf", permanent: true },
       { source: "/merge-images", destination: "/tools/merge-images", permanent: true },
+      { source: "/compress-image", destination: "/tools/compress-image", permanent: true },
       { source: "/compress-images", destination: "/tools/compress-image", permanent: true },
       { source: "/crop-image", destination: "/tools/crop-image", permanent: true },
       { source: "/remove-bg", destination: "/tools/background-remover", permanent: true },

@@ -19,12 +19,18 @@ export default function SignupPage() {
   const router = useRouter()
   const supabase = createClient()
 
+  const getNextPath = () => {
+    if (typeof window === "undefined") return "/profile"
+    const next = new URLSearchParams(window.location.search).get("next")
+    return next && next.startsWith("/") ? next : "/profile"
+  }
+
   // Check if already logged in
   useEffect(() => {
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        router.push("/profile")
+        router.push(getNextPath())
       }
     }
     checkUser()
@@ -39,13 +45,19 @@ export default function SignupPage() {
       return
     }
 
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailPattern.test(email)) {
+      setError(t("invalid_email"))
+      return
+    }
+
     if (password !== confirmPassword) {
       setError(t("passwords_dont_match") || "Passwords don't match")
       return
     }
 
-    if (password.length < 6) {
-      setError(t("password_too_short") || "Password must be at least 6 characters")
+    if (password.length < 8) {
+      setError(t("password_too_short") || "Password must be at least 8 characters")
       return
     }
 
@@ -78,8 +90,8 @@ export default function SignupPage() {
         return
       }
 
-      // No email confirmation needed - redirect to profile
-      router.push("/profile")
+      // No email confirmation needed - redirect to target page
+      router.push(getNextPath())
     } catch {
       setError(t("error_occurred") || "An error occurred. Please try again.")
       setIsLoading(false)
@@ -93,7 +105,7 @@ export default function SignupPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/profile")}`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(getNextPath())}`,
       },
     })
 

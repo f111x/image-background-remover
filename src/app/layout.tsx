@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://imagetoolss.com"),
   title: {
     default: "ImageTools - Free AI Image Tools Online",
-    template: "%s | ImageTools",
+    template: "%s",
   },
   description: "Free AI-powered image tools online. Remove backgrounds, clean watermarks, edit photos with AI prompts, and convert images to PDF. No signup required. Start with 2 free credits.",
   keywords: ["AI image tools", "background removal", "watermark remover", "AI editor", "image to PDF", "free image editing"],

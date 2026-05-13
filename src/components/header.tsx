@@ -46,13 +46,6 @@ export function Header() {
     window.location.href = "/"
   }
 
-  const navLinks = [
-    { href: "/tools/background-remover", label: t("nav_remove_bg"), icon: Scissors, isActive: pathname === "/tools/background-remover" },
-    { href: "/tools/watermark-remover", label: t("nav_watermark_remover"), icon: Eraser, isActive: pathname === "/tools/watermark-remover" },
-    { href: "/tools/ai-editor", label: t("nav_ai_editor"), icon: Wand2, isActive: pathname === "/tools/ai-editor" },
-    { href: "/tools/image-to-pdf", label: t("nav_image_to_pdf"), icon: FileText, isActive: pathname === "/tools/image-to-pdf" },
-  ]
-
   const toolsMenuItems = [
     { href: "/tools", label: t("nav_all_tools"), icon: null },
     { href: "/tools/background-remover", label: t("nav_remove_bg"), icon: Scissors },
@@ -75,21 +68,7 @@ export function Header() {
             </Link>
 
             {/* Tools Navigation */}
-            <nav className="hidden lg:flex items-center gap-1 shrink-0">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`flex items-center gap-1.5 px-2 xl:px-3 py-2 text-sm font-medium rounded-lg transition whitespace-nowrap ${
-                    link.isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800"
-                  }`}
-                >
-                  <link.icon className="w-4 h-4" />
-                  <span className="whitespace-nowrap">{link.label}</span>
-                </Link>
-              ))}
+            <nav className="hidden lg:flex items-center gap-3 shrink-0">
               {/* Tools Dropdown */}
               <div className="relative">
                 <button
@@ -109,7 +88,7 @@ export function Header() {
                           href={item.href}
                           onClick={() => setShowToolsMenu(false)}
                           className={`flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                            item.href === "/" ? "text-muted-foreground border-b border-gray-100 dark:border-gray-700" : "text-gray-700 dark:text-gray-200"
+                            item.href === pathname ? "bg-primary/10 text-primary" : "text-gray-700 dark:text-gray-200"
                           }`}
                         >
                           {item.icon && <item.icon className="w-4 h-4 text-muted-foreground" />}
