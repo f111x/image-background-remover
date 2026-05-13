@@ -29,61 +29,61 @@ export default function BackgroundRemoverPage() {
     <Layout>
       <ToolJsonLd tool="background-remover" />
       {/* Page-level H1 */}
-      <h1 className="sr-only">Remove Image Background Online Free</h1>
+      <h1 className="sr-only">AI 一键去除图片背景，几秒生成透明 PNG</h1>
 
       <BackgroundRemoverEditor />
 
       <ToolMarketingSections
-        title="Background Remover"
-        description="Remove backgrounds from any image instantly with AI. Get transparent backgrounds perfect for product photos, avatars, logos, and social media content."
+        title="去背景工具"
+        description="用 AI 快速去除任意图片背景，生成适合商品图、头像、Logo 和社媒素材的透明 PNG。"
         features={[
-          "One-click AI background removal",
-          "Supports JPG, PNG, WEBP up to 10MB",
-          "Transparent PNG output",
-          "No signup required to try",
-          "High quality edge preservation",
-          "Batch processing ready",
+          "一键 AI 去除背景",
+          "支持 JPG、PNG、WEBP，最大 10MB",
+          "导出透明 PNG",
+          "游客可试用，登录送 2 积分",
+          "高质量保留边缘细节",
+          "适合商品图和批量工作流",
         ]}
         useCases={[
-          "Ecommerce product photos",
-          "Profile pictures & avatars",
-          "Logos & brand assets",
-          "Social media graphics",
-          "Presentations & documents",
+          "电商商品图",
+          "头像与个人资料图",
+          "Logo 与品牌素材",
+          "社交媒体配图",
+          "演示文稿与文档",
         ]}
         faqs={[
           {
-            q: "What image formats are supported?",
-            a: "We support JPG, PNG, and WEBP images up to 10MB in size.",
+            q: "支持哪些图片格式？",
+            a: "支持 JPG、PNG、WEBP，单张图片最大 10MB。",
           },
           {
-            q: "Is my image data stored on your servers?",
-            a: "No. Your images are processed in memory and never stored on our servers. The result is delivered directly to you.",
+            q: "图片会被保存吗？",
+            a: "不会。图片仅用于本次处理，结果生成后即可下载。",
           },
           {
-            q: "Do I need to sign up to use this tool?",
-            a: "No. You can try the background remover as a guest. Sign up to get free credits for higher quality output without watermarks.",
+            q: "需要注册才能使用吗？",
+            a: "游客可以直接试用；登录后可领取 2 个免费积分，并下载无水印结果。",
           },
           {
-            q: "How are credits calculated?",
-            a: "One credit is consumed per image processed. Credits are deducted after successful processing.",
+            q: "积分如何计算？",
+            a: "背景去除按 1 积分处理 1 张图片，处理成功后才扣除积分。",
           },
         ]}
         relatedTools={[
           {
-            name: "Watermark Remover",
+            name: "去水印",
             href: "/tools/watermark-remover",
-            description: "Remove watermarks, text, or unwanted objects from images.",
+            description: "去除图片中的水印、文字或不需要的物体。",
           },
           {
-            name: "AI Image Editor",
+            name: "AI 编辑",
             href: "/tools/ai-editor",
-            description: "Edit photos with natural language AI prompts.",
+            description: "用自然语言提示词编辑和生成图片。",
           },
           {
-            name: "Image to PDF",
+            name: "图片转 PDF",
             href: "/tools/image-to-pdf",
-            description: "Convert your images into professional PDF documents.",
+            description: "将多张图片快速转换成 PDF 文档。",
           },
         ]}
       />

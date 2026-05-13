@@ -6,13 +6,13 @@ import { Upload, Scissors, Eraser, Wand2, FileText, Layers, Minimize2, Crop, Zap
 import { useLanguage } from "@/lib/i18n"
 
 const TOOLS = [
-  { href: "/tools/background-remover", label: "Background Remover", icon: Scissors, color: "from-purple-500 to-pink-500", badge: "Most Popular" },
-  { href: "/tools/watermark-remover", label: "Watermark Remover", icon: Eraser, color: "from-blue-500 to-cyan-500", badge: null },
-  { href: "/tools/ai-editor", label: "AI Image Editor", icon: Wand2, color: "from-orange-500 to-red-500", badge: null },
-  { href: "/tools/image-to-pdf", label: "Image to PDF", icon: FileText, color: "from-green-500 to-emerald-500", badge: null },
-  { href: "/tools/merge-images", label: "Merge Images", icon: Layers, color: "from-indigo-500 to-purple-500", badge: "New" },
-  { href: "/tools/compress-image", label: "Compress Image", icon: Minimize2, color: "from-yellow-500 to-orange-500", badge: "New" },
-  { href: "/tools/crop-image", label: "Crop & Split", icon: Crop, color: "from-pink-500 to-rose-500", badge: "New" },
+  { href: "/tools/background-remover", labelKey: "tool_background_remover", icon: Scissors, color: "from-purple-500 to-pink-500", badgeKey: "badge_most_popular" },
+  { href: "/tools/watermark-remover", labelKey: "tool_watermark_remover", icon: Eraser, color: "from-blue-500 to-cyan-500", badgeKey: null },
+  { href: "/tools/ai-editor", labelKey: "tool_ai_editor", icon: Wand2, color: "from-orange-500 to-red-500", badgeKey: null },
+  { href: "/tools/image-to-pdf", labelKey: "tool_image_to_pdf", icon: FileText, color: "from-green-500 to-emerald-500", badgeKey: null },
+  { href: "/tools/merge-images", labelKey: "tool_merge_images", icon: Layers, color: "from-indigo-500 to-purple-500", badgeKey: "badge_new" },
+  { href: "/tools/compress-image", labelKey: "tool_compress_image", icon: Minimize2, color: "from-yellow-500 to-orange-500", badgeKey: "badge_new" },
+  { href: "/tools/crop-image", labelKey: "tool_crop_image", icon: Crop, color: "from-pink-500 to-rose-500", badgeKey: "badge_new" },
 ]
 
 export function Hero() {
@@ -68,13 +68,13 @@ export function Hero() {
           {TOOLS.map((tool) => (
             <Link key={tool.href} href={tool.href} className="group">
               <div className={`relative bg-gradient-to-br ${tool.color} rounded-xl p-3 text-white h-full flex flex-col items-center justify-center gap-1.5 hover:scale-105 transition-transform shadow-md hover:shadow-lg`}>
-                {tool.badge && (
+                {tool.badgeKey && (
                   <span className="absolute -top-2 -right-2 text-[10px] bg-white text-gray-900 font-bold px-1.5 py-0.5 rounded-full shadow">
-                    {tool.badge}
+                    {t(tool.badgeKey)}
                   </span>
                 )}
                 <tool.icon className="w-5 h-5" />
-                <span className="text-[11px] font-medium text-center leading-tight">{tool.label}</span>
+                <span className="text-[11px] font-medium text-center leading-tight">{t(tool.labelKey)}</span>
               </div>
             </Link>
           ))}
@@ -92,7 +92,7 @@ export function Hero() {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-primary font-bold">✓</span>
-            <span>No signup required</span>
+            <span>{t("hero_trust_rule")}</span>
           </div>
         </div>
       </div>

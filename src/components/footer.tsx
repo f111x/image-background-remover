@@ -5,13 +5,13 @@ import { Upload, Scissors, Eraser, Wand2, FileText, Layers, Minimize2, Crop } fr
 import { useLanguage } from "@/lib/i18n"
 
 const TOOLS = [
-  { href: "/tools/background-remover", label: "Background Remover", icon: Scissors },
-  { href: "/tools/watermark-remover", label: "Watermark Remover", icon: Eraser },
-  { href: "/tools/ai-editor", label: "AI Image Editor", icon: Wand2 },
-  { href: "/tools/image-to-pdf", label: "Image to PDF", icon: FileText },
-  { href: "/tools/merge-images", label: "Merge Images", icon: Layers },
-  { href: "/tools/compress-image", label: "Compress Image", icon: Minimize2 },
-  { href: "/tools/crop-image", label: "Crop & Split", icon: Crop },
+  { href: "/tools/background-remover", labelKey: "tool_background_remover", icon: Scissors },
+  { href: "/tools/watermark-remover", labelKey: "tool_watermark_remover", icon: Eraser },
+  { href: "/tools/ai-editor", labelKey: "tool_ai_editor", icon: Wand2 },
+  { href: "/tools/image-to-pdf", labelKey: "tool_image_to_pdf", icon: FileText },
+  { href: "/tools/merge-images", labelKey: "tool_merge_images", icon: Layers },
+  { href: "/tools/compress-image", labelKey: "tool_compress_image", icon: Minimize2 },
+  { href: "/tools/crop-image", labelKey: "tool_crop_image", icon: Crop },
 ]
 
 export function Footer() {
@@ -29,24 +29,24 @@ export function Footer() {
               <span className="font-bold text-lg">ImageTools</span>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
-              Free AI-powered image tools. Remove backgrounds, erase watermarks, edit with AI, convert to PDF, and more. No signup required.
+              {t("footer_desc")}
             </p>
             <div className="flex gap-3">
-              <a href="/sitemap.xml" className="text-sm text-muted-foreground hover:text-primary">Sitemap</a>
+              <a href="/sitemap.xml" className="text-sm text-muted-foreground hover:text-primary">{t("footer_sitemap")}</a>
               <span className="text-muted-foreground">•</span>
-              <a href="/robots.txt" className="text-sm text-muted-foreground hover:text-primary">Robots</a>
+              <a href="/robots.txt" className="text-sm text-muted-foreground hover:text-primary">{t("footer_robots")}</a>
             </div>
           </div>
 
           {/* Free Tools */}
           <div>
-            <h4 className="font-semibold mb-4">Free Tools</h4>
+            <h4 className="font-semibold mb-4">{t("footer_free_tools")}</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               {TOOLS.map((tool) => (
                 <li key={tool.href}>
                   <Link href={tool.href} className="hover:text-primary flex items-center gap-1.5">
                     <tool.icon className="w-3 h-3" />
-                    {tool.label}
+                    {t(tool.labelKey)}
                   </Link>
                 </li>
               ))}
@@ -59,8 +59,8 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link href="/pricing" className="hover:text-primary">{t("footer_pricing")}</Link></li>
               <li><Link href="/faq" className="hover:text-primary">{t("nav_faq")}</Link></li>
-              <li><Link href="/login" className="hover:text-primary">Sign In</Link></li>
-              <li><Link href="/signup" className="hover:text-primary">Create Account</Link></li>
+              <li><Link href="/login" className="hover:text-primary">{t("sign_in")}</Link></li>
+              <li><Link href="/signup" className="hover:text-primary">{t("create_account")}</Link></li>
             </ul>
           </div>
 
@@ -78,8 +78,8 @@ export function Footer() {
         </div>
 
         <div className="border-t pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-          <p>&copy; {year} ImageTools. All rights reserved.</p>
-          <p>Free image tools · No signup required · No watermarks</p>
+          <p>&copy; {year} ImageTools. {t("footer_rights")}</p>
+          <p>{t("footer_rule_line")}</p>
         </div>
       </div>
     </footer>

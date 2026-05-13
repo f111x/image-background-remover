@@ -9,85 +9,22 @@ import { SubscriptionPayPal } from "@/components/paypal/SubscriptionPayPal"
 import { useSupabaseUser } from "@/hooks/use-supabase-user"
 import { analytics } from "@/lib/analytics"
 
-const creditPackages = [
-  {
-    name: "Trial",
-    price: "1",
-    credits: 10,
-    features: [
-      "10 one-time credits",
-      "Standard quality",
-      "High quality output",
-      "No watermark on request",
-      "Email support",
-    ],
-    popular: false,
-  },
-  {
-    name: "Starter",
-    price: "5",
-    credits: 50,
-    features: [
-      "50 one-time credits",
-      "High quality output",
-      "No watermark",
-      "Priority email support",
-      "Credits never expire",
-    ],
-    popular: true,
-  },
-  {
-    name: "Value",
-    price: "15",
-    credits: 200,
-    features: [
-      "200 one-time credits",
-      "Highest quality output",
-      "No watermark",
-      "Priority support",
-      "Credits never expire",
-      "Bulk discount",
-    ],
-    popular: false,
-  },
-]
-
-const monthlyPlans = [
-  {
-    name: "Basic",
-    price: "5",
-    credits: 50,
-    features: [
-      "50 credits/month",
-      "Credits refresh monthly",
-      "Unused credits roll over",
-      "Up to 100 rollover cap",
-      "High quality output",
-      "Email support",
-    ],
-    popular: false,
-  },
-  {
-    name: "Pro",
-    price: "15",
-    credits: 200,
-    features: [
-      "200 credits/month",
-      "Credits refresh monthly",
-      "Unused credits roll over",
-      "Up to 400 rollover cap",
-      "Highest quality output",
-      "Priority support",
-      "No watermark",
-    ],
-    popular: true,
-  },
-]
 
 export function PricingContent() {
   const { t } = useLanguage()
   const { user } = useSupabaseUser()
   const [purchasing, setPurchasing] = useState<string | null>(null)
+
+  const creditPackages = [
+    { name: t("plan_trial"), id: "Trial", price: "1", credits: 10, features: [t("feature_trial_credits"), t("feature_standard_quality"), t("feature_high_quality"), t("feature_no_watermark"), t("feature_email_support")], popular: false },
+    { name: t("plan_starter"), id: "Starter", price: "5", credits: 50, features: [t("feature_50_credits"), t("feature_high_quality"), t("feature_no_watermark"), t("feature_priority_email_support"), t("feature_credits_never_expire")], popular: true },
+    { name: t("plan_value"), id: "Value", price: "15", credits: 200, features: [t("feature_200_credits"), t("feature_highest_quality"), t("feature_no_watermark"), t("feature_priority_support"), t("feature_credits_never_expire"), t("feature_bulk_discount")], popular: false },
+  ]
+
+  const monthlyPlans = [
+    { name: t("plan_basic"), id: "Basic", price: "5", credits: 50, features: [t("feature_50_month"), t("feature_refresh_monthly"), t("feature_rollover"), t("feature_rollover_100"), t("feature_high_quality"), t("feature_email_support")], popular: false },
+    { name: t("plan_pro"), id: "Pro", price: "15", credits: 200, features: [t("feature_200_month"), t("feature_refresh_monthly"), t("feature_rollover"), t("feature_rollover_400"), t("feature_highest_quality"), t("feature_priority_support"), t("feature_no_watermark")], popular: true },
+  ]
 
   useEffect(() => {
     analytics.pricing.view()
@@ -113,6 +50,9 @@ export function PricingContent() {
           </h1>
           <p className="text-xl text-gray-500 max-w-2xl mx-auto">
             {t("pricing_subtitle")}
+          </p>
+          <p className="text-sm text-gray-500 max-w-3xl mx-auto mt-4 bg-white border border-purple-100 rounded-xl px-4 py-3">
+            {t("pricing_credit_rule")}
           </p>
         </div>
 
@@ -148,11 +88,11 @@ export function PricingContent() {
                   <div className="mt-2">
                     <span className="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 text-yellow-600 text-sm rounded-full">
                       <Zap className="w-3 h-3" />
-                      {pkg.credits} credits
+                      {pkg.credits} {t("credits_label")}
                     </span>
                   </div>
                   <p className="text-xs text-gray-400 mt-2">
-                    ${(parseFloat(pkg.price) / pkg.credits).toFixed(3)} per credit
+                    ${(parseFloat(pkg.price) / pkg.credits).toFixed(3)} {t("per_credit")}
                   </p>
                 </div>
 
@@ -172,13 +112,13 @@ export function PricingContent() {
                   >
                     {t("login_to_purchase")}
                   </a>
-                ) : purchasing === pkg.name ? (
+                ) : purchasing === pkg.id ? (
                   <div className="space-y-3">
                     <PayPalCheckout
-                      packageName={pkg.name}
+                      packageName={pkg.id}
                       price={pkg.price}
                       credits={pkg.credits}
-                      onSuccess={(credits) => handlePurchaseSuccess(credits, pkg.name)}
+                      onSuccess={(credits) => handlePurchaseSuccess(credits, pkg.id)}
                     />
                     <button
                       onClick={() => setPurchasing(null)}
@@ -190,8 +130,8 @@ export function PricingContent() {
                 ) : (
                   <button
                     onClick={() => {
-                      analytics.pricing.checkoutClick({ plan: pkg.name })
-                      setPurchasing(pkg.name)
+                      analytics.pricing.checkoutClick({ plan: pkg.id })
+                      setPurchasing(pkg.id)
                     }}
                     className={`w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
                       pkg.popular
@@ -237,15 +177,15 @@ export function PricingContent() {
 
                 <div className="text-center mb-6">
                   <span className="text-5xl font-bold">${plan.price}</span>
-                  <span className="text-gray-400">/month</span>
+                  <span className="text-gray-400">/{t("month_unit")}</span>
                   <div className="mt-2">
                     <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-600 text-sm rounded-full">
                       <RefreshCw className="w-3 h-3" />
-                      {plan.credits}/month
+                      {plan.credits} {t("credits_per_month")}
                     </span>
                   </div>
                   <p className="text-xs text-gray-400 mt-2">
-                    Auto-renews monthly
+                    {t("auto_renews_monthly")}
                   </p>
                 </div>
 
@@ -267,7 +207,7 @@ export function PricingContent() {
                   </a>
                 ) : (
                   <SubscriptionPayPal
-                    planName={plan.name}
+                    planName={plan.id}
                     credits={plan.credits}
                     price={plan.price}
                   />

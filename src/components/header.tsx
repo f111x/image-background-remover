@@ -47,59 +47,56 @@ export function Header() {
   }
 
   const navLinks = [
-    { href: "/tools/background-remover", label: t("nav_remove_bg") || "Remove Background", icon: Scissors, isActive: pathname === "/tools/background-remover" },
-    { href: "/tools/watermark-remover", label: t("nav_watermark_remover") || "Watermark Remover", icon: Eraser, isActive: pathname === "/tools/watermark-remover" },
-    { href: "/tools/ai-editor", label: t("nav_ai_editor") || "AI Editor", icon: Wand2, isActive: pathname === "/tools/ai-editor" },
-    { href: "/tools/image-to-pdf", label: t("nav_image_to_pdf") || "Image to PDF", icon: FileText, isActive: pathname === "/tools/image-to-pdf" },
-    { href: "/tools/merge-images", label: t("nav_merge_images") || "Merge Images", icon: Layers, isActive: pathname === "/tools/merge-images" },
-    { href: "/tools/compress-image", label: t("nav_compress_image") || "Compress Image", icon: Minimize2, isActive: pathname === "/tools/compress-image" },
-    { href: "/tools/crop-image", label: t("nav_crop_image") || "Crop & Split", icon: Crop, isActive: pathname === "/tools/crop-image" },
+    { href: "/tools/background-remover", label: t("nav_remove_bg"), icon: Scissors, isActive: pathname === "/tools/background-remover" },
+    { href: "/tools/watermark-remover", label: t("nav_watermark_remover"), icon: Eraser, isActive: pathname === "/tools/watermark-remover" },
+    { href: "/tools/ai-editor", label: t("nav_ai_editor"), icon: Wand2, isActive: pathname === "/tools/ai-editor" },
+    { href: "/tools/image-to-pdf", label: t("nav_image_to_pdf"), icon: FileText, isActive: pathname === "/tools/image-to-pdf" },
   ]
 
   const toolsMenuItems = [
-    { href: "/tools", label: t("nav_all_tools") || "All Tools", icon: null },
-    { href: "/tools/background-remover", label: t("nav_remove_bg") || "Remove Background", icon: Scissors },
-    { href: "/tools/watermark-remover", label: t("nav_watermark_remover") || "Watermark Remover", icon: Eraser },
-    { href: "/tools/ai-editor", label: t("nav_ai_editor") || "AI Editor", icon: Wand2 },
-    { href: "/tools/image-to-pdf", label: t("nav_image_to_pdf") || "Image to PDF", icon: FileText },
-    { href: "/tools/merge-images", label: t("nav_merge_images") || "Merge Images", icon: Layers },
-    { href: "/tools/compress-image", label: t("nav_compress_image") || "Compress Image", icon: Minimize2 },
-    { href: "/tools/crop-image", label: t("nav_crop_image") || "Crop & Split", icon: Crop },
+    { href: "/tools", label: t("nav_all_tools"), icon: null },
+    { href: "/tools/background-remover", label: t("nav_remove_bg"), icon: Scissors },
+    { href: "/tools/watermark-remover", label: t("nav_watermark_remover"), icon: Eraser },
+    { href: "/tools/ai-editor", label: t("nav_ai_editor"), icon: Wand2 },
+    { href: "/tools/image-to-pdf", label: t("nav_image_to_pdf"), icon: FileText },
+    { href: "/tools/merge-images", label: t("nav_merge_images"), icon: Layers },
+    { href: "/tools/compress-image", label: t("nav_compress_image"), icon: Minimize2 },
+    { href: "/tools/crop-image", label: t("nav_crop_image"), icon: Crop },
   ]
 
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center">
-          <div className="flex items-center gap-6">
-            <Link href="/" className="flex items-center space-x-2">
+        <div className="container flex h-14 items-center gap-3">
+          <div className="flex min-w-0 items-center gap-3 xl:gap-5">
+            <Link href="/" className="flex shrink-0 items-center space-x-2">
               <Upload className="h-5 w-5" />
               <span className="font-bold">ImageTools</span>
             </Link>
 
             {/* Tools Navigation */}
-            <nav className="flex items-center gap-1">
+            <nav className="hidden lg:flex items-center gap-1 shrink-0">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition ${
+                  className={`flex items-center gap-1.5 px-2 xl:px-3 py-2 text-sm font-medium rounded-lg transition whitespace-nowrap ${
                     link.isActive
                       ? "bg-primary/10 text-primary"
                       : "text-muted-foreground hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800"
                   }`}
                 >
                   <link.icon className="w-4 h-4" />
-                  <span>{link.label}</span>
+                  <span className="whitespace-nowrap">{link.label}</span>
                 </Link>
               ))}
               {/* Tools Dropdown */}
               <div className="relative">
                 <button
                   onClick={() => setShowToolsMenu(!showToolsMenu)}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition text-muted-foreground hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="flex items-center gap-1.5 px-2 xl:px-3 py-2 text-sm font-medium rounded-lg transition text-muted-foreground hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 whitespace-nowrap"
                 >
-                  <span>Tools</span>
+                  <span>{t("nav_tools")}</span>
                   <svg className={`w-3 h-3 transition-transform ${showToolsMenu ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                 </button>
                 {showToolsMenu && (
@@ -125,17 +122,17 @@ export function Header() {
               </div>
             </nav>
 
-            <nav className="flex items-center gap-4">
-              <Link href="/pricing" className="text-sm font-medium text-muted-foreground hover:text-primary">
+            <nav className="hidden xl:flex items-center gap-4 shrink-0">
+              <Link href="/pricing" className="text-sm font-medium text-muted-foreground hover:text-primary whitespace-nowrap">
                 {t("nav_pricing")}
               </Link>
-              <Link href="/faq" className="text-sm font-medium text-muted-foreground hover:text-primary">
+              <Link href="/faq" className="text-sm font-medium text-muted-foreground hover:text-primary whitespace-nowrap">
                 {t("nav_faq")}
               </Link>
             </nav>
           </div>
 
-          <div className="flex items-center gap-3 ml-auto">
+          <div className="flex items-center gap-2 ml-auto shrink-0">
             {/* Language Selector */}
             <div className="relative">
               <button

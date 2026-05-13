@@ -221,7 +221,7 @@ export default function SignupPage() {
           <p className="text-center text-xs text-gray-400 mt-4">
             {t("terms_agreement")}{" "}
             <Link href="/terms" className="underline hover:text-purple-500">{t("terms")}</Link>
-            {" and "}
+            {" "}{t("terms_connector")}{" "}
             <Link href="/privacy" className="underline hover:text-purple-500">{t("privacy")}</Link>
           </p>
         </div>

@@ -176,11 +176,11 @@ export function BackgroundRemoverEditor() {
                   : "bg-red-500/20 text-red-400"
               }`}>
                 <Coins className="w-4 h-4" />
-                <span>{credits} credits available</span>
+                <span>{credits} {t("credits_available")}</span>
               </div>
             ) : !loading && !user ? (
               <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-purple-500/20 text-purple-300 text-sm">
-                <span>👋 Guest Mode — No login required to try · <button onClick={() => setShowSignIn(true)} className="underline hover:text-purple-200">{t("login")} to use credits</button></span>
+                <span>{t("guest_try_credits_notice")} <button onClick={() => setShowSignIn(true)} className="underline hover:text-purple-200">{t("login")}</button></span>
               </div>
             ) : null}
           </div>
@@ -238,7 +238,7 @@ export function BackgroundRemoverEditor() {
                   ) : !user ? (
                     <>
                       <Upload className="w-6 h-6 mr-3" />
-                      {t("remove_bg")} (Guest)
+                      {t("remove_bg")} ({t("guest_label")})
                     </>
                   ) : (
                     `✨ ${t("remove_bg")}`
