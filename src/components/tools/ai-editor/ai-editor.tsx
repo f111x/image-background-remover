@@ -225,11 +225,11 @@ export function AIEditor() {
                   : "bg-red-500/20 text-red-400"
               }`}>
                 <Coins className="w-4 h-4" />
-                <span>{credits} credits available (2 credits/generation)</span>
+                <span>{credits} {t("credits_available_two")}</span>
               </div>
             ) : !loading && !user ? (
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/20 text-purple-300 text-sm">
-                <span>👋 Guest Mode — No login required to try · <button onClick={() => setShowSignIn(true)} className="underline hover:text-purple-200">{t("login")} to use credits</button></span>
+                <span>{t("guest_try_credits_notice")} <button onClick={() => setShowSignIn(true)} className="underline hover:text-purple-200">{t("login")}</button></span>
               </div>
             ) : null}
           </div>
@@ -375,7 +375,7 @@ export function AIEditor() {
                     ) : !user ? (
                       <>
                         <Sparkles className="w-6 h-6 mr-3" />
-                        {t("editor_generate_btn")} (Guest)
+                        {t("editor_generate_btn")} ({t("guest_label")})
                       </>
                     ) : (
                       <>

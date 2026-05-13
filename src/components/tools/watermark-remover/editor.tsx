@@ -450,11 +450,11 @@ export function WatermarkRemoverEditor() {
                   : "bg-red-500/20 text-red-400"
               }`}>
                 <Coins className="w-4 h-4" />
-                <span>{credits} credits available (1 credit/use)</span>
+                <span>{credits} {t("credits_available_one")}</span>
               </div>
             ) : !loading && !user ? (
               <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-purple-500/20 text-purple-300 text-sm">
-                <span>👋 Guest Mode — <button onClick={() => setShowSignIn(true)} className="underline hover:text-purple-200">{t("login")} to save your work</button></span>
+                <span>{t("guest_save_notice")} <button onClick={() => setShowSignIn(true)} className="underline hover:text-purple-200">{t("login")}</button></span>
               </div>
             ) : null}
           </div>

@@ -15,14 +15,27 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
+  const [signupHref, setSignupHref] = useState("/signup")
   const { t } = useLanguage()
   const router = useRouter()
   const supabase = createClient()
 
+  const getNextPath = () => {
+    if (typeof window === "undefined") return "/profile"
+    const next = new URLSearchParams(window.location.search).get("next")
+    return next && next.startsWith("/") ? next : "/profile"
+  }
+
+  const getSignupPath = () => {
+    const nextPath = getNextPath()
+    return nextPath === "/profile" ? "/signup" : `/signup?next=${encodeURIComponent(nextPath)}`
+  }
+
   useEffect(() => {
+    setSignupHref(getSignupPath())
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (user) router.push("/profile")
+      if (user) router.push(getNextPath())
     }
     checkUser()
   }, [supabase.auth, router])
@@ -33,7 +46,7 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/profile")}`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(getNextPath())}`,
       },
     })
     if (error) { setError(error.message); setIsLoading(false) }
@@ -44,7 +57,7 @@ export default function LoginPage() {
     setError("")
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
     if (signInError) { setError(signInError.message); setIsLoading(false); return }
-    router.push("/profile")
+    router.push(getNextPath())
   }
 
   const handleSignUp = async () => {
@@ -62,7 +75,7 @@ export default function LoginPage() {
         setError(""); setSuccessMessage(t("email_confirmation_sent") || "Account created! Please check your email.")
         setEmail(""); setPassword(""); setMode("select"); setIsLoading(false); return
       }
-      router.push("/profile")
+      router.push(getNextPath())
     } catch { setError("An error occurred."); setIsLoading(false) }
   }
 
@@ -94,7 +107,7 @@ export default function LoginPage() {
                 <div className="relative my-4"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-300" /></div><div className="relative flex justify-center text-sm"><span className="px-2 bg-white text-gray-500">{t("or")}</span></div></div>
                 <Button onClick={() => setMode("email")} variant="outline" className="w-full">{t("signin_email")}</Button>
               </div>
-              <p className="text-center text-sm text-gray-500 mt-6">{t("no_account")} <Link href="/signup" className="text-purple-500 hover:text-purple-600 font-medium">{t("sign_up")}</Link></p>
+              <p className="text-center text-sm text-gray-500 mt-6">{t("no_account")} <Link href={signupHref} className="text-purple-500 hover:text-purple-600 font-medium">{t("sign_up")}</Link></p>
             </>
           ) : (
             <>
@@ -111,7 +124,7 @@ export default function LoginPage() {
                 <Button onClick={handleSignUp} disabled={isLoading || !email || !password} variant="outline" className="w-full">{isLoading ? t("creating_account") : t("create_account")}</Button>
               </div>
               <Button variant="ghost" onClick={() => { setMode("select"); setSuccessMessage(""); setError("") }} className="w-full mt-4">{t("back_to_signin")}</Button>
-              <p className="text-center text-sm text-gray-500 mt-4">{t("no_account")} <Link href="/signup" className="text-purple-500 hover:text-purple-600 font-medium">{t("sign_up")}</Link></p>
+              <p className="text-center text-sm text-gray-500 mt-4">{t("no_account")} <Link href={signupHref} className="text-purple-500 hover:text-purple-600 font-medium">{t("sign_up")}</Link></p>
             </>
           )}
         </div>
