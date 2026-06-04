@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Upload, LogIn, LogOut, Coins, UserCircle, Globe, Wand2, Scissors, Eraser, FileText, Layers, Minimize2, Crop } from "lucide-react"
+import { Upload, LogIn, LogOut, Coins, UserCircle, Globe, Wand2, Scissors, Eraser, FileText, Layers, Minimize2, Crop, Users } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
@@ -51,6 +51,7 @@ export function Header() {
     { href: "/tools/background-remover", label: t("nav_remove_bg"), icon: Scissors },
     { href: "/tools/watermark-remover", label: t("nav_watermark_remover"), icon: Eraser },
     { href: "/tools/ai-editor", label: t("nav_ai_editor"), icon: Wand2 },
+    { href: "/tools/face-swap", label: t("nav_face_swap"), icon: Users },
     { href: "/tools/image-to-pdf", label: t("nav_image_to_pdf"), icon: FileText },
     { href: "/tools/merge-images", label: t("nav_merge_images"), icon: Layers },
     { href: "/tools/compress-image", label: t("nav_compress_image"), icon: Minimize2 },

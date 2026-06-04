@@ -1,13 +1,14 @@
 "use client"
 
 import Link from "next/link"
-import { Upload, Scissors, Eraser, Wand2, FileText, Layers, Minimize2, Crop } from "lucide-react"
+import { Upload, Scissors, Eraser, Wand2, FileText, Layers, Minimize2, Crop, Users } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 
 const TOOLS = [
   { href: "/tools/background-remover", labelKey: "tool_background_remover", icon: Scissors },
   { href: "/tools/watermark-remover", labelKey: "tool_watermark_remover", icon: Eraser },
   { href: "/tools/ai-editor", labelKey: "tool_ai_editor", icon: Wand2 },
+  { href: "/tools/face-swap", labelKey: "tool_face_swap", icon: Users },
   { href: "/tools/image-to-pdf", labelKey: "tool_image_to_pdf", icon: FileText },
   { href: "/tools/merge-images", labelKey: "tool_merge_images", icon: Layers },
   { href: "/tools/compress-image", labelKey: "tool_compress_image", icon: Minimize2 },
