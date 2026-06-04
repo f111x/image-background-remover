@@ -23,6 +23,12 @@ export const analytics = {
     convert: () => track("image_to_pdf_convert"),
     success: () => track("image_to_pdf_success"),
   },
+  faceSwap: {
+    generate: () => track("face_swap_generate"),
+    success: (metadata?: { creditsUsed?: number }) =>
+      track("face_swap_success", metadata),
+    download: () => track("face_swap_download"),
+  },
   pricing: {
     view: () => track("pricing_view"),
     checkoutClick: (metadata?: { plan?: string }) =>

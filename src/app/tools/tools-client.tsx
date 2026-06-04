@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Scissors, Wand2, ArrowRight, CheckCircle, Eraser, FileText, Layers, Minimize2, Crop } from "lucide-react"
+import { Scissors, Wand2, ArrowRight, CheckCircle, Eraser, FileText, Layers, Minimize2, Crop, Users } from "lucide-react"
 import { Layout } from "@/components/layout"
 import { ConversionProof } from "@/components/conversion-proof"
 import { ToolsJsonLd } from "@/components/seo/tools-json-ld"
@@ -31,6 +31,14 @@ const tools = [
     href: "/tools/ai-editor",
     icon: Wand2,
     features: ["tools_ai_feature_1", "tools_ai_feature_2", "tools_ai_feature_3", "tools_ai_feature_4"],
+  },
+  {
+    id: "face-swap",
+    nameKey: "tool_face_swap",
+    descriptionKey: "tools_face_swap_desc_long",
+    href: "/tools/face-swap",
+    icon: Users,
+    features: ["tools_face_swap_feature_1", "tools_face_swap_feature_2", "tools_face_swap_feature_3", "tools_face_swap_feature_4"],
   },
   {
     id: "image-to-pdf",

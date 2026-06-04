@@ -50,6 +50,12 @@ const TOOL_SCHEMAS: Record<string, ToolJsonLdProps> = {
     url: "https://imagetoolss.com/tools/crop-image",
     category: "Image Editing",
   },
+  "face-swap": {
+    name: "Face Swap — Swap Faces Online Free | ImageTools",
+    description: "Swap faces in any photo with AI. Upload a source face and target photo — get realistic face swaps in seconds. Free to try, supports JPG/PNG/WEBP.",
+    url: "https://imagetoolss.com/tools/face-swap",
+    category: "Image Editing",
+  },
 }
 
 export function ToolJsonLd({ tool }: { tool: string }) {
