@@ -11,6 +11,8 @@ interface ToolMarketingProps {
   useCases?: string[]
   faqs?: { q: string; a: string }[]
   relatedTools?: { name: string; href: string; description: string }[]
+  processTitle?: string
+  processDescription?: string
 }
 
 export function ToolMarketingSections({
@@ -20,8 +22,10 @@ export function ToolMarketingSections({
   useCases,
   faqs,
   relatedTools,
+  processTitle,
+  processDescription,
 }: ToolMarketingProps) {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
 
   return (
     <>
@@ -37,8 +41,8 @@ export function ToolMarketingSections({
             </div>
             <div className="text-center">
               <div className="w-14 h-14 rounded-2xl bg-pink-100 text-pink-600 flex items-center justify-center text-2xl font-bold mx-auto mb-4">2</div>
-              <h3 className="font-bold text-lg mb-2">{t("marketing_step_process_title")}</h3>
-              <p className="text-muted-foreground text-sm">{t("marketing_step_process_desc")}</p>
+              <h3 className="font-bold text-lg mb-2">{processTitle || t("marketing_step_process_title")}</h3>
+              <p className="text-muted-foreground text-sm">{processDescription || t("marketing_step_process_desc")}</p>
             </div>
             <div className="text-center">
               <div className="w-14 h-14 rounded-2xl bg-green-100 text-green-600 flex items-center justify-center text-2xl font-bold mx-auto mb-4">3</div>
@@ -52,7 +56,9 @@ export function ToolMarketingSections({
       {/* Features */}
       <section className="py-16 px-4 bg-secondary/20">
         <div className="container mx-auto max-w-5xl">
-          <h2 className="text-3xl font-bold text-center mb-4">{t("marketing_why_use")} {title}？</h2>
+          <h2 className="text-3xl font-bold text-center mb-4">
+            {t("marketing_why_use")} {title}{language === "zh" ? "？" : "?"}
+          </h2>
           <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">{description}</p>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature) => (

@@ -109,16 +109,15 @@ export async function POST(request: NextRequest) {
       }),
     })
 
-    // Fallback: try model string if version hash doesn't work
+    // Fallback: try Replicate's model endpoint if the pinned version is not available
     if (!createResponse.ok) {
-      createResponse = await fetch("https://api.replicate.com/v1/predictions", {
+      createResponse = await fetch(`https://api.replicate.com/v1/models/${MODEL_NAME}/predictions`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${REPLICATE_API_TOKEN}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: MODEL_NAME,
           input: {
             source_image: sourceImage,
             target_image: targetImage,
@@ -176,7 +175,9 @@ export async function POST(request: NextRequest) {
       }, { status: 500 })
     }
 
-    const imageUrl = completedPrediction.output?.[0]
+    const imageUrl = Array.isArray(completedPrediction.output)
+      ? completedPrediction.output[0]
+      : completedPrediction.output
 
     if (!imageUrl) {
       if (userId) {

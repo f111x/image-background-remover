@@ -27,26 +27,26 @@ const PAGE_SIZES: { value: PageSize; label: string }[] = [
 ]
 
 const ORIENTATIONS: { value: Orientation; label: string }[] = [
-  { value: "portrait", label: "纵向" },
-  { value: "landscape", label: "横向" },
+  { value: "portrait", label: "Portrait" },
+  { value: "landscape", label: "Landscape" },
 ]
 
 const IMAGES_PER_PAGE_OPTIONS: { value: ImagesPerPage; label: string }[] = [
-  { value: 1, label: "1 张/页" },
-  { value: 2, label: "2 张/页" },
-  { value: 4, label: "4 张/页 (2×2)" },
-  { value: 6, label: "6 张/页 (2×3)" },
-  { value: 9, label: "9 张/页 (3×3)" },
+  { value: 1, label: "1 / page" },
+  { value: 2, label: "2 / page" },
+  { value: 4, label: "4 / page (2×2)" },
+  { value: 6, label: "6 / page (2×3)" },
+  { value: 9, label: "9 / page (3×3)" },
 ]
 
 const IMAGE_FIT_OPTIONS: { value: ImageFit; label: string }[] = [
-  { value: "fit", label: "适应 (完整显示)" },
-  { value: "fill", label: "填充 (裁切填满)" },
-  { value: "center", label: "居中 (保留白边)" },
+  { value: "fit", label: "Fit (show full image)" },
+  { value: "fill", label: "Fill (crop to page)" },
+  { value: "center", label: "Center (keep whitespace)" },
 ]
 
 const MARGIN_OPTIONS: { value: PageMargin; label: string }[] = [
-  { value: 0, label: "无" },
+  { value: 0, label: "None" },
   { value: 5, label: "5mm" },
   { value: 10, label: "10mm" },
   { value: 15, label: "15mm" },

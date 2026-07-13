@@ -117,38 +117,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Service not configured" }, { status: 500 })
     }
 
-    // Upload to Supabase Storage
-    // For guests, use a temporary path that will be cleaned up
-    const timestamp = Date.now()
-    const safeFileName = imageFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')
-    const fileName = userId 
-      ? `${userId}/${timestamp}-${safeFileName}`
-      : `guest/${timestamp}-${safeFileName}`
-    
-    const buffer = Buffer.from(await imageFile.arrayBuffer())
-    
-    const { error: uploadError } = await supabase.storage
-      .from('reference-images')
-      .upload(fileName, buffer, {
-        contentType: imageFile.type,
-        upsert: false
-      })
-
-    if (uploadError) {
-      console.error("Failed to upload to Supabase Storage:", uploadError)
-      return NextResponse.json({ error: "Failed to upload image" }, { status: 500 })
-    }
-
-    // Get public URL
-    const { data: urlData } = supabase.storage
-      .from('reference-images')
-      .getPublicUrl(fileName)
-
-    const imageUrl = urlData.publicUrl
-
-    // Call Remove.bg
+    // Send the uploaded file directly to Remove.bg. The previous implementation
+    // first uploaded guest files to Supabase Storage, which fails when the
+    // bucket policy does not allow anonymous inserts and blocks the main tool.
     const removeBgFormData = new FormData()
-    removeBgFormData.append("image_url", imageUrl)
+    removeBgFormData.append("image_file", imageFile)
     removeBgFormData.append("size", "auto")
 
     const response = await fetch("https://api.remove.bg/v1.0/removebg", {
@@ -158,9 +131,6 @@ export async function POST(request: NextRequest) {
       },
       body: removeBgFormData,
     })
-
-    // Clean up uploaded file
-    await supabase.storage.from('reference-images').remove([fileName]).catch(() => {})
 
     let imageBlob: Blob
     let errorMessage = "Failed to process image"
