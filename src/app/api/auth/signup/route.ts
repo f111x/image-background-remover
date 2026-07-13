@@ -21,24 +21,17 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient()
 
-    // Check if user already exists
-    const { data: existingUser } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("email", email)
-      .single()
+    const origin = request.nextUrl.origin
 
-    if (existingUser) {
-      return NextResponse.json(
-        { error: "This email is already registered. Try signing in instead." },
-        { status: 400 }
-      )
-    }
-
-    // Sign up with Supabase Auth
+    // Sign up with Supabase Auth. Do not pre-check profiles: profiles can be
+    // absent for confirmed Auth users, and .single() turns "no rows" into an
+    // error that hides the real signup failure.
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent("/profile")}`,
+      },
     })
 
     if (error) {

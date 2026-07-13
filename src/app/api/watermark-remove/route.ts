@@ -161,76 +161,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "AI service not configured" }, { status: 500 })
     }
 
-    // Convert files to base64
+    // Replicate accepts data URLs. Sending data URLs directly avoids the
+    // guest Supabase Storage upload path that was failing in production.
     const imageBuffer = Buffer.from(await imageFile.arrayBuffer())
     const maskBuffer = Buffer.from(await maskFile.arrayBuffer())
-    const imageBase64 = imageBuffer.toString("base64")
-    const maskBase64 = maskBuffer.toString("base64")
-
-    // Create data URL for Replicate
-    const imageUrl = `data:${imageFile.type};base64,${imageBase64}`
-    const maskUrl = `data:${maskFile.type};base64,${maskBase64}`
-
-    // Upload images to Supabase Storage for Replicate to fetch
-    const timestamp = Date.now()
-    const safeFileName = (name: string) => name.replace(/[^a-zA-Z0-9.-]/g, '_')
-    
-    const imagePath = userId 
-      ? `${userId}/${timestamp}-image-${safeFileName(imageFile.name)}`
-      : `guest/${timestamp}-image-${safeFileName(imageFile.name)}`
-    const maskPath = userId 
-      ? `${userId}/${timestamp}-mask-${safeFileName(maskFile.name)}`
-      : `guest/${timestamp}-mask-${safeFileName(maskFile.name)}`
-    
-    const { error: imageUploadError } = await supabase.storage
-      .from('reference-images')
-      .upload(imagePath, imageBuffer, {
-        contentType: imageFile.type,
-        upsert: false
-      })
-
-    if (imageUploadError) {
-      console.error("Failed to upload image to Supabase Storage:", imageUploadError)
-      return NextResponse.json({ error: "Failed to upload image" }, { status: 500 })
-    }
-
-    const { error: maskUploadError } = await supabase.storage
-      .from('reference-images')
-      .upload(maskPath, maskBuffer, {
-        contentType: maskFile.type,
-        upsert: false
-      })
-
-    if (maskUploadError) {
-      console.error("Failed to upload mask to Supabase Storage:", maskUploadError)
-      // Clean up uploaded image
-      await supabase.storage.from('reference-images').remove([imagePath]).catch(() => {})
-      return NextResponse.json({ error: "Failed to upload mask" }, { status: 500 })
-    }
-
-    // Get public URLs
-    const { data: imageUrlData } = supabase.storage
-      .from('reference-images')
-      .getPublicUrl(imagePath)
-    const { data: maskUrlData } = supabase.storage
-      .from('reference-images')
-      .getPublicUrl(maskPath)
-
-    const imagePublicUrl = imageUrlData.publicUrl
-    const maskPublicUrl = maskUrlData.publicUrl
+    const imageUrl = `data:${imageFile.type};base64,${imageBuffer.toString("base64")}`
+    const maskUrl = `data:${maskFile.type};base64,${maskBuffer.toString("base64")}`
 
     // Create prediction on Replicate
-    const createResponse = await fetch("https://api.replicate.com/v1/predictions", {
+    const createResponse = await fetch("https://api.replicate.com/v1/models/stability-ai/sdxl-image-inpainting/predictions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${REPLICATE_API_TOKEN}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        version: "stability-ai/sdxl-image-inpainting",
         input: {
-          image: imagePublicUrl,
-          mask: maskPublicUrl,
+          image: imageUrl,
+          mask: maskUrl,
           prompt: "high quality, clean image without watermark or text, natural looking inpainting",
           negative_prompt: "watermark, text, logo, signature, blurry, low quality",
           num_inference_steps: 20,
@@ -238,9 +186,6 @@ export async function POST(request: NextRequest) {
         },
       }),
     })
-
-    // Clean up uploaded files
-    await supabase.storage.from('reference-images').remove([imagePath, maskPath]).catch(() => {})
 
     if (!createResponse.ok) {
       const errorData = await createResponse.json().catch(() => ({}))

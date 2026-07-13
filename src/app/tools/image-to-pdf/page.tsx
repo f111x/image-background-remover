@@ -34,6 +34,8 @@ export default function ImageToPDFPage() {
       <ToolMarketingSections
         title="Image to PDF"
         description="Convert your images into professional PDF documents. Merge multiple images, choose page sizes, and download instantly — all in your browser."
+        processTitle="Arrange PDF Pages"
+        processDescription="Choose page size, orientation, images per page, fit mode, and margins before generating your PDF locally."
         features={[
           "Free to use, no credits required",
           "Merge up to 20 images into one PDF",

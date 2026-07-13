@@ -141,15 +141,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "AI service not configured" }, { status: 500 })
     }
 
-    // Create prediction on Replicate (use model name, Replicate will use latest version)
-    const createResponse = await fetch("https://api.replicate.com/v1/predictions", {
+    // Create prediction on Replicate through the model endpoint. The generic
+    // /v1/predictions endpoint requires an immutable version hash; passing a
+    // model slug there causes provider errors in production.
+    const createResponse = await fetch(`https://api.replicate.com/v1/models/${MODEL_NAME}/predictions`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${REPLICATE_API_TOKEN}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        version: "black-forest-labs/flux-schnell",
         input: {
           prompt: prompt.trim(),
           go_fast: true,
@@ -210,7 +211,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Get the generated image URL
-    const imageUrl = completedPrediction.output?.[0]
+    const imageUrl = Array.isArray(completedPrediction.output)
+      ? completedPrediction.output[0]
+      : completedPrediction.output
     
     if (!imageUrl) {
       if (userId) {
