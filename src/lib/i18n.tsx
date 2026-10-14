@@ -622,6 +622,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem("language") as Language | null
     if (saved && (saved === "en" || saved === "zh")) {
       setLanguageState(saved)
+    } else {
+      // Default to English regardless of browser language
+      setLanguageState("en")
     }
   }, [])
 
